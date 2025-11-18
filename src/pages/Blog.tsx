@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Calendar, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
@@ -94,9 +95,9 @@ const Blog = () => {
                     Learn the warning signs of a failing steering rack and when to replace it. A faulty steering rack can compromise your vehicle's safety and handling. This comprehensive guide covers everything you need to know.
                   </p>
                   <Link to="/blog/1">
-                    <button className="px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
+                    <Button variant="default" size="sm">
                       Read Full Article
-                    </button>
+                    </Button>
                   </Link>
                 </CardContent>
               </div>
@@ -134,9 +135,9 @@ const Blog = () => {
                         <span>{article.author}</span>
                       </div>
                       <Link to={`/blog/${article.id}`}>
-                        <button className="text-primary hover:underline font-semibold">
+                        <Button variant="ghost" className="text-primary hover:underline font-semibold p-0 h-auto">
                           Read More →
-                        </button>
+                        </Button>
                       </Link>
                     </div>
                   </CardContent>
@@ -189,14 +190,14 @@ const Blog = () => {
             <p className="text-xl mb-8 opacity-90">Visit our shop for genuine parts backed by expert knowledge</p>
             <div className="flex flex-wrap gap-4 justify-center">
               <Link to="/shop">
-                <button className="px-8 py-3 bg-secondary text-secondary-foreground font-semibold rounded-md hover:bg-secondary/90 transition-colors">
+                <Button variant="outline" size="lg" className="border-secondary-foreground text-secondary-foreground hover:bg-accent hover:text-accent-foreground hover:border-accent">
                   Browse Shop
-                </button>
+                </Button>
               </Link>
               <Link to="/contact">
-                <button className="px-8 py-3 border-2 border-primary-foreground font-semibold rounded-md hover:bg-primary-foreground hover:text-primary transition-colors">
+                <Button variant="outline" size="lg" className="border-secondary-foreground text-secondary-foreground hover:bg-accent hover:text-accent-foreground hover:border-accent">
                   Contact Us
-                </button>
+                </Button>
               </Link>
             </div>
           </div>

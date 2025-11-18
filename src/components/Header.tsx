@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Phone, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { FaWhatsapp } from "react-icons/fa";
 import logo from "@/assets/logo.png";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
 
   const navLinks = [
     { to: "/", label: "Home" },
@@ -35,7 +37,11 @@ const Header = () => {
               <Link
                 key={link.to}
                 to={link.to}
-                className="text-secondary-foreground hover:text-primary transition-colors font-medium"
+                className={`font-medium transition-colors ${
+                  location.pathname === link.to 
+                    ? "text-primary" 
+                    : "text-secondary-foreground hover:text-primary"
+                }`}
               >
                 {link.label}
               </Link>
@@ -55,8 +61,8 @@ const Header = () => {
               target="_blank" 
               rel="noopener noreferrer"
             >
-              <Button size="sm" className="gap-2">
-                <MessageCircle className="h-4 w-4" />
+              <Button variant="default" size="sm" className="gap-2 bg-accent hover:bg-accent/90">
+                <FaWhatsapp className="h-4 w-4" />
                 <span className="hidden sm:inline">WhatsApp</span>
               </Button>
             </a>
@@ -79,7 +85,11 @@ const Header = () => {
               <Link
                 key={link.to}
                 to={link.to}
-                className="block py-2 text-secondary-foreground hover:text-primary transition-colors font-medium"
+                className={`block py-2 font-medium transition-colors ${
+                  location.pathname === link.to 
+                    ? "text-primary" 
+                    : "text-secondary-foreground hover:text-primary"
+                }`}
                 onClick={() => setIsMenuOpen(false)}
               >
                 {link.label}

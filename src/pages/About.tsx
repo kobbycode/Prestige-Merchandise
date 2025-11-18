@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Building2, Target, Award, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Building2, Target, Award, Users, MessageCircle, Phone } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -125,14 +126,16 @@ const About = () => {
             <p className="text-xl mb-8 opacity-90">Visit our shop in Abossey Okai or contact us today</p>
             <div className="flex flex-wrap gap-4 justify-center">
               <a href="https://wa.me/233247654321" target="_blank" rel="noopener noreferrer">
-                <button className="px-8 py-3 bg-secondary text-secondary-foreground font-semibold rounded-md hover:bg-secondary/90 transition-colors">
+                <Button variant="outline" size="lg" className="gap-2 text-secondary-foreground border-secondary-foreground hover:bg-accent hover:text-accent-foreground hover:border-accent">
+                  <MessageCircle className="h-5 w-5" />
                   Contact on WhatsApp
-                </button>
+                </Button>
               </a>
               <a href="tel:0541234567">
-                <button className="px-8 py-3 border-2 border-primary-foreground font-semibold rounded-md hover:bg-primary-foreground hover:text-primary transition-colors">
+                <Button variant="outline" size="lg" className="gap-2 text-secondary-foreground border-secondary-foreground hover:bg-accent hover:text-accent-foreground hover:border-accent">
+                  <Phone className="h-5 w-5" />
                   Call Us Now
-                </button>
+                </Button>
               </a>
             </div>
           </div>

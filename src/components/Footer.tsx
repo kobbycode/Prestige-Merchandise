@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Facebook, Instagram } from "lucide-react";
+import { FaFacebookF, FaInstagram, FaTiktok } from "react-icons/fa";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -71,28 +72,28 @@ const Footer = () => {
                 href="https://facebook.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-3 bg-primary/10 rounded-full hover:bg-primary hover:text-primary-foreground transition-colors"
+                className="p-3 bg-primary/10 rounded-full hover:bg-primary hover:text-primary-foreground transition-colors duration-300 ease-in-out transform hover:scale-110"
                 aria-label="Facebook"
               >
-                <Facebook className="h-5 w-5" />
+                <FaFacebookF className="h-5 w-5" />
               </a>
               <a
                 href="https://instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-3 bg-primary/10 rounded-full hover:bg-primary hover:text-primary-foreground transition-colors"
+                className="p-3 bg-primary/10 rounded-full hover:bg-primary hover:text-primary-foreground transition-colors duration-300 ease-in-out transform hover:scale-110"
                 aria-label="Instagram"
               >
-                <Instagram className="h-5 w-5" />
+                <FaInstagram className="h-5 w-5" />
               </a>
               <a
                 href="https://tiktok.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-3 bg-primary/10 rounded-full hover:bg-primary hover:text-primary-foreground transition-colors text-xl font-bold"
+                className="p-3 bg-primary/10 rounded-full hover:bg-primary hover:text-primary-foreground transition-colors duration-300 ease-in-out transform hover:scale-110"
                 aria-label="TikTok"
               >
-                ⓣ
+                <FaTiktok className="h-5 w-5" />
               </a>
             </div>
           </div>

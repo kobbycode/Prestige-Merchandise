@@ -90,12 +90,6 @@ const Index = () => {
                     Shop Now
                   </Button>
                 </Link>
-                <a href="https://wa.me/233247654321" target="_blank" rel="noopener noreferrer">
-                  <Button size="lg" variant="outline" className="gap-2">
-                    <MessageCircle className="h-5 w-5" />
-                    Contact on WhatsApp
-                  </Button>
-                </a>
               </div>
             </div>
           </div>
@@ -196,10 +190,12 @@ const Index = () => {
             <p className="text-xl mb-8 opacity-90">Contact us today for the best auto parts deals in Ghana</p>
             <div className="flex flex-wrap gap-4 justify-center">
               <Link to="/shop">
-                <Button size="lg" variant="secondary">Browse Shop</Button>
+                <Button size="lg" variant="outline" className="border-secondary-foreground text-secondary-foreground hover:bg-accent hover:text-accent-foreground hover:border-accent">
+                  Browse Shop
+                </Button>
               </Link>
               <Link to="/contact">
-                <Button size="lg" variant="outline" className="border-2 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
+                <Button size="lg" variant="outline" className="border-secondary-foreground text-secondary-foreground hover:bg-accent hover:text-accent-foreground hover:border-accent">
                   Get in Touch
                 </Button>
               </Link>
