@@ -24,7 +24,7 @@ const Header = () => {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
-            <img src={logo} alt="Prestige Merchandise" className="h-12 w-12" />
+            <img src={logo} alt="Prestige Merchandise" className="h-28 w-auto bg-white rounded-full p-1" />
             <div className="hidden sm:block">
               <h1 className="text-xl font-bold text-primary-foreground">The Prestige Merchandise</h1>
               <p className="text-xs text-secondary-foreground/80">Genuine Auto Parts</p>
@@ -37,11 +37,10 @@ const Header = () => {
               <Link
                 key={link.to}
                 to={link.to}
-                className={`font-medium transition-colors ${
-                  location.pathname === link.to 
-                    ? "text-primary" 
-                    : "text-secondary-foreground hover:text-primary"
-                }`}
+                className={`font-medium transition-colors ${location.pathname === link.to
+                  ? "text-primary"
+                  : "text-secondary-foreground hover:text-primary"
+                  }`}
               >
                 {link.label}
               </Link>
@@ -56,9 +55,9 @@ const Header = () => {
                 054 123 4567
               </Button>
             </a>
-            <a 
-              href="https://wa.me/233247654321" 
-              target="_blank" 
+            <a
+              href="https://wa.me/233247654321"
+              target="_blank"
               rel="noopener noreferrer"
             >
               <Button variant="default" size="sm" className="gap-2 bg-accent hover:bg-accent/90">
@@ -85,11 +84,10 @@ const Header = () => {
               <Link
                 key={link.to}
                 to={link.to}
-                className={`block py-2 font-medium transition-colors ${
-                  location.pathname === link.to 
-                    ? "text-primary" 
-                    : "text-secondary-foreground hover:text-primary"
-                }`}
+                className={`block py-2 font-medium transition-colors ${location.pathname === link.to
+                  ? "text-primary"
+                  : "text-secondary-foreground hover:text-primary"
+                  }`}
                 onClick={() => setIsMenuOpen(false)}
               >
                 {link.label}
