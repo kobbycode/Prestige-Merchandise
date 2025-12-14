@@ -16,10 +16,10 @@
     --popover-foreground: 220 15% 15%;
 
     --primary: 45 96% 51%;
-    --primary-foreground: 0 0% 100%;
+    --primary-foreground: 215 80% 15%;
 
-    --secondary: 220 15% 20%;
-    --secondary-foreground: 220 10% 60%; 
+    --secondary: 215 80% 15%;
+    --secondary-foreground: 0 0% 100%;
 
     --muted: 220 10% 96%;
     --muted-foreground: 220 10% 45%;
@@ -61,10 +61,11 @@
     --popover-foreground: 0 0% 95%;
 
     --primary: 45 96% 51%;
-    --primary-foreground: 0 0% 100%;
+    --primary-foreground: 215 80% 15%;
 
-    --secondary: 220 15% 20%;
-    --secondary-foreground: 220 10% 80%; /* Changed from 0 0% 95% to a lighter blue-grey for dark mode */
+    --secondary: 215 80% 15%;
+    --secondary-foreground: 220 10% 80%;
+    /* Changed from 0 0% 95% to a lighter blue-grey for dark mode */
 
     --muted: 220 15% 18%;
     --muted-foreground: 220 10% 60%;

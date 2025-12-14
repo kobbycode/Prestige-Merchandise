@@ -68,13 +68,13 @@ const Index = () => {
       <main>
         {/* Hero Section */}
         <section className="relative h-[600px] bg-secondary overflow-hidden">
-          <div 
+          <div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${heroImage})` }}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-secondary/95 via-secondary/70 to-transparent"></div>
           </div>
-          
+
           <div className="relative container mx-auto px-4 h-full flex items-center">
             <div className="max-w-2xl text-secondary-foreground">
               <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight">
@@ -123,13 +123,13 @@ const Index = () => {
           <div className="container mx-auto px-4">
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">Featured Products</h2>
             <p className="text-center text-muted-foreground mb-12">Browse our most popular auto parts</p>
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               {featuredProducts.map((product) => (
                 <Card key={product.id} className="shadow-card hover:shadow-hover transition-all overflow-hidden group">
                   <div className="aspect-square overflow-hidden bg-muted">
-                    <img 
-                      src={product.image} 
+                    <img
+                      src={product.image}
                       alt={product.name}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                     />
@@ -142,7 +142,7 @@ const Index = () => {
                         <ShoppingCart className="h-4 w-4" />
                         Add to Cart
                       </Button>
-                      <a 
+                      <a
                         href={`https://wa.me/233247654321?text=I'm interested in ${product.name}`}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -190,12 +190,12 @@ const Index = () => {
             <p className="text-xl mb-8 opacity-90">Contact us today for the best auto parts deals in Ghana</p>
             <div className="flex flex-wrap gap-4 justify-center">
               <Link to="/shop">
-                <Button size="lg" variant="outline" className="border-secondary-foreground text-secondary-foreground hover:bg-accent hover:text-accent-foreground hover:border-accent">
+                <Button size="lg" variant="secondary" className="min-w-[150px]">
                   Browse Shop
                 </Button>
               </Link>
               <Link to="/contact">
-                <Button size="lg" variant="outline" className="border-secondary-foreground text-secondary-foreground hover:bg-accent hover:text-accent-foreground hover:border-accent">
+                <Button size="lg" variant="secondary" className="min-w-[150px]">
                   Get in Touch
                 </Button>
               </Link>

@@ -30,15 +30,15 @@ const About = () => {
               <Card className="shadow-card mb-8">
                 <CardContent className="p-8">
                   <p className="text-lg leading-relaxed mb-6">
-                    Founded in <strong>2018</strong>, <strong className="text-primary">The Prestige Merchandise</strong> is a 
-                    trusted name in Ghana's auto parts market. We are located at <strong>Abossey Okai, Accra</strong>, 
+                    Founded in <strong>2018</strong>, <strong className="text-primary">The Prestige Merchandise</strong> is a
+                    trusted name in Ghana's auto parts market. We are located at <strong>Abossey Okai, Accra</strong>,
                     and specialize in steering systems and lubricants for all vehicle types.
                   </p>
-                  
+
                   <p className="text-lg leading-relaxed">
-                    Our mission is to provide <strong>genuine, affordable, and durable auto parts</strong> to 
-                    every customer across Ghana. We understand the importance of quality parts for vehicle safety 
-                    and performance, which is why we source directly from trusted manufacturers and offer comprehensive 
+                    Our mission is to provide <strong>genuine, affordable, and durable auto parts</strong> to
+                    every customer across Ghana. We understand the importance of quality parts for vehicle safety
+                    and performance, which is why we source directly from trusted manufacturers and offer comprehensive
                     warranties on all our products.
                   </p>
                 </CardContent>
@@ -126,13 +126,13 @@ const About = () => {
             <p className="text-xl mb-8 opacity-90">Visit our shop in Abossey Okai or contact us today</p>
             <div className="flex flex-wrap gap-4 justify-center">
               <a href="https://wa.me/233247654321" target="_blank" rel="noopener noreferrer">
-                <Button variant="outline" size="lg" className="gap-2 text-secondary-foreground border-secondary-foreground hover:bg-accent hover:text-accent-foreground hover:border-accent">
+                <Button variant="secondary" size="lg" className="gap-2 min-w-[150px]">
                   <MessageCircle className="h-5 w-5" />
                   Contact on WhatsApp
                 </Button>
               </a>
               <a href="tel:0541234567">
-                <Button variant="outline" size="lg" className="gap-2 text-secondary-foreground border-secondary-foreground hover:bg-accent hover:text-accent-foreground hover:border-accent">
+                <Button variant="secondary" size="lg" className="gap-2 min-w-[150px]">
                   <Phone className="h-5 w-5" />
                   Call Us Now
                 </Button>

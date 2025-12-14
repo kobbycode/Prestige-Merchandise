@@ -116,19 +116,19 @@ const Blog = () => {
                     <div className="flex items-center gap-3 text-sm text-muted-foreground mb-4">
                       <span className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
-                        {new Date(article.date).toLocaleDateString('en-US', { 
-                          month: 'short', 
-                          day: 'numeric', 
-                          year: 'numeric' 
+                        {new Date(article.date).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
                         })}
                       </span>
                       <span>•</span>
                       <span>{article.readTime}</span>
                     </div>
-                    
+
                     <h3 className="text-xl font-bold mb-3 line-clamp-2">{article.title}</h3>
                     <p className="text-muted-foreground mb-4 flex-1 line-clamp-3">{article.excerpt}</p>
-                    
+
                     <div className="flex items-center justify-between pt-4 border-t">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <User className="h-4 w-4" />
@@ -153,7 +153,7 @@ const Blog = () => {
             <div className="max-w-4xl mx-auto text-center">
               <h2 className="text-3xl font-bold mb-4">Why Read Our Blog?</h2>
               <p className="text-lg text-muted-foreground mb-8">
-                Our articles help you make informed decisions about car maintenance and auto parts. 
+                Our articles help you make informed decisions about car maintenance and auto parts.
                 Learn from experts with years of experience in the Ghanaian automotive industry.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -190,12 +190,12 @@ const Blog = () => {
             <p className="text-xl mb-8 opacity-90">Visit our shop for genuine parts backed by expert knowledge</p>
             <div className="flex flex-wrap gap-4 justify-center">
               <Link to="/shop">
-                <Button variant="outline" size="lg" className="border-secondary-foreground text-secondary-foreground hover:bg-accent hover:text-accent-foreground hover:border-accent">
+                <Button variant="secondary" size="lg" className="min-w-[150px]">
                   Browse Shop
                 </Button>
               </Link>
               <Link to="/contact">
-                <Button variant="outline" size="lg" className="border-secondary-foreground text-secondary-foreground hover:bg-accent hover:text-accent-foreground hover:border-accent">
+                <Button variant="secondary" size="lg" className="min-w-[150px]">
                   Contact Us
                 </Button>
               </Link>

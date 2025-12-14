@@ -47,23 +47,14 @@ const Header = () => {
             ))}
           </nav>
 
-          {/* Contact Actions */}
           <div className="flex items-center gap-2">
-            <a href="tel:0541234567" className="hidden md:block">
-              <Button variant="outline" size="sm" className="gap-2">
-                <Phone className="h-4 w-4" />
-                054 123 4567
-              </Button>
-            </a>
             <a
               href="https://wa.me/233247654321"
               target="_blank"
               rel="noopener noreferrer"
+              className="text-green-500 hover:scale-110 transition-transform"
             >
-              <Button variant="default" size="sm" className="gap-2 bg-accent hover:bg-accent/90">
-                <FaWhatsapp className="h-4 w-4" />
-                <span className="hidden sm:inline">WhatsApp</span>
-              </Button>
+              <FaWhatsapp className="h-8 w-8" />
             </a>
 
             {/* Mobile Menu Button */}
@@ -93,12 +84,6 @@ const Header = () => {
                 {link.label}
               </Link>
             ))}
-            <a href="tel:0541234567" className="block py-2 md:hidden">
-              <Button variant="outline" size="sm" className="gap-2 w-full">
-                <Phone className="h-4 w-4" />
-                054 123 4567
-              </Button>
-            </a>
           </nav>
         )}
       </div>
