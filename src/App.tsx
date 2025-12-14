@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Shop from "./pages/Shop";
+import ProductDetail from "./pages/ProductDetail";
 import About from "./pages/About";
 import Services from "./pages/Services";
 import Blog from "./pages/Blog";
@@ -16,6 +17,7 @@ import Products from "./pages/admin/Products";
 import BlogAdmin from "./pages/admin/Blog";
 import Admins from "./pages/admin/Admins";
 import Profile from "./pages/admin/Profile";
+import ProductForm from "./pages/admin/ProductForm";
 import AdminLayout from "./components/layout/AdminLayout";
 import { AuthProvider } from "./contexts/AuthContext";
 
@@ -31,6 +33,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/shop" element={<Shop />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/about" element={<About />} />
             <Route path="/services" element={<Services />} />
             <Route path="/blog" element={<Blog />} />
@@ -41,6 +44,8 @@ const App = () => (
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="products" element={<Products />} />
+              <Route path="products/new" element={<ProductForm />} />
+              <Route path="products/:id/edit" element={<ProductForm />} />
               <Route path="blog" element={<BlogAdmin />} />
               <Route path="admins" element={<Admins />} />
               <Route path="profile" element={<Profile />} />
