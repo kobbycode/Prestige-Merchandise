@@ -31,4 +31,30 @@ export interface Category {
     createdAt: string;
 }
 
+export interface BlogPost {
+    id: string;
+    title: string;
+    slug: string;
+    excerpt: string;
+    content: string;
+    coverImage: string;
+    authorId: string;
+    isPublished: boolean;
+    publishedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+    tags: string[];
+}
+
+export interface Review {
+    id: string;
+    productId: string;
+    userId: string;
+    userName: string;
+    rating: number; // 1-5
+    comment: string;
+    createdAt: string;
+    isVerifiedPurchase?: boolean;
+}
+
 export type ProductFormData = Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>;

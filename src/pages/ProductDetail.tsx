@@ -9,11 +9,14 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, ShoppingCart, MessageCircle, Package, ChevronLeft, ChevronRight } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Reviews from "@/components/product/Reviews";
 import { toast } from "sonner";
+import { useCart } from "@/contexts/CartContext";
 
 const ProductDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { addToCart } = useCart();
     const [product, setProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -61,6 +64,28 @@ const ProductDetail = () => {
             ...prev,
             [variantName]: option
         }));
+    };
+
+    const handleAddToCart = () => {
+        if (!product) return;
+
+        // Check availability logic if needed (e.g. max stock)
+
+        // Validate variants
+        let variantString = "";
+        if (product.variants && product.variants.length > 0) {
+            const missingVariants = product.variants.filter(v => !selectedVariants[v.name]);
+            if (missingVariants.length > 0) {
+                toast.error(`Please select ${missingVariants.map(v => v.name).join(", ")}`);
+                return;
+            }
+            // Generate deterministic variant string based on variants order
+            variantString = product.variants
+                .map(v => selectedVariants[v.name])
+                .join(" / ");
+        }
+
+        addToCart(product, 1, variantString || undefined);
     };
 
     if (loading) {
@@ -136,8 +161,8 @@ const ProductDetail = () => {
                                                                 key={index}
                                                                 onClick={() => setCurrentImageIndex(index)}
                                                                 className={`w-2 h-2 rounded-full transition-all ${index === currentImageIndex
-                                                                        ? "bg-primary w-8"
-                                                                        : "bg-white/50"
+                                                                    ? "bg-primary w-8"
+                                                                    : "bg-white/50"
                                                                     }`}
                                                             />
                                                         ))}
@@ -161,8 +186,8 @@ const ProductDetail = () => {
                                             key={index}
                                             onClick={() => setCurrentImageIndex(index)}
                                             className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${index === currentImageIndex
-                                                    ? "border-primary"
-                                                    : "border-transparent hover:border-muted-foreground"
+                                                ? "border-primary"
+                                                : "border-transparent hover:border-muted-foreground"
                                                 }`}
                                         >
                                             <img
@@ -182,7 +207,7 @@ const ProductDetail = () => {
                                 <div className="flex items-start justify-between gap-4 mb-2">
                                     <h1 className="text-3xl md:text-4xl font-bold">{product.name}</h1>
                                     {product.featured && (
-                                        <Badge variant="secondary">Featured</Badge>
+                                        <Badge variant="secondary" className="rounded-none px-4 py-1 flex items-center justify-center">Featured</Badge>
                                     )}
                                 </div>
                                 <p className="text-muted-foreground">SKU: {product.sku}</p>
@@ -198,7 +223,9 @@ const ProductDetail = () => {
                                         <p className="text-xl text-muted-foreground line-through">
                                             GHS {product.compareAtPrice.toFixed(2)}
                                         </p>
-                                        <Badge variant="destructive">{discount}% OFF</Badge>
+                                        <Badge variant="destructive" className="rounded-none px-3 py-1 flex items-center justify-center">
+                                            {discount}% OFF
+                                        </Badge>
                                     </>
                                 )}
                             </div>
@@ -254,16 +281,7 @@ const ProductDetail = () => {
                                     <span className="font-semibold">Category:</span>{" "}
                                     <Badge variant="secondary">{product.category}</Badge>
                                 </p>
-                                {product.tags && product.tags.length > 0 && (
-                                    <div className="flex flex-wrap gap-2">
-                                        <span className="text-sm font-semibold">Tags:</span>
-                                        {product.tags.map((tag, index) => (
-                                            <Badge key={index} variant="outline">
-                                                {tag}
-                                            </Badge>
-                                        ))}
-                                    </div>
-                                )}
+
                             </div>
 
                             {/* Action Buttons */}
@@ -272,6 +290,7 @@ const ProductDetail = () => {
                                     className="w-full gap-2"
                                     size="lg"
                                     disabled={product.stock === 0}
+                                    onClick={handleAddToCart}
                                 >
                                     <ShoppingCart className="h-5 w-5" />
                                     Add to Cart
@@ -288,7 +307,22 @@ const ProductDetail = () => {
                                     </Button>
                                 </a>
                             </div>
+                            {/* Additional Details */}
+                            <div>
+                                <h2 className="text-xl font-semibold mb-2">Product Details</h2>
+                                <ul className="list-disc pl-5 mt-2 space-y-1">
+                                    <li>Genuine Toyota part</li>
+                                    <li>Direct replacement</li>
+                                    <li>Includes necessary mounting hardware</li>
+                                    <li>1-year warranty against defects</li>
+                                </ul>
+                            </div>
                         </div>
+                    </div>
+
+                    {/* Reviews Section */}
+                    <div className="mt-16">
+                        <Reviews productId={product.id} />
                     </div>
                 </div>
             </main>

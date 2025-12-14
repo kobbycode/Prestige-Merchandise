@@ -21,6 +21,13 @@ import {
     DialogDescription,
     DialogClose,
 } from "@/components/ui/dialog";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trash2, Plus, ShieldAlert } from "lucide-react";
 import { collection, getDocs } from "firebase/firestore";
@@ -40,6 +47,7 @@ const Admins = () => {
     const [loading, setLoading] = useState(true);
     const [newEmail, setNewEmail] = useState("");
     const [newPassword, setNewPassword] = useState("");
+    const [newRole, setNewRole] = useState<"admin" | "super_admin">("admin");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -102,7 +110,7 @@ const Admins = () => {
         const toastId = toast.loading("Creating admin account...");
 
         try {
-            const newAdmin = await createAdmin(newEmail, newPassword);
+            const newAdmin = await createAdmin(newEmail, newPassword, newRole);
             // Optimistic update: Add to list immediately
             if (newAdmin) {
                 setAdmins(prev => [...prev, { id: newAdmin.uid, ...newAdmin } as AdminUser]);
@@ -111,6 +119,7 @@ const Admins = () => {
             setIsDialogOpen(false);
             setNewEmail("");
             setNewPassword("");
+            setNewRole("admin");
             // fetchAdmins(); // Skip network fetch
         } catch (error: any) {
             console.error("Error creating admin:", error);
@@ -182,6 +191,18 @@ const Admins = () => {
                                     required
                                     minLength={6}
                                 />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="role">Role</Label>
+                                <Select value={newRole} onValueChange={(value: any) => setNewRole(value)}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select a role" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="admin">Admin (Standard)</SelectItem>
+                                        <SelectItem value="super_admin">Super Admin (Full Access)</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
                             <Button type="submit" className="w-full text-primary-foreground" disabled={isSubmitting}>
                                 {isSubmitting ? "Creating..." : "Create Admin"}

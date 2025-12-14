@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { doc, getDoc, setDoc, updateDoc, collection } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, collection, query, orderBy, getDocs } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { db, storage } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
-import { Product, ProductFormData } from "@/types/product";
+import { Product, ProductFormData, Category } from "@/types/product";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,6 +31,7 @@ const ProductForm = () => {
     const [submitting, setSubmitting] = useState(false);
     const [imageFiles, setImageFiles] = useState<File[]>([]);
     const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
 
     const [formData, setFormData] = useState<ProductFormData>({
         name: "",
@@ -48,10 +49,31 @@ const ProductForm = () => {
     });
 
     useEffect(() => {
+        fetchCategories();
         if (isEdit && id) {
             fetchProduct(id);
         }
     }, [id, isEdit]);
+
+    const fetchCategories = async () => {
+        try {
+            const q = query(collection(db, "categories"), orderBy("name"));
+            const querySnapshot = await getDocs(q);
+            const categoriesList: Category[] = [];
+            querySnapshot.forEach((doc) => {
+                categoriesList.push({ id: doc.id, ...doc.data() } as Category);
+            });
+            setCategories(categoriesList);
+            // If creating new product and categories exist, set default
+            if (!isEdit && categoriesList.length > 0 && !formData.category) {
+                // setFormData(prev => ({ ...prev, category: categoriesList[0].name }));
+                // actually better to force user to choose
+            }
+        } catch (error) {
+            console.error("Error fetching categories:", error);
+            // toast.error("Failed to load categories");
+        }
+    };
 
     const fetchProduct = async (productId: string) => {
         try {
@@ -85,6 +107,8 @@ const ProductForm = () => {
             setLoading(false);
         }
     };
+
+    // ... (rest of image handling functions) ...
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);
@@ -406,12 +430,40 @@ const ProductForm = () => {
                             <CardContent className="space-y-4">
                                 <div>
                                     <Label htmlFor="category">Category *</Label>
-                                    <Input
-                                        id="category"
+                                    <Select
                                         value={formData.category}
-                                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                        onValueChange={(value) => setFormData({ ...formData, category: value })}
                                         required
-                                    />
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select Category" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {categories.map((category) => (
+                                                <SelectItem key={category.id} value={category.name}>
+                                                    {category.name}
+                                                </SelectItem>
+                                            ))}
+                                            {categories.length === 0 && (
+                                                <SelectItem value="uncategorized" disabled>
+                                                    No categories found
+                                                </SelectItem>
+                                            )}
+                                        </SelectContent>
+                                    </Select>
+                                    <div className="mt-2 text-xs text-right">
+                                        <a
+                                            href="/admin/categories"
+                                            target="_blank"
+                                            className="text-primary hover:underline cursor-pointer"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                window.open('/admin/categories', '_blank');
+                                            }}
+                                        >
+                                            Manage Categories
+                                        </a>
+                                    </div>
                                 </div>
 
                                 <div>

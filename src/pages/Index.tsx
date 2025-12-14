@@ -1,16 +1,47 @@
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useCart } from "@/contexts/CartContext";
+import { Link, useNavigate } from "react-router-dom";
+import { collection, query, where, limit, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { Product } from "@/types/product";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Wrench, Truck, DollarSign, FileText, MessageCircle, ShoppingCart } from "lucide-react";
+import { Wrench, Truck, DollarSign, FileText, MessageCircle, ShoppingCart, Package } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import heroImage from "@/assets/hero-mechanic.jpg";
-import steeringPump from "@/assets/products/steering-pump.jpg";
-import steeringRack from "@/assets/products/steering-rack.jpg";
-import engineOil from "@/assets/products/engine-oil.jpg";
-import suspension from "@/assets/products/suspension.jpg";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFeaturedProducts = async () => {
+      try {
+        const q = query(
+          collection(db, "products"),
+          where("featured", "==", true),
+          where("status", "==", "active"),
+          limit(4)
+        );
+        const querySnapshot = await getDocs(q);
+        const products: Product[] = [];
+        querySnapshot.forEach((doc) => {
+          products.push({ id: doc.id, ...doc.data() } as Product);
+        });
+        setFeaturedProducts(products);
+      } catch (error) {
+        console.error("Error fetching featured products:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFeaturedProducts();
+  }, []);
+
   const features = [
     {
       icon: Wrench,
@@ -31,33 +62,6 @@ const Index = () => {
       icon: FileText,
       title: "Invoice & Warranty Guaranteed",
       description: "Full documentation and warranty on all purchases"
-    }
-  ];
-
-  const featuredProducts = [
-    {
-      id: 1,
-      name: "Toyota Corolla Power Steering Pump",
-      price: "GHS 950",
-      image: steeringPump
-    },
-    {
-      id: 2,
-      name: "Nissan Steering Rack",
-      price: "GHS 1,200",
-      image: steeringRack
-    },
-    {
-      id: 3,
-      name: "Castrol Engine Oil 4L",
-      price: "GHS 350",
-      image: engineOil
-    },
-    {
-      id: 4,
-      name: "Suspension Shock Absorber",
-      price: "GHS 680",
-      image: suspension
     }
   ];
 
@@ -124,40 +128,69 @@ const Index = () => {
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">Featured Products</h2>
             <p className="text-center text-muted-foreground mb-12">Browse our most popular auto parts</p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {featuredProducts.map((product) => (
-                <Card key={product.id} className="shadow-card hover:shadow-hover transition-all overflow-hidden group">
-                  <div className="aspect-square overflow-hidden bg-muted">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
-                  </div>
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold mb-2 line-clamp-2">{product.name}</h3>
-                    <p className="text-2xl font-bold text-primary mb-4">{product.price}</p>
-                    <div className="space-y-2">
-                      <Button className="w-full gap-2" size="sm">
-                        <ShoppingCart className="h-4 w-4" />
-                        Add to Cart
-                      </Button>
-                      <a
-                        href={`https://wa.me/233247654321?text=I'm interested in ${product.name}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block"
-                      >
-                        <Button variant="outline" className="w-full gap-2" size="sm">
-                          <MessageCircle className="h-4 w-4" />
-                          Order on WhatsApp
-                        </Button>
-                      </a>
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              </div>
+            ) : featuredProducts.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                {featuredProducts.map((product) => (
+                  <Card
+                    key={product.id}
+                    className="shadow-card hover:shadow-hover transition-all overflow-hidden group cursor-pointer"
+                    onClick={() => navigate(`/product/${product.id}`)}
+                  >
+                    <div className="aspect-square overflow-hidden bg-muted">
+                      {product.images && product.images[0] ? (
+                        <img
+                          src={product.images[0]}
+                          alt={product.name}
+                          className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Package className="h-16 w-16 text-muted-foreground" />
+                        </div>
+                      )}
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    <CardContent className="p-4">
+                      <h3 className="font-semibold mb-2 line-clamp-2 min-h-[3rem]">{product.name}</h3>
+                      <div className="flex items-baseline gap-2 mb-4">
+                        <p className="text-2xl font-bold text-primary">GHS {product.price.toFixed(2)}</p>
+                        {product.compareAtPrice && (
+                          <p className="text-sm text-muted-foreground line-through">GHS {product.compareAtPrice.toFixed(2)}</p>
+                        )}
+                      </div>
+                      <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
+                        <Button
+                          className="w-full gap-2"
+                          size="sm"
+                          onClick={() => addToCart(product, 1)}
+                        >
+                          <ShoppingCart className="h-4 w-4" />
+                          Add to Cart
+                        </Button>
+                        <a
+                          href={`https://wa.me/233247654321?text=I'm interested in ${product.name}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block"
+                        >
+                          <Button variant="outline" className="w-full gap-2" size="sm">
+                            <MessageCircle className="h-4 w-4" />
+                            Order on WhatsApp
+                          </Button>
+                        </a>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 bg-muted rounded-lg">
+                <p className="text-muted-foreground">No featured products available at the moment.</p>
+              </div>
+            )}
 
             <div className="text-center">
               <Link to="/shop">

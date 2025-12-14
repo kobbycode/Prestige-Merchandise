@@ -1,11 +1,16 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Phone, MessageCircle } from "lucide-react";
+import { Menu, X, Phone, MessageCircle, User, LogOut, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FaWhatsapp } from "react-icons/fa";
 import logo from "@/assets/logo.png";
+import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
+import CartSheet from "./cart/CartSheet";
 
 const Header = () => {
+  const { isAuthenticated, logout } = useAuth();
+  const { cartCount, setIsCartOpen } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
 
@@ -45,6 +50,33 @@ const Header = () => {
                 {link.label}
               </Link>
             ))}
+            {/* Cart Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative"
+              onClick={() => setIsCartOpen(true)}
+            >
+              <ShoppingBag className="h-5 w-5" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] font-bold text-primary-foreground flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </Button>
+
+            {/* Auth Button */}
+            {isAuthenticated ? (
+              <Button variant="ghost" size="icon" onClick={logout} title="Logout">
+                <LogOut className="h-5 w-5" />
+              </Button>
+            ) : (
+              <Link to="/login">
+                <Button variant="ghost" size="icon" title="Login">
+                  <User className="h-5 w-5" />
+                </Button>
+              </Link>
+            )}
           </nav>
 
           <div className="flex items-center gap-2">
@@ -86,6 +118,7 @@ const Header = () => {
             ))}
           </nav>
         )}
+        <CartSheet />
       </div>
     </header>
   );

@@ -38,8 +38,9 @@ interface AuthContextType {
     loading: boolean;
     isAuthenticated: boolean;
     login: (email: string, password: string) => Promise<void>;
+    signup: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
-    createAdmin: (email: string, password: string) => Promise<any>;
+    createAdmin: (email: string, password: string, role?: UserRole) => Promise<any>;
     deleteAdmin: (uid: string) => Promise<void>;
     changePassword: (password: string) => Promise<void>;
 }
@@ -50,6 +51,7 @@ const AuthContext = createContext<AuthContextType>({
     loading: true,
     isAuthenticated: false,
     login: async () => { },
+    signup: async () => { },
     logout: async () => { },
     createAdmin: async () => { },
     deleteAdmin: async () => { },
@@ -92,10 +94,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                                     setRole(null);
                                 }
                             } else {
-                                // Valid user, but no admin profile = Access Denied
-                                console.error("Access Denied: Admin document missing for UID:", user.uid);
-                                setRole(null);
-                                toast.error("Access Restricted: Admin Profile Missing");
+                                // Default to "customer" role if not in admins collection
+                                // This allows valid users to log in without admin privileges
+                                console.log("User logged in as Customer (No admin profile):", user.uid);
+                                setRole(null); // Role is null for regular customers
                             }
                         }
                         // CRITICAL: Only stop loading after we have the role (or lack thereof)
@@ -143,7 +145,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         await firebaseSignOut(auth);
     };
 
-    const createAdmin = async (email: string, password: string) => {
+    const signup = async (email: string, password: string) => {
+        setLoading(true);
+        try {
+            await createUserWithEmailAndPassword(auth, email, password);
+            // No need to set user/role here, the onAuthStateChanged listener will handle it
+        } catch (error) {
+            setLoading(false);
+            throw error;
+        }
+    };
+
+    const createAdmin = async (email: string, password: string, role: UserRole = 'admin') => {
         console.log("🔵 createAdmin: Starting...");
         // 1. Initialize Secondary App
         // We use a timestamp to ensure the app name is unique every time, preventing "App already exists" errors
@@ -168,7 +181,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const newAdminData = {
                 uid: userCredential.user.uid,
                 email,
-                role: 'admin',
+                role,
                 createdAt: new Date().toISOString()
             };
 
@@ -217,6 +230,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             loading,
             isAuthenticated: !!user,
             login,
+            signup,
             logout,
             createAdmin,
             deleteAdmin,

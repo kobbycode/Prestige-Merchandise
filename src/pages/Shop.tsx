@@ -9,9 +9,11 @@ import { Input } from "@/components/ui/input";
 import { MessageCircle, Search, ShoppingCart, Package } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { useCart } from "@/contexts/CartContext";
 
 const Shop = () => {
   const navigate = useNavigate();
+  const { addToCart } = useCart();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [products, setProducts] = useState<Product[]>([]);
@@ -175,7 +177,11 @@ const Shop = () => {
                               )}
                             </div>
                             <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
-                              <Button className="w-full gap-2" size="sm">
+                              <Button
+                                className="w-full gap-2"
+                                size="sm"
+                                onClick={() => addToCart(product, 1)}
+                              >
                                 <ShoppingCart className="h-4 w-4" />
                                 Add to Cart
                               </Button>

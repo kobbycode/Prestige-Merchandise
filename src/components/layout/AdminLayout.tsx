@@ -10,7 +10,8 @@ import {
     Menu,
     X,
     Settings,
-    Shield
+    Shield,
+    FolderTree
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { cn } from "@/lib/utils";
@@ -53,6 +54,7 @@ const AdminLayout = () => {
     const navItems = [
         { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
         { icon: Package, label: "Products", path: "/admin/products" },
+        { icon: FolderTree, label: "Categories", path: "/admin/categories" },
         { icon: FileText, label: "Blog Posts", path: "/admin/blog" },
         // Only show Admins management to super_admin
         ...(role === 'super_admin' ? [{ icon: Shield, label: "Manage Admins", path: "/admin/admins" }] : []),
