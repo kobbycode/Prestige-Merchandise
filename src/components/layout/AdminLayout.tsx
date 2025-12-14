@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Outlet, useNavigate, useLocation, Link } from "react-router-dom";
-import { isAuthenticated, logout } from "@/lib/auth";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
     LayoutDashboard,
@@ -8,31 +8,55 @@ import {
     FileText,
     LogOut,
     Menu,
-    X
+    X,
+    Settings,
+    Shield
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { cn } from "@/lib/utils";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+    DialogTrigger,
+    DialogClose
+} from "@/components/ui/dialog";
 
 const AdminLayout = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const { isAuthenticated, loading, logout, role } = useAuth();
 
     useEffect(() => {
-        if (!isAuthenticated()) {
+        if (!loading && !isAuthenticated) {
             navigate("/admin/login");
         }
-    }, [navigate]);
+    }, [isAuthenticated, loading, navigate]);
 
-    const handleLogout = () => {
-        logout();
+    const handleLogout = async () => {
+        await logout();
         navigate("/admin/login");
     };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
 
     const navItems = [
         { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
         { icon: Package, label: "Products", path: "/admin/products" },
         { icon: FileText, label: "Blog Posts", path: "/admin/blog" },
+        // Only show Admins management to super_admin
+        ...(role === 'super_admin' ? [{ icon: Shield, label: "Manage Admins", path: "/admin/admins" }] : []),
+        { icon: Settings, label: "Profile", path: "/admin/profile" },
     ];
 
     return (
@@ -89,14 +113,31 @@ const AdminLayout = () => {
                     </nav>
 
                     <div className="p-4 border-t border-white/10">
-                        <Button
-                            variant="ghost"
-                            className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-900/20 gap-2"
-                            onClick={handleLogout}
-                        >
-                            <LogOut className="h-5 w-5" />
-                            Logout
-                        </Button>
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-900/20 gap-2"
+                                >
+                                    <LogOut className="h-5 w-5" />
+                                    Logout
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Confirm Logout</DialogTitle>
+                                    <DialogDescription>
+                                        Are you sure you want to log out of the admin panel?
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <DialogFooter>
+                                    <DialogClose asChild>
+                                        <Button variant="outline">Cancel</Button>
+                                    </DialogClose>
+                                    <Button variant="destructive" onClick={handleLogout}>Logout</Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
                     </div>
                 </div>
             </aside>

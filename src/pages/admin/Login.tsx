@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "@/lib/auth";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,16 +9,25 @@ import { toast } from "sonner";
 import logo from "@/assets/logo.png";
 
 const Login = () => {
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const { login } = useAuth();
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (login(password)) {
+        setIsLoading(true);
+
+        try {
+            await login(email, password);
             toast.success("Welcome back, Admin!");
             navigate("/admin");
-        } else {
-            toast.error("Invalid password");
+        } catch (error: any) {
+            console.error(error);
+            toast.error("Invalid credentials. Please try again.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -29,11 +38,23 @@ const Login = () => {
                     <div className="mx-auto bg-white p-2 rounded-full w-fit shadow-sm">
                         <img src={logo} alt="Logo" className="h-20 w-auto" />
                     </div>
-                    <CardTitle className="text-2xl font-bold">Admin Access</CardTitle>
-                    <CardDescription>Enter your credential to manage the dashboard</CardDescription>
+                    <CardTitle className="text-2xl font-bold">Admin Portal</CardTitle>
+                    <CardDescription>Secure login for enterprise management</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleLogin} className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="email">Email Address</Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                placeholder="admin@prestige.com"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="focus-visible:ring-primary"
+                                required
+                            />
+                        </div>
                         <div className="space-y-2">
                             <Label htmlFor="password">Password</Label>
                             <Input
@@ -43,15 +64,17 @@ const Login = () => {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="focus-visible:ring-primary"
+                                required
                             />
                         </div>
-                        <Button type="submit" className="w-full font-bold text-white shadow-md hover:shadow-lg transition-all">
-                            Login to Dashboard
+                        <Button
+                            type="submit"
+                            className="w-full font-bold text-black shadow-md hover:shadow-lg transition-all"
+                            disabled={isLoading}
+                        >
+                            {isLoading ? "Authenticating..." : "Login to Dashboard"}
                         </Button>
                     </form>
-                    <div className="mt-4 text-center text-xs text-muted-foreground">
-                        <p>Hint: password is 'admin123'</p>
-                    </div>
                 </CardContent>
             </Card>
         </div>
