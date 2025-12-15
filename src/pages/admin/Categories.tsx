@@ -140,12 +140,12 @@ const Categories = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Categories</h1>
-                    <p className="text-muted-foreground">Manage your product categories</p>
+                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Categories</h1>
+                    <p className="text-sm md:text-base text-muted-foreground">Manage your product categories</p>
                 </div>
-                <Button onClick={() => handleOpenDialog()}>
+                <Button onClick={() => handleOpenDialog()} className="w-full md:w-auto">
                     <Plus className="mr-2 h-4 w-4" /> Add Category
                 </Button>
             </div>
@@ -173,51 +173,103 @@ const Categories = () => {
                             No categories found. Create one to get started.
                         </div>
                     ) : (
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Name</TableHead>
-                                    <TableHead>Slug</TableHead>
-                                    <TableHead>Description</TableHead>
-                                    <TableHead>Created At</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
+                        <>
+                            {/* Mobile: Card View */}
+                            <div className="block md:hidden space-y-4">
                                 {filteredCategories.map((category) => (
-                                    <TableRow key={category.id}>
-                                        <TableCell className="font-medium flex items-center gap-2">
-                                            <FolderTree className="h-4 w-4 text-muted-foreground" />
-                                            {category.name}
-                                        </TableCell>
-                                        <TableCell>{category.slug}</TableCell>
-                                        <TableCell className="max-w-xs truncate" title={category.description}>
-                                            {category.description || "-"}
-                                        </TableCell>
-                                        <TableCell>
-                                            {new Date(category.createdAt).toLocaleDateString()}
-                                        </TableCell>
-                                        <TableCell className="text-right space-x-2">
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() => handleOpenDialog(category)}
-                                            >
-                                                <Pencil className="h-4 w-4" />
-                                            </Button>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="text-destructive"
-                                                onClick={() => setDeleteId(category.id)}
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
+                                    <div key={category.id} className="bg-white rounded-lg border p-4 shadow-sm space-y-3">
+                                        <div className="flex justify-between items-start gap-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center shrink-0">
+                                                    <FolderTree className="h-5 w-5 text-muted-foreground" />
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium">{category.name}</p>
+                                                    <p className="text-xs text-muted-foreground">{category.slug}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-1">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8"
+                                                    onClick={() => handleOpenDialog(category)}
+                                                >
+                                                    <Pencil className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-destructive"
+                                                    onClick={() => setDeleteId(category.id)}
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
+
+                                        {category.description && (
+                                            <div className="text-sm text-muted-foreground bg-muted/30 p-2 rounded">
+                                                {category.description}
+                                            </div>
+                                        )}
+
+                                        <div className="text-xs text-muted-foreground pt-2 border-t">
+                                            Created: {new Date(category.createdAt).toLocaleDateString()}
+                                        </div>
+                                    </div>
                                 ))}
-                            </TableBody>
-                        </Table>
+                            </div>
+
+                            {/* Desktop: Table View */}
+                            <div className="hidden md:block">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Name</TableHead>
+                                            <TableHead>Slug</TableHead>
+                                            <TableHead>Description</TableHead>
+                                            <TableHead>Created At</TableHead>
+                                            <TableHead className="text-right">Actions</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {filteredCategories.map((category) => (
+                                            <TableRow key={category.id}>
+                                                <TableCell className="font-medium flex items-center gap-2">
+                                                    <FolderTree className="h-4 w-4 text-muted-foreground" />
+                                                    {category.name}
+                                                </TableCell>
+                                                <TableCell>{category.slug}</TableCell>
+                                                <TableCell className="max-w-xs truncate" title={category.description}>
+                                                    {category.description || "-"}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {new Date(category.createdAt).toLocaleDateString()}
+                                                </TableCell>
+                                                <TableCell className="text-right space-x-2">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => handleOpenDialog(category)}
+                                                    >
+                                                        <Pencil className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="text-destructive"
+                                                        onClick={() => setDeleteId(category.id)}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </>
                     )}
                 </CardContent>
             </Card>

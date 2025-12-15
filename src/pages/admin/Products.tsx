@@ -103,12 +103,12 @@ const Products = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Products</h1>
-                    <p className="text-muted-foreground">Manage your product catalog</p>
+                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Products</h1>
+                    <p className="text-sm md:text-base text-muted-foreground">Manage your product catalog</p>
                 </div>
-                <Button onClick={() => navigate('/admin/products/new')} className="gap-2">
+                <Button onClick={() => navigate('/admin/products/new')} className="gap-2 w-full md:w-auto">
                     <Plus className="h-4 w-4" /> Add Product
                 </Button>
             </div>
@@ -142,65 +142,64 @@ const Products = () => {
                             )}
                         </div>
                     ) : (
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Product</TableHead>
-                                    <TableHead>SKU</TableHead>
-                                    <TableHead>Category</TableHead>
-                                    <TableHead>Stock</TableHead>
-                                    <TableHead>Price</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
+                        <div className="space-y-4">
+                            {/* Mobile View: Cards */}
+                            <div className="block md:hidden space-y-4">
                                 {filteredProducts.map((product) => (
-                                    <TableRow key={product.id}>
-                                        <TableCell>
-                                            <div className="flex items-center gap-3">
+                                    <div key={product.id} className="bg-white rounded-lg border p-4 shadow-sm space-y-3">
+                                        <div className="flex gap-4">
+                                            {/* Product Image */}
+                                            <div className="h-20 w-20 shrink-0 rounded bg-muted overflow-hidden">
                                                 {product.images[0] ? (
                                                     <img
                                                         src={product.images[0]}
                                                         alt={product.name}
-                                                        className="h-10 w-10 rounded object-cover"
+                                                        className="h-full w-full object-cover"
                                                     />
                                                 ) : (
-                                                    <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
-                                                        <Package className="h-5 w-5 text-muted-foreground" />
+                                                    <div className="h-full w-full flex items-center justify-center">
+                                                        <Package className="h-8 w-8 text-muted-foreground" />
                                                     </div>
                                                 )}
-                                                <div>
-                                                    <div className="font-medium">{product.name}</div>
-                                                    {product.featured && (
-                                                        <span className="text-xs text-primary">Featured</span>
-                                                    )}
+                                            </div>
+
+                                            {/* Product Info */}
+                                            <div className="flex-1 space-y-1">
+                                                <div className="flex justify-between items-start">
+                                                    <h3 className="font-semibold line-clamp-1">{product.name}</h3>
+                                                    {getStatusBadge(product.status)}
                                                 </div>
+                                                <p className="text-sm text-muted-foreground line-clamp-1">
+                                                    {product.category}
+                                                </p>
+                                                <p className="text-xs font-mono text-muted-foreground">
+                                                    SKU: {product.sku}
+                                                </p>
                                             </div>
-                                        </TableCell>
-                                        <TableCell className="font-mono text-sm">{product.sku}</TableCell>
-                                        <TableCell>{product.category}</TableCell>
-                                        <TableCell>
-                                            <span className={product.stock < 10 ? 'text-destructive font-medium' : ''}>
-                                                {product.stock}
-                                            </span>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div>
-                                                <div className="font-medium">${product.price.toFixed(2)}</div>
-                                                {product.compareAtPrice && (
-                                                    <div className="text-xs text-muted-foreground line-through">
-                                                        ${product.compareAtPrice.toFixed(2)}
+                                        </div>
+
+                                        <div className="flex justify-between items-center pt-2 border-t">
+                                            <div className="space-y-0.5">
+                                                <div className="font-semibold">
+                                                    GH₵ {product.price.toFixed(2)}
+                                                </div>
+                                                {product.stock < 10 && (
+                                                    <div className="text-xs text-destructive font-medium">
+                                                        Low Stock: {product.stock}
+                                                    </div>
+                                                )}
+                                                {product.stock >= 10 && (
+                                                    <div className="text-xs text-muted-foreground">
+                                                        Stock: {product.stock}
                                                     </div>
                                                 )}
                                             </div>
-                                        </TableCell>
-                                        <TableCell>{getStatusBadge(product.status)}</TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex items-center justify-end gap-2">
+
+                                            <div className="flex gap-1">
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
+                                                    className="h-8"
                                                     onClick={() => navigate(`/admin/products/${product.id}/edit`)}
                                                 >
                                                     <Pencil className="h-4 w-4" />
@@ -208,17 +207,98 @@ const Products = () => {
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                    className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                                                     onClick={() => setDeleteId(product.id)}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
                                             </div>
-                                        </TableCell>
-                                    </TableRow>
+                                        </div>
+                                    </div>
                                 ))}
-                            </TableBody>
-                        </Table>
+                            </div>
+
+                            {/* Desktop View: Table */}
+                            <div className="hidden md:block">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Product</TableHead>
+                                            <TableHead>SKU</TableHead>
+                                            <TableHead>Category</TableHead>
+                                            <TableHead>Stock</TableHead>
+                                            <TableHead>Price</TableHead>
+                                            <TableHead>Status</TableHead>
+                                            <TableHead className="text-right">Actions</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {filteredProducts.map((product) => (
+                                            <TableRow key={product.id}>
+                                                <TableCell>
+                                                    <div className="flex items-center gap-3">
+                                                        {product.images[0] ? (
+                                                            <img
+                                                                src={product.images[0]}
+                                                                alt={product.name}
+                                                                className="h-10 w-10 rounded object-cover"
+                                                            />
+                                                        ) : (
+                                                            <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
+                                                                <Package className="h-5 w-5 text-muted-foreground" />
+                                                            </div>
+                                                        )}
+                                                        <div>
+                                                            <div className="font-medium">{product.name}</div>
+                                                            {product.featured && (
+                                                                <span className="text-xs text-primary">Featured</span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="font-mono text-sm">{product.sku}</TableCell>
+                                                <TableCell>{product.category}</TableCell>
+                                                <TableCell>
+                                                    <span className={product.stock < 10 ? 'text-destructive font-medium' : ''}>
+                                                        {product.stock}
+                                                    </span>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div>
+                                                        <div className="font-medium">GH₵ {product.price.toFixed(2)}</div>
+                                                        {product.compareAtPrice && (
+                                                            <div className="text-xs text-muted-foreground line-through">
+                                                                GH₵ {product.compareAtPrice.toFixed(2)}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>{getStatusBadge(product.status)}</TableCell>
+                                                <TableCell className="text-right">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => navigate(`/admin/products/${product.id}/edit`)}
+                                                        >
+                                                            <Pencil className="h-4 w-4" />
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                            onClick={() => setDeleteId(product.id)}
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </div>
                     )}
                 </CardContent>
             </Card>

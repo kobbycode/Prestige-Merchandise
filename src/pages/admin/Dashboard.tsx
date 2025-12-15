@@ -253,13 +253,13 @@ const Dashboard = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-                    <p className="text-muted-foreground">Overview of your store's performance</p>
+                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h1>
+                    <p className="text-sm md:text-base text-muted-foreground">Overview of your store's performance</p>
                 </div>
-                <Link to="/admin/products/new">
-                    <Button>Add Product</Button>
+                <Link to="/admin/products/new" className="w-full md:w-auto">
+                    <Button className="w-full md:w-auto">Add Product</Button>
                 </Link>
             </div>
 
@@ -354,26 +354,58 @@ const Dashboard = () => {
                     <CardContent>
                         <div className="space-y-8">
                             {recentProducts.map((product) => (
-                                <div key={product.id} className="flex items-center">
-                                    <div className="h-9 w-9 rounded overflow-hidden bg-muted">
-                                        {product.images && product.images[0] ? (
-                                            <img src={product.images[0]} alt="" className="h-full w-full object-cover" />
-                                        ) : (
-                                            <div className="h-full w-full flex items-center justify-center bg-gray-100">
-                                                <Package className="h-4 w-4 text-gray-400" />
+                                <div key={product.id} className="space-y-4 sm:space-y-0">
+                                    {/* Mobile: Boxed Card */}
+                                    <div className="block sm:hidden bg-card rounded-lg border p-3 shadow-sm mb-4">
+                                        <div className="flex gap-3">
+                                            <div className="h-14 w-14 rounded overflow-hidden bg-muted shrink-0">
+                                                {product.images && product.images[0] ? (
+                                                    <img src={product.images[0]} alt="" className="h-full w-full object-cover" />
+                                                ) : (
+                                                    <div className="h-full w-full flex items-center justify-center bg-gray-100">
+                                                        <Package className="h-4 w-4 text-gray-400" />
+                                                    </div>
+                                                )}
                                             </div>
-                                        )}
-                                    </div>
-                                    <div className="ml-4 space-y-1">
-                                        <p className="text-sm font-medium leading-none line-clamp-1">{product.name}</p>
-                                        <div className="flex items-center gap-2">
-                                            <p className="text-xs text-muted-foreground">{product.category || "Uncategorized"}</p>
-                                            {product.stock <= 5 && (
-                                                <span className="text-[10px] bg-red-100 text-red-600 px-1 rounded">Low Stock</span>
-                                            )}
+                                            <div className="flex-1 min-w-0 flex flex-col justify-center">
+                                                <p className="font-semibold text-sm line-clamp-1">{product.name}</p>
+                                                <p className="text-xs text-muted-foreground">{product.category || "Uncategorized"}</p>
+                                                <div className="flex justify-between items-center mt-1.5">
+                                                    <div className="font-bold text-sm">
+                                                        GH₵ {product.price.toLocaleString()}
+                                                    </div>
+                                                    {product.stock <= 5 && (
+                                                        <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full">Low Stock</span>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="ml-auto font-medium text-sm">GH₵ {product.price.toLocaleString()}</div>
+
+                                    {/* Desktop: Row (Hidden on mobile) */}
+                                    <div className="hidden sm:flex items-center gap-3">
+                                        <div className="flex items-center">
+                                            <div className="h-9 w-9 rounded overflow-hidden bg-muted shrink-0">
+                                                {product.images && product.images[0] ? (
+                                                    <img src={product.images[0]} alt="" className="h-full w-full object-cover" />
+                                                ) : (
+                                                    <div className="h-full w-full flex items-center justify-center bg-gray-100">
+                                                        <Package className="h-4 w-4 text-gray-400" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="ml-4 space-y-1">
+                                                <p className="text-sm font-medium leading-none line-clamp-1">{product.name}</p>
+                                                <div className="flex items-center gap-2">
+                                                    <p className="text-xs text-muted-foreground">{product.category || "Uncategorized"}</p>
+                                                    {product.stock <= 5 && (
+                                                        <span className="text-[10px] bg-red-100 text-red-600 px-1 rounded">Low Stock</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="ml-auto font-medium text-sm">GH₵ {product.price.toLocaleString()}</div>
+                                    </div>
                                 </div>
                             ))}
                             {recentProducts.length === 0 && <p className="text-sm text-muted-foreground text-center">No products added yet.</p>}
@@ -397,15 +429,14 @@ const Dashboard = () => {
                     </CardHeader>
                     <CardContent>
                         {orderStatusData.length > 0 ? (
-                            <ResponsiveContainer width="100%" height={300}>
+                            <ResponsiveContainer width="100%" height={350}>
                                 <PieChart>
                                     <Pie
                                         data={orderStatusData}
                                         cx="50%"
                                         cy="50%"
                                         labelLine={false}
-                                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                                        outerRadius={80}
+                                        outerRadius={65}
                                         fill="#8884d8"
                                         dataKey="value"
                                     >
@@ -414,6 +445,13 @@ const Dashboard = () => {
                                         ))}
                                     </Pie>
                                     <Tooltip />
+                                    <Legend
+                                        layout="horizontal"
+                                        verticalAlign="bottom"
+                                        align="center"
+                                        wrapperStyle={{ paddingTop: "20px" }}
+                                        formatter={(value, entry: any) => <span className="text-xs text-muted-foreground ml-1">{value} ({entry.payload.value})</span>}
+                                    />
                                 </PieChart>
                             </ResponsiveContainer>
                         ) : (
@@ -429,28 +467,67 @@ const Dashboard = () => {
                     <CardContent>
                         <div className="space-y-8">
                             {recentOrders.map((order) => (
-                                <div key={order.id} className="flex items-center">
-                                    <div className="flex-1 space-y-1">
-                                        <p className="text-sm font-medium leading-none">
-                                            {order.customerDetails.firstName} {order.customerDetails.lastName}
-                                        </p>
-                                        <div className="flex items-center gap-2">
-                                            <p className="text-xs text-muted-foreground">
-                                                {order.createdAt?.seconds ? format(new Date(order.createdAt.seconds * 1000), "PPp") : "N/A"}
-                                            </p>
+                                <div key={order.id} className="space-y-4 sm:space-y-0">
+                                    {/* Mobile: Boxed Card */}
+                                    <div className="block sm:hidden bg-card rounded-lg border p-3 shadow-sm mb-4">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <p className="font-semibold text-sm">
+                                                    {order.customerDetails.firstName} {order.customerDetails.lastName}
+                                                </p>
+                                                <p className="text-xs text-muted-foreground mt-0.5">
+                                                    {order.items.length} items
+                                                </p>
+                                            </div>
                                             <Badge className={getStatusClassName(order.status)} variant="outline">
                                                 {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                                             </Badge>
                                         </div>
-                                    </div>
-                                    <div className="ml-auto flex items-center gap-3">
-                                        <div className="text-right">
-                                            <p className="text-sm font-medium">GH₵ {order.amount.toFixed(2)}</p>
-                                            <p className="text-xs text-muted-foreground">{order.items.length} items</p>
+                                        <div className="flex justify-between items-end border-t pt-2">
+                                            <div>
+                                                <p className="text-xs text-muted-foreground">Ordered</p>
+                                                <p className="text-xs font-medium">
+                                                    {order.createdAt?.seconds ? format(new Date(order.createdAt.seconds * 1000), "MMM dd, p") : "N/A"}
+                                                </p>
+                                            </div>
+                                            <div className="text-right flex items-center gap-3">
+                                                <div className="mr-2">
+                                                    <p className="text-xs text-muted-foreground">Total</p>
+                                                    <p className="text-sm font-bold">GH₵ {order.amount.toFixed(2)}</p>
+                                                </div>
+                                                <Link to={`/admin/orders/${order.id}`}>
+                                                    <Button variant="outline" size="sm" className="h-8 w-8 p-0 rounded-full">
+                                                        <ArrowRight className="h-4 w-4" />
+                                                    </Button>
+                                                </Link>
+                                            </div>
                                         </div>
-                                        <Link to={`/admin/orders/${order.id}`}>
-                                            <Button variant="ghost" size="sm">View</Button>
-                                        </Link>
+                                    </div>
+
+                                    {/* Desktop: Row (Hidden on mobile) */}
+                                    <div className="hidden sm:flex items-center gap-4 border-b pb-4 last:border-0 last:pb-0">
+                                        <div className="flex-1 space-y-1">
+                                            <p className="text-sm font-medium leading-none">
+                                                {order.customerDetails.firstName} {order.customerDetails.lastName}
+                                            </p>
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <p className="text-xs text-muted-foreground">
+                                                    {order.createdAt?.seconds ? format(new Date(order.createdAt.seconds * 1000), "PPp") : "N/A"}
+                                                </p>
+                                                <Badge className={getStatusClassName(order.status)} variant="outline">
+                                                    {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                                                </Badge>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center justify-end gap-3">
+                                            <div className="text-right">
+                                                <p className="text-sm font-medium">GH₵ {order.amount.toFixed(2)}</p>
+                                                <p className="text-xs text-muted-foreground">{order.items.length} items</p>
+                                            </div>
+                                            <Link to={`/admin/orders/${order.id}`}>
+                                                <Button variant="ghost" size="sm">View</Button>
+                                            </Link>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
@@ -465,47 +542,49 @@ const Dashboard = () => {
                         </div>
                     </CardContent>
                 </Card>
-            </div>
+            </div >
             {/* Low Stock Detailed List */}
-            {stats.lowStockProducts > 0 && (
-                <Card className="border-red-200 bg-red-50/50">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-red-700">
-                            <AlertTriangle className="h-5 w-5" />
-                            Low Stock Alert
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-sm text-left">
-                                <thead className="text-xs uppercase bg-red-100 text-red-700">
-                                    <tr>
-                                        <th className="px-4 py-3">Product</th>
-                                        <th className="px-4 py-3">Category</th>
-                                        <th className="px-4 py-3">Current Stock</th>
-                                        <th className="px-4 py-3 text-right">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {/* Ideally we filter this from the main products list we fetched */}
-                                    {/* Since we don't have the full product list in state (only count), we might need to fetch or filter if we kept them. */}
-                                    {/* Wait, we only fetched counts in the original code, except 'recent'. 
+            {
+                stats.lowStockProducts > 0 && (
+                    <Card className="border-red-200 bg-red-50/50">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2 text-red-700">
+                                <AlertTriangle className="h-5 w-5" />
+                                Low Stock Alert
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-sm text-left">
+                                    <thead className="text-xs uppercase bg-red-100 text-red-700">
+                                        <tr>
+                                            <th className="px-4 py-3">Product</th>
+                                            <th className="px-4 py-3">Category</th>
+                                            <th className="px-4 py-3">Current Stock</th>
+                                            <th className="px-4 py-3 text-right">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {/* Ideally we filter this from the main products list we fetched */}
+                                        {/* Since we don't have the full product list in state (only count), we might need to fetch or filter if we kept them. */}
+                                        {/* Wait, we only fetched counts in the original code, except 'recent'. 
                                         Actually, the original code DID get all products into a local array 'products' but only set 'recentProducts' to state. 
                                         I should improve the state to hold 'lowStockItems' 
                                      */}
-                                    {/* Placeholder for now to show structure, will need to update state logic above to populate this. */}
-                                    <tr>
-                                        <td className="px-4 py-3" colSpan={4}>
-                                            <div className="text-center text-muted-foreground">Detailed list requires state update. (Updating next step)</div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </CardContent>
-                </Card>
-            )}
-        </div>
+                                        {/* Placeholder for now to show structure, will need to update state logic above to populate this. */}
+                                        <tr>
+                                            <td className="px-4 py-3" colSpan={4}>
+                                                <div className="text-center text-muted-foreground">Detailed list requires state update. (Updating next step)</div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )
+            }
+        </div >
     );
 };
 

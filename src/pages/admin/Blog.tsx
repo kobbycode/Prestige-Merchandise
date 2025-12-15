@@ -85,13 +85,13 @@ const Blog = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Blog Posts</h1>
-                    <p className="text-muted-foreground">Manage your blog articles</p>
+                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Blog Posts</h1>
+                    <p className="text-sm md:text-base text-muted-foreground">Manage your blog articles</p>
                 </div>
-                <Link to="/admin/blog/new">
-                    <Button className="gap-2 text-white">
+                <Link to="/admin/blog/new" className="w-full md:w-auto">
+                    <Button className="gap-2 text-white w-full md:w-auto">
                         <Plus className="h-4 w-4" /> Create Post
                     </Button>
                 </Link>
@@ -109,7 +109,66 @@ const Blog = () => {
                 </div>
             </div>
 
-            <div className="border rounded-lg">
+            {/* Mobile: Card View */}
+            <div className="block md:hidden space-y-4">
+                {filteredPosts.length === 0 ? (
+                    <div className="text-center py-12 text-muted-foreground bg-white rounded-lg border border-dashed">
+                        No posts found.
+                    </div>
+                ) : (
+                    filteredPosts.map((post) => (
+                        <div key={post.id} className="bg-white rounded-lg border p-4 shadow-sm space-y-3">
+                            <div className="flex gap-4">
+                                {/* Image */}
+                                <div className="h-16 w-16 rounded overflow-hidden bg-muted shrink-0">
+                                    {post.coverImage ? (
+                                        <img src={post.coverImage} alt={post.title} className="h-full w-full object-cover" />
+                                    ) : (
+                                        <div className="h-full w-full flex items-center justify-center bg-gray-100">
+                                            <FileText className="h-6 w-6 text-gray-400" />
+                                        </div>
+                                    )}
+                                </div>
+                                {/* Content */}
+                                <div className="flex-1 min-w-0">
+                                    <h3 className="font-semibold text-sm line-clamp-2 leading-tight mb-1">{post.title}</h3>
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <div className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${post.isPublished
+                                            ? "bg-green-100 text-green-700"
+                                            : "bg-gray-100 text-gray-700"
+                                            }`}>
+                                            {post.isPublished ? "Published" : "Draft"}
+                                        </div>
+                                        <span className="text-xs text-muted-foreground">
+                                            {format(new Date(post.createdAt), "MMM d, yyyy")}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex justify-end gap-2 border-t pt-3">
+                                <Link to={`/admin/blog/${post.id}/edit`}>
+                                    <Button variant="outline" size="sm" className="h-8">
+                                        <Pencil className="h-3.5 w-3.5 mr-1.5" /> Edit
+                                    </Button>
+                                </Link>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20"
+                                    onClick={() => setDeleteId(post.id)}
+                                >
+                                    <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Delete
+                                </Button>
+                            </div>
+                        </div>
+                    ))
+                )}
+            </div>
+
+            {/* Desktop: Table View */}
+            <div className="hidden md:block border rounded-lg">
                 <Table>
                     <TableHeader>
                         <TableHead>Title</TableHead>
@@ -145,8 +204,8 @@ const Blog = () => {
                                     </TableCell>
                                     <TableCell>
                                         <div className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border ${post.isPublished
-                                                ? "border-transparent bg-green-500 text-white hover:bg-green-600"
-                                                : "border-transparent bg-gray-500 text-white hover:bg-gray-600"
+                                            ? "border-transparent bg-green-500 text-white hover:bg-green-600"
+                                            : "border-transparent bg-gray-500 text-white hover:bg-gray-600"
                                             }`}>
                                             {post.isPublished ? "Published" : "Draft"}
                                         </div>

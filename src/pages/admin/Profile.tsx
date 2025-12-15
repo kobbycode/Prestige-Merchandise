@@ -37,8 +37,8 @@ const Profile = () => {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight">Profile Settings</h1>
-                <p className="text-muted-foreground">Manage your account preferences</p>
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Profile Settings</h1>
+                <p className="text-sm md:text-base text-muted-foreground">Manage your account preferences</p>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2">
@@ -49,16 +49,19 @@ const Profile = () => {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="flex items-center gap-4 p-4 border rounded-lg bg-muted/50">
-                            <div className="bg-primary/20 p-3 rounded-full">
+                            <div className="bg-primary/20 p-3 rounded-full shrink-0">
                                 <ShieldCheck className="h-6 w-6 text-primary-foreground" />
                             </div>
-                            <div>
+                            <div className="min-w-0">
                                 <p className="font-medium">Email Address</p>
-                                <p className="text-sm text-muted-foreground">{user?.email}</p>
+                                <p className="text-sm text-muted-foreground truncate" title={user?.email || ''}>{user?.email}</p>
                             </div>
                         </div>
 
                         <div className="flex items-center gap-4 p-4 border rounded-lg bg-muted/50">
+                            <div className="bg-primary/20 p-3 rounded-full shrink-0">
+                                <ShieldCheck className="h-6 w-6 text-primary-foreground" />
+                            </div>
                             <div>
                                 <p className="font-medium">Role</p>
                                 <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${role === 'super_admin' ? 'bg-primary/20 text-primary-foreground' : 'bg-gray-100 text-gray-800'
@@ -99,9 +102,11 @@ const Profile = () => {
                                     minLength={6}
                                 />
                             </div>
-                            <Button type="submit" disabled={loading} className="w-full text-primary-foreground">
-                                {loading ? "Updating..." : "Update Password"}
-                            </Button>
+                            <div className="flex justify-end">
+                                <Button type="submit" disabled={loading} className="w-full md:w-auto text-primary-foreground">
+                                    {loading ? "Updating..." : "Update Password"}
+                                </Button>
+                            </div>
                         </form>
                     </CardContent>
                 </Card>

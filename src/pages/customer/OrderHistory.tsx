@@ -173,7 +173,7 @@ const OrderHistory = () => {
                             {orders.map((order) => (
                                 <Card key={order.id}>
                                     <CardHeader>
-                                        <div className="flex items-center justify-between">
+                                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                             <div>
                                                 <CardTitle className="text-base">
                                                     Order #{order.id.substring(0, 8).toUpperCase()}
@@ -184,13 +184,13 @@ const OrderHistory = () => {
                                                         : "N/A"}
                                                 </p>
                                             </div>
-                                            <Badge className={getStatusClassName(order.status)} variant="outline">
+                                            <Badge className={`w-fit ${getStatusClassName(order.status)}`} variant="outline">
                                                 {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                                             </Badge>
                                         </div>
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="flex items-center justify-between">
+                                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                             <div>
                                                 <p className="text-sm text-muted-foreground">
                                                     {order.items.length} item{order.items.length !== 1 ? 's' : ''}
@@ -198,8 +198,8 @@ const OrderHistory = () => {
                                                 <p className="text-lg font-bold">GH₵ {order.amount.toFixed(2)}</p>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <Link to={`/account/orders/${order.id}`}>
-                                                    <Button variant="outline" size="sm">
+                                                <Link to={`/account/orders/${order.id}`} className="flex-1 md:flex-none">
+                                                    <Button variant="outline" size="sm" className="w-full md:w-auto">
                                                         <Eye className="mr-2 h-4 w-4" />
                                                         View
                                                     </Button>

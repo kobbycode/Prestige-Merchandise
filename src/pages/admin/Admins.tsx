@@ -153,15 +153,15 @@ const Admins = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Manage Admins</h1>
-                    <p className="text-muted-foreground">Create and remove system administrators</p>
+                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Manage Admins</h1>
+                    <p className="text-sm md:text-base text-muted-foreground">Create and remove system administrators</p>
                 </div>
 
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button className="gap-2 text-primary-foreground">
+                        <Button className="gap-2 text-primary-foreground w-full md:w-auto">
                             <Plus className="h-4 w-4" /> Add Admin
                         </Button>
                     </DialogTrigger>
@@ -217,42 +217,75 @@ const Admins = () => {
                     <CardTitle>Administrators</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Email</TableHead>
-                                <TableHead>Role</TableHead>
-                                <TableHead>Created At</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {admins.map((admin) => (
-                                <TableRow key={admin.id}>
-                                    <TableCell>{admin.email}</TableCell>
-                                    <TableCell>
-                                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${admin.role === 'super_admin' ? 'bg-primary/20 text-primary-foreground' : 'bg-gray-100 text-gray-800'
+                    {/* Mobile: Card View */}
+                    <div className="block md:hidden space-y-4">
+                        {admins.map((admin) => (
+                            <div key={admin.id} className="bg-white rounded-lg border p-4 shadow-sm space-y-3">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <p className="font-semibold text-sm truncate pr-2 max-w-[200px]">{admin.email}</p>
+                                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 mt-1 text-[10px] font-medium ${admin.role === 'super_admin' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-800'
                                             }`}>
                                             {admin.role === 'super_admin' ? 'Super Admin' : 'Admin'}
                                         </span>
-                                    </TableCell>
-                                    <TableCell>{new Date(admin.createdAt).toLocaleDateString()}</TableCell>
-                                    <TableCell className="text-right">
-                                        {admin.role !== 'super_admin' && admin.id !== currentUser?.uid && (
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                                onClick={() => handleDeleteClick(admin.id)}
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        )}
-                                    </TableCell>
+                                    </div>
+                                    {admin.role !== 'super_admin' && admin.id !== currentUser?.uid && (
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                            onClick={() => handleDeleteClick(admin.id)}
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    )}
+                                </div>
+                                <div className="text-xs text-muted-foreground pt-2 border-t">
+                                    Created: {new Date(admin.createdAt).toLocaleDateString()}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Desktop: Table View */}
+                    <div className="hidden md:block">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Email</TableHead>
+                                    <TableHead>Role</TableHead>
+                                    <TableHead>Created At</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {admins.map((admin) => (
+                                    <TableRow key={admin.id}>
+                                        <TableCell>{admin.email}</TableCell>
+                                        <TableCell>
+                                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${admin.role === 'super_admin' ? 'bg-primary/20 text-primary-foreground' : 'bg-gray-100 text-gray-800'
+                                                }`}>
+                                                {admin.role === 'super_admin' ? 'Super Admin' : 'Admin'}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell>{new Date(admin.createdAt).toLocaleDateString()}</TableCell>
+                                        <TableCell className="text-right">
+                                            {admin.role !== 'super_admin' && admin.id !== currentUser?.uid && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                    onClick={() => handleDeleteClick(admin.id)}
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
                 </CardContent>
             </Card>
 

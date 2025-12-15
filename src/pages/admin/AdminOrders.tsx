@@ -182,7 +182,7 @@ const AdminOrders = () => {
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold tracking-tight">Orders</h1>
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Orders</h1>
             </div>
 
             {/* Search and Filters */}
@@ -288,61 +288,119 @@ const AdminOrders = () => {
                             {searchQuery ? 'No orders found matching your search.' : 'No orders found.'}
                         </div>
                     ) : (
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Order ID</TableHead>
-                                    <TableHead>Customer</TableHead>
-                                    <TableHead>Date</TableHead>
-                                    <TableHead>Total</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
+                        <div className="space-y-4">
+                            {/* Mobile View: Cards */}
+                            <div className="block md:hidden space-y-4">
                                 {filteredOrders.map((order) => (
-                                    <TableRow key={order.id}>
-                                        <TableCell className="font-medium font-mono text-xs">
-                                            {order.id.substring(0, 8)}...
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="font-medium">
-                                                {order.customerDetails.firstName} {order.customerDetails.lastName}
+                                    <div key={order.id} className="bg-white rounded-lg border p-4 space-y-3 shadow-sm">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <div className="font-semibold">
+                                                    {order.customerDetails.firstName} {order.customerDetails.lastName}
+                                                </div>
+                                                <div className="text-xs text-muted-foreground mt-1">
+                                                    ID: {order.id.substring(0, 8).toUpperCase()}
+                                                </div>
                                             </div>
-                                            <div className="text-xs text-muted-foreground">
-                                                {order.customerDetails.phone}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            {order.createdAt?.seconds ? format(new Date(order.createdAt.seconds * 1000), "PPP") : "N/A"}
-                                        </TableCell>
-                                        <TableCell>GH₵ {order.amount.toFixed(2)}</TableCell>
-                                        <TableCell>
                                             <Badge className={getStatusClassName(order.status)} variant="outline">
                                                 {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                                             </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <Link to={`/admin/orders/${order.id}`}>
-                                                    <Button variant="ghost" size="icon">
-                                                        <Eye className="h-4 w-4" />
-                                                    </Button>
-                                                </Link>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                                                    onClick={() => setDeleteId(order.id)}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
+                                        </div>
+
+                                        <div className="flex justify-between items-center text-sm">
+                                            <div>
+                                                <div className="text-muted-foreground">Date</div>
+                                                <div>
+                                                    {order.createdAt?.seconds
+                                                        ? format(new Date(order.createdAt.seconds * 1000), "MMM dd, yyyy")
+                                                        : "N/A"}
+                                                </div>
                                             </div>
-                                        </TableCell>
-                                    </TableRow>
+                                            <div className="text-right">
+                                                <div className="text-muted-foreground">Total</div>
+                                                <div className="font-semibold">GH₵ {order.amount.toFixed(2)}</div>
+                                            </div>
+                                        </div>
+
+                                        <div className="pt-2 flex justify-end gap-2 border-t mt-2">
+                                            <Link to={`/admin/orders/${order.id}`}>
+                                                <Button variant="outline" size="sm" className="h-8">
+                                                    <Eye className="mr-2 h-3.5 w-3.5" />
+                                                    View
+                                                </Button>
+                                            </Link>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+                                                onClick={() => setDeleteId(order.id)}
+                                            >
+                                                <Trash2 className="h-3.5 w-3.5" />
+                                            </Button>
+                                        </div>
+                                    </div>
                                 ))}
-                            </TableBody>
-                        </Table>
+                            </div>
+
+                            {/* Desktop View: Table */}
+                            <div className="hidden md:block">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Order ID</TableHead>
+                                            <TableHead>Customer</TableHead>
+                                            <TableHead>Date</TableHead>
+                                            <TableHead>Total</TableHead>
+                                            <TableHead>Status</TableHead>
+                                            <TableHead className="text-right">Actions</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {filteredOrders.map((order) => (
+                                            <TableRow key={order.id}>
+                                                <TableCell className="font-medium font-mono text-xs">
+                                                    {order.id.substring(0, 8)}...
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="font-medium">
+                                                        {order.customerDetails.firstName} {order.customerDetails.lastName}
+                                                    </div>
+                                                    <div className="text-xs text-muted-foreground">
+                                                        {order.customerDetails.phone}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    {order.createdAt?.seconds ? format(new Date(order.createdAt.seconds * 1000), "PPP") : "N/A"}
+                                                </TableCell>
+                                                <TableCell>GH₵ {order.amount.toFixed(2)}</TableCell>
+                                                <TableCell>
+                                                    <Badge className={getStatusClassName(order.status)} variant="outline">
+                                                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <Link to={`/admin/orders/${order.id}`}>
+                                                            <Button variant="ghost" size="icon">
+                                                                <Eye className="h-4 w-4" />
+                                                            </Button>
+                                                        </Link>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                                                            onClick={() => setDeleteId(order.id)}
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </div>
                     )}
                 </CardContent>
             </Card>
