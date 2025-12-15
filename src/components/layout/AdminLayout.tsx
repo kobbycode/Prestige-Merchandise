@@ -11,7 +11,8 @@ import {
     X,
     Settings,
     Shield,
-    FolderTree
+    FolderTree,
+    ShoppingBag
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { cn } from "@/lib/utils";
@@ -53,6 +54,7 @@ const AdminLayout = () => {
 
     const navItems = [
         { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
+        { icon: ShoppingBag, label: "Orders", path: "/admin/orders" },
         { icon: Package, label: "Products", path: "/admin/products" },
         { icon: FolderTree, label: "Categories", path: "/admin/categories" },
         { icon: FileText, label: "Blog Posts", path: "/admin/blog" },
@@ -75,7 +77,7 @@ const AdminLayout = () => {
             {/* Sidebar */}
             <aside
                 className={cn(
-                    "fixed lg:static inset-y-0 left-0 z-50 w-64 bg-secondary text-secondary-foreground border-r shadow-xl transform transition-transform duration-200 lg:transform-none",
+                    "fixed lg:static inset-y-0 left-0 z-50 w-64 bg-secondary text-secondary-foreground border-r shadow-xl transform transition-transform duration-200 lg:transform-none print:hidden",
                     isSidebarOpen ? "translate-x-0" : "-translate-x-full"
                 )}
             >
@@ -146,7 +148,7 @@ const AdminLayout = () => {
 
             {/* Main Content */}
             <div className="flex-1 flex flex-col min-w-0">
-                <header className="bg-secondary text-secondary-foreground border-b border-white/10 h-16 flex items-center px-4 lg:hidden">
+                <header className="bg-secondary text-secondary-foreground border-b border-white/10 h-16 flex items-center px-4 lg:hidden print:hidden">
                     <Button variant="ghost" size="icon" className="hover:bg-white/10 hover:text-white" onClick={() => setIsSidebarOpen(true)}>
                         <Menu className="h-6 w-6" />
                     </Button>

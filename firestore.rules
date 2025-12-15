@@ -38,6 +38,20 @@ service cloud.firestore {
         get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role in ['super_admin', 'admin'];
     }
 
+    // Orders collection rules
+    match /orders/{orderId} {
+      // Allow anyone to create orders (including guests)
+      allow create: if true;
+      
+      // Allow admins to read and update orders
+      allow read, update: if request.auth != null && 
+        get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role in ['super_admin', 'admin'];
+      
+      // Allow authenticated customers to read their own orders
+      allow read: if request.auth != null && 
+        request.auth.uid == resource.data.userId;
+    }
+
     match /reviews/{reviewId} {
       allow read: if true;
       allow create: if request.auth != null;
@@ -49,4 +63,5 @@ service cloud.firestore {
       allow read, write: if false;
     }
   }
+}
 

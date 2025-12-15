@@ -16,6 +16,7 @@ const Shop = () => {
   const { addToCart } = useCart();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [priceRange, setPriceRange] = useState({ min: "", max: "" });
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<string[]>([]);
@@ -56,8 +57,19 @@ const Shop = () => {
     const matchesCategory = selectedCategory === "all" ||
       selectedCategory === "All Products" ||
       product.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+
+    const minPrice = priceRange.min ? parseFloat(priceRange.min) : 0;
+    const maxPrice = priceRange.max ? parseFloat(priceRange.max) : Infinity;
+    const matchesPrice = product.price >= minPrice && product.price <= maxPrice;
+
+    return matchesSearch && matchesCategory && matchesPrice;
   });
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    setSelectedCategory("all");
+    setPriceRange({ min: "", max: "" });
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -121,6 +133,46 @@ const Shop = () => {
                           ))}
                         </div>
                       </div>
+
+                      {/* Price Range Filter */}
+                      <div>
+                        <h4 className="font-semibold mb-3 text-sm text-muted-foreground">PRICE RANGE</h4>
+                        <div className="space-y-3">
+                          <div>
+                            <label className="text-xs text-muted-foreground mb-1 block">Min Price (GH₵)</label>
+                            <Input
+                              type="number"
+                              placeholder="0"
+                              value={priceRange.min}
+                              onChange={(e) => setPriceRange({ ...priceRange, min: e.target.value })}
+                              min="0"
+                              step="10"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs text-muted-foreground mb-1 block">Max Price (GH₵)</label>
+                            <Input
+                              type="number"
+                              placeholder="Any"
+                              value={priceRange.max}
+                              onChange={(e) => setPriceRange({ ...priceRange, max: e.target.value })}
+                              min="0"
+                              step="10"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Clear Filters */}
+                      {(searchQuery || selectedCategory !== "all" || priceRange.min || priceRange.max) && (
+                        <Button
+                          variant="outline"
+                          className="w-full mt-4"
+                          onClick={clearFilters}
+                        >
+                          Clear All Filters
+                        </Button>
+                      )}
                     </CardContent>
                   </Card>
                 </aside>
@@ -137,10 +189,7 @@ const Shop = () => {
                     <Card className="p-12 text-center">
                       <p className="text-muted-foreground text-lg">No products found matching your criteria.</p>
                       <Button
-                        onClick={() => {
-                          setSearchQuery("");
-                          setSelectedCategory("all");
-                        }}
+                        onClick={clearFilters}
                         className="mt-4"
                       >
                         Clear Filters

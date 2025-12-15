@@ -16,10 +16,12 @@ import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Loader2, ArrowLeft, ShieldCheck } from "lucide-react";
+import { initEmailJS, sendOrderConfirmation } from "@/lib/emailService";
 
 const checkoutSchema = z.object({
     firstName: z.string().min(2, "First name is required"),
     lastName: z.string().min(2, "Last name is required"),
+    email: z.string().email("Valid email is required"),
     phone: z.string().min(10, "Valid phone number is required"),
     address: z.string().min(5, "Delivery address is required"),
     city: z.string().min(2, "City is required"),
@@ -40,12 +42,18 @@ const Checkout = () => {
         defaultValues: {
             firstName: "",
             lastName: "",
+            email: "",
             phone: "",
             address: "",
             city: "",
             region: "",
             notes: "",
         },
+    });
+
+    // Initialize EmailJS on component mount
+    useState(() => {
+        initEmailJS();
     });
 
     const onSubmit = async (data: CheckoutValues) => {
@@ -76,6 +84,15 @@ const Checkout = () => {
             };
 
             const docRef = await addDoc(collection(db, "orders"), orderData);
+
+            // Send order confirmation email (non-blocking)
+            sendOrderConfirmation(
+                { ...orderData, orderId: docRef.id },
+                data.email
+            ).catch(err => {
+                console.error("Failed to send confirmation email:", err);
+                // Don't block the order flow if email fails
+            });
 
             clearCart();
             toast.success("Order placed successfully!");
@@ -154,6 +171,20 @@ const Checkout = () => {
                                                     )}
                                                 />
                                             </div>
+
+                                            <FormField
+                                                control={form.control}
+                                                name="email"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Email</FormLabel>
+                                                        <FormControl>
+                                                            <Input type="email" placeholder="john.doe@example.com" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
 
                                             <FormField
                                                 control={form.control}

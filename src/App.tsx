@@ -24,7 +24,12 @@ import BlogPostForm from "./pages/admin/BlogPostForm";
 import Admins from "./pages/admin/Admins";
 import Profile from "./pages/admin/Profile";
 import ProductForm from "./pages/admin/ProductForm";
+import AdminOrders from "./pages/admin/AdminOrders";
+import OrderDetail from "./pages/admin/OrderDetail";
 import AdminLayout from "./components/layout/AdminLayout";
+import CustomerProfile from "./pages/customer/Profile";
+import OrderHistory from "./pages/customer/OrderHistory";
+import CustomerOrderDetail from "./pages/customer/CustomerOrderDetail";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CartProvider } from "./contexts/CartContext";
 
@@ -53,6 +58,11 @@ const App = () => (
               <Route path="/login" element={<CustomerLogin />} />
               <Route path="/register" element={<Register />} />
 
+              {/* Customer Account */}
+              <Route path="/account" element={<CustomerProfile />} />
+              <Route path="/account/orders" element={<OrderHistory />} />
+              <Route path="/account/orders/:id" element={<CustomerOrderDetail />} />
+
               {/* Admin Routes */}
               <Route path="/admin/login" element={<Login />} />
               <Route path="/admin" element={<AdminLayout />}>
@@ -61,6 +71,8 @@ const App = () => (
                 <Route path="products/new" element={<ProductForm />} />
                 <Route path="products/:id/edit" element={<ProductForm />} />
                 <Route path="categories" element={<Categories />} />
+                <Route path="orders" element={<AdminOrders />} />
+                <Route path="orders/:id" element={<OrderDetail />} />
                 <Route path="blog" element={<BlogAdmin />} />
                 <Route path="blog/new" element={<BlogPostForm />} />
                 <Route path="blog/:id/edit" element={<BlogPostForm />} />

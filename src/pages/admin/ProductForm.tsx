@@ -20,6 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, Upload, X, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { checkAndAlertLowStock } from "@/lib/stockMonitor";
 
 const ProductForm = () => {
     const { id } = useParams();
@@ -174,6 +175,12 @@ const ProductForm = () => {
 
             if (isEdit) {
                 await updateDoc(doc(db, "products", productId), dataToWrite);
+
+                // Check for low stock and send alert if needed
+                checkAndAlertLowStock(productId, formData.stock).catch(err => {
+                    console.error("Failed to check/send low stock alert:", err);
+                });
+
                 toast.success("Product updated successfully", { id: toastId });
             } else {
                 await setDoc(doc(db, "products", productId), dataToWrite);
