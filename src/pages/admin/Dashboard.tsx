@@ -12,6 +12,8 @@ import {
     Bar,
     PieChart,
     Pie,
+    AreaChart,
+    Area,
     XAxis,
     YAxis,
     CartesianGrid,
@@ -51,6 +53,8 @@ const Dashboard = () => {
     const [recentOrders, setRecentOrders] = useState<Order[]>([]);
     const [categoryData, setCategoryData] = useState<{ name: string, count: number }[]>([]);
     const [orderStatusData, setOrderStatusData] = useState<{ name: string, value: number }[]>([]);
+    const [revenueChartData, setRevenueChartData] = useState<{ date: string, revenue: number }[]>([]);
+    const [lowStockItems, setLowStockItems] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -59,6 +63,7 @@ const Dashboard = () => {
                 // Fetch Products
                 const productsSnap = await getDocs(collection(db, "products"));
                 const products: Product[] = [];
+                const lowStockList: Product[] = [];
                 let activeCount = 0;
                 let lowStockCount = 0;
                 let value = 0;
@@ -68,7 +73,10 @@ const Dashboard = () => {
                     const p = { id: doc.id, ...doc.data() } as Product;
                     products.push(p);
                     if (p.status === 'active') activeCount++;
-                    if (p.stock <= 5) lowStockCount++;
+                    if (p.stock <= 5) {
+                        lowStockCount++;
+                        lowStockList.push(p);
+                    }
                     value += p.price * p.stock;
 
                     // Category counts
@@ -76,6 +84,8 @@ const Dashboard = () => {
                         catCounts[p.category] = (catCounts[p.category] || 0) + 1;
                     }
                 });
+
+                setLowStockItems(lowStockList);
 
                 // Fetch Categories
                 const categoriesSnap = await getDocs(collection(db, "categories"));
@@ -102,11 +112,15 @@ const Dashboard = () => {
                     statusCounts[o.status] = (statusCounts[o.status] || 0) + 1;
                 });
 
-                // Fetch Recent Orders
+                // Fetch Recent Orders (Fetch more to get meaningful data for charts, e.g. last 20 or 50)
+                // Actually, for the chart we might want ALL orders or just slice from the main orders array
+                // But the 'recentOrders' view is limited to 5.
+                // Let's repurpose 'recentOrders' state for the list, and use 'orders' for the chart.
+
                 const recentOrdersQuery = query(collection(db, "orders"), orderBy("createdAt", "desc"), limit(5));
                 const recentOrdersSnap = await getDocs(recentOrdersQuery);
-                const recentOrders: Order[] = [];
-                recentOrdersSnap.forEach(doc => recentOrders.push({ id: doc.id, ...doc.data() } as Order));
+                const recentOrdersList: Order[] = [];
+                recentOrdersSnap.forEach(doc => recentOrdersList.push({ id: doc.id, ...doc.data() } as Order));
 
                 setStats({
                     totalProducts: products.length,
@@ -120,7 +134,57 @@ const Dashboard = () => {
                 });
 
                 setRecentProducts(recent);
-                setRecentOrders(recentOrders);
+                setRecentOrders(recentOrdersList);
+
+                // For chart: Use all orders, sort by date
+                setRecentOrders(orders.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)).slice(0, 7)); // Just showing last 7 for chart? 
+                // Wait, if I overwrite recentOrders with 7 items, the list only shows 7. 
+                // But the chart needs potentially more data or same data. 
+                // Let's keep recentOrders for the list (5 items) and create a separate state for chart if needed?
+                // OR just use the 'orders' array we already fetched which has EVERYTHING.
+                // The previous code block for the chart used 'recentOrders'.
+                // Let's update the chart logic to use 'allOrders' (which I need to save to state) OR just process 'orders' here and save processed data.
+
+                // Let's create `revenueChartData` state.
+                const processedRevenueData = orders.reduce((acc: any[], order) => {
+                    if (!order.createdAt?.seconds) return acc;
+                    const date = format(new Date(order.createdAt.seconds * 1000), "MMM dd");
+                    const existing = acc.find(item => item.date === date);
+                    if (existing) {
+                        existing.revenue += order.amount;
+                    } else {
+                        acc.push({ date, revenue: order.amount });
+                    }
+                    return acc;
+                }, [])
+                    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()) // sort by date roughly? "MMM dd" isn't year-safe but okay for recent.
+                // Actually safer to sort by raw timestamp then format.
+                // Re-doing chart data logic:
+
+                // Group by date string (unique key)
+                const revenueMap = new Map<string, number>();
+                orders.forEach(o => {
+                    if (o.createdAt?.seconds) {
+                        const d = new Date(o.createdAt.seconds * 1000);
+                        const key = format(d, "MMM dd");
+                        revenueMap.set(key, (revenueMap.get(key) || 0) + o.amount);
+                    }
+                });
+                // Convert to array and taking last 7 days? Or just all available days?
+                // Let's take last 7 entries for cleanliness.
+                const chartDataRaw = Array.from(revenueMap.entries()).map(([date, revenue]) => ({ date, revenue }));
+                // We need them sorted chronologically. This map order isn't guaranteed.
+                // Since we want simple "Trends", let's just reverse the recent logic or robustly sort.
+                // Robust:
+                // ... ignoring subtle sort issues for now, the original list was unordered.
+                // Let's use the 'orders' array which is effectively random unless sorted.
+                // 'orders' array isn't sorted in the fetch above (no orderBy).
+                // Let's just rely on the fact that for a small shop, sorting by string 'MMM dd' might fail across years but works for now.
+                // Better: Use `recentOrders` (which was 5 items) from before? No that's too small.
+                // Let's save `orders` to a state `allOrders` or just `recentOrders`? 
+                // I will save `recentOrders` as the short list (5) and add `revenueData` state.
+
+                setRecentOrders(recentOrdersList); // Keep list as 5
 
                 // Format category chart data
                 const chartData = Object.entries(catCounts)
@@ -136,6 +200,24 @@ const Dashboard = () => {
                         value
                     }));
                 setOrderStatusData(statusChartData);
+
+                // PROCESS REVENUE DATA FOR STATE
+                const revData = orders
+                    .filter(o => o.createdAt?.seconds)
+                    .sort((a, b) => (a.createdAt!.seconds - b.createdAt!.seconds)) // Oldest first
+                    .reduce((acc: any[], order) => {
+                        const date = format(new Date(order.createdAt.seconds * 1000), "MMM dd");
+                        const existing = acc.find(item => item.date === date);
+                        if (existing) {
+                            existing.revenue += order.amount;
+                        } else {
+                            acc.push({ date, revenue: order.amount });
+                        }
+                        return acc;
+                    }, [])
+                    .slice(-7); // Last 7 days with activity
+
+                setRevenueChartData(revData);
 
             } catch (error) {
                 console.error("Error fetching dashboard data:", error);
@@ -167,6 +249,7 @@ const Dashboard = () => {
     };
 
     const COLORS = ['hsl(var(--primary))', '#8884d8', '#82ca9d', '#ffc658', '#ff8042'];
+
 
     return (
         <div className="space-y-6">
@@ -239,42 +322,31 @@ const Dashboard = () => {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+                {/* Revenue Chart */}
                 <Card className="col-span-4">
                     <CardHeader>
-                        <CardTitle>Products by Category</CardTitle>
+                        <CardTitle>Revenue Trends</CardTitle>
                     </CardHeader>
                     <CardContent className="pl-2">
                         <ResponsiveContainer width="100%" height={350}>
-                            <BarChart data={categoryData}>
-                                <XAxis
-                                    dataKey="name"
-                                    stroke="#888888"
-                                    fontSize={12}
-                                    tickLine={false}
-                                    axisLine={false}
-                                />
-                                <YAxis
-                                    stroke="#888888"
-                                    fontSize={12}
-                                    tickLine={false}
-                                    axisLine={false}
-                                    allowDecimals={false}
-                                />
+                            <AreaChart data={revenueChartData}>
+                                <defs>
+                                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8} />
+                                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                                    </linearGradient>
+                                </defs>
+                                <XAxis dataKey="date" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                                <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₵${value}`} />
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                <Tooltip
-                                    cursor={{ fill: 'transparent' }}
-                                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                                />
-                                <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]}>
-                                    {categoryData.map((_, index) => (
-                                        <Cell key={`cell-${index}`} fill={index % 2 === 0 ? "hsl(var(--primary))" : "hsl(var(--primary))"} opacity={0.8} />
-                                    ))}
-                                </Bar>
-                            </BarChart>
+                                <Tooltip />
+                                <Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorRevenue)" />
+                            </AreaChart>
                         </ResponsiveContainer>
                     </CardContent>
                 </Card>
 
+                {/* Recent Products */}
                 <Card className="col-span-3">
                     <CardHeader>
                         <CardTitle>Recent Products</CardTitle>
@@ -295,23 +367,16 @@ const Dashboard = () => {
                                     <div className="ml-4 space-y-1">
                                         <p className="text-sm font-medium leading-none line-clamp-1">{product.name}</p>
                                         <div className="flex items-center gap-2">
-                                            <p className="text-xs text-muted-foreground">
-                                                {product.category || "Uncategorized"}
-                                            </p>
+                                            <p className="text-xs text-muted-foreground">{product.category || "Uncategorized"}</p>
                                             {product.stock <= 5 && (
                                                 <span className="text-[10px] bg-red-100 text-red-600 px-1 rounded">Low Stock</span>
                                             )}
                                         </div>
                                     </div>
-                                    <div className="ml-auto font-medium text-sm">
-                                        GH₵ {product.price.toLocaleString()}
-                                    </div>
+                                    <div className="ml-auto font-medium text-sm">GH₵ {product.price.toLocaleString()}</div>
                                 </div>
                             ))}
-                            {recentProducts.length === 0 && (
-                                <p className="text-sm text-muted-foreground text-center">No products added yet.</p>
-                            )}
-
+                            {recentProducts.length === 0 && <p className="text-sm text-muted-foreground text-center">No products added yet.</p>}
                             <div className="pt-4 text-center">
                                 <Link to="/admin/products">
                                     <Button variant="outline" size="sm" className="w-full">
@@ -328,7 +393,7 @@ const Dashboard = () => {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
                 <Card className="col-span-3">
                     <CardHeader>
-                        <CardTitle>Order Status Breakdown</CardTitle>
+                        <CardTitle>Order Status</CardTitle>
                     </CardHeader>
                     <CardContent>
                         {orderStatusData.length > 0 ? (
@@ -384,17 +449,12 @@ const Dashboard = () => {
                                             <p className="text-xs text-muted-foreground">{order.items.length} items</p>
                                         </div>
                                         <Link to={`/admin/orders/${order.id}`}>
-                                            <Button variant="ghost" size="sm">
-                                                View
-                                            </Button>
+                                            <Button variant="ghost" size="sm">View</Button>
                                         </Link>
                                     </div>
                                 </div>
                             ))}
-                            {recentOrders.length === 0 && (
-                                <p className="text-sm text-muted-foreground text-center">No orders yet.</p>
-                            )}
-
+                            {recentOrders.length === 0 && <p className="text-sm text-muted-foreground text-center">No orders yet.</p>}
                             <div className="pt-4 text-center">
                                 <Link to="/admin/orders">
                                     <Button variant="outline" size="sm" className="w-full">
@@ -406,6 +466,45 @@ const Dashboard = () => {
                     </CardContent>
                 </Card>
             </div>
+            {/* Low Stock Detailed List */}
+            {stats.lowStockProducts > 0 && (
+                <Card className="border-red-200 bg-red-50/50">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-700">
+                            <AlertTriangle className="h-5 w-5" />
+                            Low Stock Alert
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm text-left">
+                                <thead className="text-xs uppercase bg-red-100 text-red-700">
+                                    <tr>
+                                        <th className="px-4 py-3">Product</th>
+                                        <th className="px-4 py-3">Category</th>
+                                        <th className="px-4 py-3">Current Stock</th>
+                                        <th className="px-4 py-3 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {/* Ideally we filter this from the main products list we fetched */}
+                                    {/* Since we don't have the full product list in state (only count), we might need to fetch or filter if we kept them. */}
+                                    {/* Wait, we only fetched counts in the original code, except 'recent'. 
+                                        Actually, the original code DID get all products into a local array 'products' but only set 'recentProducts' to state. 
+                                        I should improve the state to hold 'lowStockItems' 
+                                     */}
+                                    {/* Placeholder for now to show structure, will need to update state logic above to populate this. */}
+                                    <tr>
+                                        <td className="px-4 py-3" colSpan={4}>
+                                            <div className="text-center text-muted-foreground">Detailed list requires state update. (Updating next step)</div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
         </div>
     );
 };

@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, runTransaction, doc, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -17,6 +18,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Loader2, ArrowLeft, ShieldCheck } from "lucide-react";
 import { initEmailJS, sendOrderConfirmation } from "@/lib/emailService";
+import { checkAndAlertLowStock } from "@/lib/stockMonitor";
 
 const checkoutSchema = z.object({
     firstName: z.string().min(2, "First name is required"),
@@ -83,26 +85,152 @@ const Checkout = () => {
                 createdAt: serverTimestamp(),
             };
 
-            const docRef = await addDoc(collection(db, "orders"), orderData);
+            let orderId = "";
 
-            // Send order confirmation email (non-blocking)
-            sendOrderConfirmation(
-                { ...orderData, orderId: docRef.id },
-                data.email
-            ).catch(err => {
-                console.error("Failed to send confirmation email:", err);
-                // Don't block the order flow if email fails
+            // Use a transaction to ensure stock is available and update it atomically
+            await runTransaction(db, async (transaction) => {
+                // 1. Check stock for all items
+                for (const item of items) {
+                    const productRef = doc(db, "products", item.product.id);
+                    const productDoc = await transaction.get(productRef);
+
+                    if (!productDoc.exists()) {
+                        throw new Error(`Product ${item.product.name} no longer exists.`);
+                    }
+
+                    const currentStock = productDoc.data().stock;
+                    if (currentStock < item.quantity) {
+                        throw new Error(`Insufficient stock for ${item.product.name}. Only ${currentStock} left.`);
+                    }
+                }
+
+                // 2. Reduce stock
+                for (const item of items) {
+                    const productRef = doc(db, "products", item.product.id);
+                    // We need to read again or if we read above we can use that data, but inside transaction 
+                    // reading multiple times is fine or we can optimize. simple read again is cleaner code for now.
+                    // Actually we can't reuse the doc snapshot easily for update unless we passed it.
+                    // But standard pattern is read then write.
+                    // Since we read all first to validate, we can now write all.
+                    // Note: Firestore requires all reads before any writes.
+
+                    // Optimization: We can just use increment(-quantity) without reading IF we didn't care about negative stock,
+                    // but we DO care. So the read loop above is correct.
+                    // Now we perform writes.
+
+                    // We need to calculate new stock to set it precisely? 
+                    // No, invalidation logic is handled by the transaction lock.
+                    // We can use increment, OR calculate from the read value. 
+                    // Let's re-read to be safe? No, transaction snapshot is consistent.
+                    // IMPORTANT: Firestore transactions failing if you read after write?
+                    // "All reads must happen before any writes."
+
+                    // So we must have read everything in step 1.
+                    // In step 2 we calculate new values based on what we read?
+                    // But we didn't store the snapshots. Let's modify approach to store snapshots.
+                    // Actually, simple standard way for e-commerce:
+
+                    // Re-implement loop to Read AND modify in memory, then commit? No.
+                    // Standard:
+                    // Loop items: Read stock. Check.
+                    // Loop items: Update stock.
+                    // But we can't read then write then read then write.
+                    // We must Read Item 1, Read Item 2...
+                    // Then Write Item 1, Write Item 2...
+                }
+
+                // Let's redo correctly:
+                const productRefs = items.map(item => doc(db, "products", item.product.id));
+                const productDocs = await Promise.all(productRefs.map(ref => transaction.get(ref)));
+
+                // Check availability
+                productDocs.forEach((doc, index) => {
+                    if (!doc.exists()) {
+                        throw new Error(`Product ${items[index].product.name} not found.`);
+                    }
+                    const stock = doc.data().stock;
+                    if (stock < items[index].quantity) {
+                        throw new Error(`Insufficient stock for ${items[index].product.name}. Available: ${stock}`);
+                    }
+                });
+
+                // Deduct stock
+                items.forEach((item, index) => {
+                    const newStock = productDocs[index].data().stock - item.quantity;
+                    transaction.update(productRefs[index], { stock: newStock });
+                });
+
+                // Create Order
+                const newOrderRef = doc(collection(db, "orders"));
+                orderId = newOrderRef.id;
+                transaction.set(newOrderRef, { ...orderData, id: orderId }); // Ensure ID is in data if needed, or just rely on doc ID
+            });
+
+            // Post-transaction actions (Non-blocking)
+
+            // 1. Send Order Confirmation Email
+            if (orderId) {
+                // We used set with a generated ref, so we have the ID.
+                // orderData doesn't have the ID yet in the object passed to addDoc (which we replaced).
+                sendOrderConfirmation(
+                    { ...orderData, orderId: orderId }, // Use the actual ID
+                    data.email
+                ).catch(err => console.error("Failed to send confirmation email:", err));
+
+                // Notify Admins
+                try {
+                    // Fetch all admins
+                    // Fetch all admins (including super_admin)
+                    const adminsQuery = query(collection(db, "admins")); // Fetch all from admins collection
+                    const adminSnaps = await getDocs(adminsQuery);
+
+
+                    const notificationPromises = adminSnaps.docs.map(adminDoc =>
+                        addDoc(collection(db, "notifications"), {
+                            userId: adminDoc.id,
+                            type: "new_order",
+                            title: "New Order",
+                            message: `New order #${orderId.slice(0, 8)} from ${data.firstName}`,
+                            read: false,
+                            createdAt: serverTimestamp(),
+                            data: { orderId: orderId },
+                            link: `/admin/orders/${orderId}`
+                        })
+                    );
+                    await Promise.all(notificationPromises);
+                } catch (error) {
+                    console.error("Failed to notify admins:", error);
+                }
+            }
+
+            // 2. Check Low Stock Levels and Alert Admin
+            // We need to check the *new* stock levels.
+            items.forEach(async (item) => {
+                try {
+                    // We can fetch the new stock or calculate it. 
+                    // Fetching is safer to ensure we get the committed value.
+                    // But getting it from DB is an extra read.
+                    // Let's simply call our helper which fetches and checks.
+                    // Note: This calls checkAndAlertLowStock which does a read effectively.
+                    // Depending on implementation of checkAndAlertLowStock.
+                    const productRef = doc(db, "products", item.product.id);
+                    const snap = await import("firebase/firestore").then(m => m.getDoc(productRef));
+                    if (snap.exists()) {
+                        const currentStock = snap.data().stock;
+                        checkAndAlertLowStock(item.product.id, currentStock);
+                    }
+                } catch (e) {
+                    console.error("Error monitoring stock:", e);
+                }
             });
 
             clearCart();
             toast.success("Order placed successfully!");
-            // Navigate to a success page or order history
-            // For now, redirect to home with a message
-            navigate("/", { state: { orderId: docRef.id, success: true } });
+            navigate("/", { state: { orderId: orderId, success: true } });
 
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error placing order:", error);
-            toast.error("Failed to place order. Please try again.");
+            toast.error(error.message || "Failed to place order. Please try again.");
         } finally {
             setIsSubmitting(false);
         }

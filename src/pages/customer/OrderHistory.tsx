@@ -1,21 +1,35 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
+import { collection, query, where, orderBy, getDocs, deleteDoc, doc, writeBatch, serverTimestamp, addDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Package, Eye } from "lucide-react";
+import { Loader2, Package, Eye, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { Order } from "@/types/order";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { toast } from "sonner";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const OrderHistory = () => {
     const { user } = useAuth();
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
+
+    const [deleteId, setDeleteId] = useState<string | null>(null);
+    const [isDeletingAll, setIsDeletingAll] = useState(false);
 
     useEffect(() => {
         if (user?.uid) {
@@ -45,6 +59,63 @@ const OrderHistory = () => {
         }
     };
 
+    const handleDeleteOrder = async () => {
+        if (!deleteId) return;
+        try {
+            const orderToDelete = orders.find(o => o.id === deleteId);
+            await deleteDoc(doc(db, "orders", deleteId));
+
+            // Notify admins
+            if (orderToDelete) {
+                const adminsQuery = query(collection(db, "admins"));
+                const adminSnaps = await getDocs(adminsQuery);
+                const adminNotifications = adminSnaps.docs.map(adminDoc => ({
+                    userId: adminDoc.id,
+                    type: "info",
+                    title: "Order Cancelled by User",
+                    message: `Order #${orderToDelete.id.substring(0, 8).toUpperCase()} was deleted by the customer.`,
+                    read: false,
+                    createdAt: serverTimestamp(),
+                    link: "/admin/orders"
+                }));
+
+                const batch = writeBatch(db);
+                adminNotifications.forEach(notif => {
+                    const ref = doc(collection(db, "notifications"));
+                    batch.set(ref, notif);
+                });
+                await batch.commit();
+            }
+
+            setOrders(prev => prev.filter(o => o.id !== deleteId));
+            toast.success("Order deleted from history");
+        } catch (error) {
+            console.error("Error deleting order:", error);
+            toast.error("Failed to delete order");
+        } finally {
+            setDeleteId(null);
+        }
+    };
+
+    const handleClearAll = async () => {
+        if (!user?.uid) return;
+        try {
+            const batch = writeBatch(db);
+            orders.forEach((order) => {
+                const docRef = doc(db, "orders", order.id);
+                batch.delete(docRef);
+            });
+            await batch.commit();
+            setOrders([]);
+            toast.success("Order history cleared");
+        } catch (error) {
+            console.error("Error clearing history:", error);
+            toast.error("Failed to clear history");
+        } finally {
+            setIsDeletingAll(false);
+        }
+    };
+
     const getStatusClassName = (status: string) => {
         switch (status) {
             case "pending": return "bg-yellow-100 text-yellow-800 hover:bg-yellow-100/80 border-transparent";
@@ -66,7 +137,19 @@ const OrderHistory = () => {
 
             <main className="flex-1 bg-muted/30">
                 <div className="container mx-auto px-4 py-8">
-                    <h1 className="text-3xl font-bold mb-8">Order History</h1>
+                    <div className="flex items-center justify-between mb-8">
+                        <h1 className="text-3xl font-bold">Order History</h1>
+                        {orders.length > 0 && (
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => setIsDeletingAll(true)}
+                            >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Clear History
+                            </Button>
+                        )}
+                    </div>
 
                     {loading ? (
                         <div className="flex items-center justify-center h-[50vh]">
@@ -114,12 +197,22 @@ const OrderHistory = () => {
                                                 </p>
                                                 <p className="text-lg font-bold">GH₵ {order.amount.toFixed(2)}</p>
                                             </div>
-                                            <Link to={`/account/orders/${order.id}`}>
-                                                <Button variant="outline" size="sm">
-                                                    <Eye className="mr-2 h-4 w-4" />
-                                                    View Details
+                                            <div className="flex items-center gap-2">
+                                                <Link to={`/account/orders/${order.id}`}>
+                                                    <Button variant="outline" size="sm">
+                                                        <Eye className="mr-2 h-4 w-4" />
+                                                        View
+                                                    </Button>
+                                                </Link>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                                                    onClick={() => setDeleteId(order.id)}
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
                                                 </Button>
-                                            </Link>
+                                            </div>
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -128,6 +221,40 @@ const OrderHistory = () => {
                     )}
                 </div>
             </main>
+
+            <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Order?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to delete this order from your history? This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDeleteOrder} className="bg-red-600 hover:bg-red-700">
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            <AlertDialog open={isDeletingAll} onOpenChange={setIsDeletingAll}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Clear Order History?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to delete all verified orders? This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleClearAll} className="bg-red-600 hover:bg-red-700">
+                            Clear History
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
 
             <Footer />
         </div>

@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Phone, MessageCircle, User, LogOut, ShoppingBag } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Menu, X, Phone, MessageCircle, User, LogOut, ShoppingBag, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FaWhatsapp } from "react-icons/fa";
 import logo from "@/assets/logo.png";
@@ -14,12 +15,24 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import CartSheet from "./cart/CartSheet";
+import { NotificationDropdown } from "./notifications/NotificationDropdown";
 
 const Header = () => {
   const { isAuthenticated, logout } = useAuth();
   const { cartCount, setIsCartOpen } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery("");
+      setIsMenuOpen(false);
+    }
+  };
 
   const navLinks = [
     { to: "/", label: "Home" },
@@ -45,6 +58,18 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-6">
+
+            {/* Global Search Bar */}
+            <form onSubmit={handleSearch} className="relative w-64">
+              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-blue-950" />
+              <Input
+                type="text"
+                placeholder="Search parts..."
+                className="pl-8 h-9 bg-background/50 border-secondary-foreground/20 focus:border-primary placeholder:text-blue-950 text-blue-950"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </form>
             {navLinks.map((link) => (
               <Link
                 key={link.to}
@@ -71,6 +96,9 @@ const Header = () => {
                 </span>
               )}
             </Button>
+
+            {/* Notification Dropdown */}
+            {isAuthenticated && <NotificationDropdown />}
 
             {/* Auth Button / Dropdown */}
             {isAuthenticated ? (

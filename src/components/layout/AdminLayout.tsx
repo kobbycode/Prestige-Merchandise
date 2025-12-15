@@ -12,8 +12,10 @@ import {
     Settings,
     Shield,
     FolderTree,
+
     ShoppingBag
 } from "lucide-react";
+import { NotificationDropdown } from "../notifications/NotificationDropdown";
 import logo from "@/assets/logo.png";
 import { cn } from "@/lib/utils";
 import {
@@ -148,11 +150,17 @@ const AdminLayout = () => {
 
             {/* Main Content */}
             <div className="flex-1 flex flex-col min-w-0">
-                <header className="bg-secondary text-secondary-foreground border-b border-white/10 h-16 flex items-center px-4 lg:hidden print:hidden">
-                    <Button variant="ghost" size="icon" className="hover:bg-white/10 hover:text-white" onClick={() => setIsSidebarOpen(true)}>
-                        <Menu className="h-6 w-6" />
-                    </Button>
-                    <span className="ml-3 font-semibold text-primary">Admin Menu</span>
+                <header className="bg-secondary text-secondary-foreground border-b border-white/10 h-16 flex items-center px-4 justify-between print:hidden">
+                    <div className="flex items-center">
+                        <Button variant="ghost" size="icon" className="lg:hidden hover:bg-white/10 hover:text-white mr-2" onClick={() => setIsSidebarOpen(true)}>
+                            <Menu className="h-6 w-6" />
+                        </Button>
+                        <span className="font-semibold text-primary lg:hidden">Admin Menu</span>
+                    </div>
+
+                    <div className="flex items-center gap-4 ml-auto">
+                        <NotificationDropdown />
+                    </div>
                 </header>
 
                 <main className="flex-1 p-4 lg:p-8 overflow-y-auto">

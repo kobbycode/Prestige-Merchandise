@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -55,6 +55,24 @@ const OrderDetail = () => {
             const docRef = doc(db, "orders", order.id);
             await updateDoc(docRef, { status: newStatus });
             setOrder({ ...order, status: newStatus });
+
+            // Create in-app notification for the user
+            if (order.userId && order.userId !== "guest") {
+                try {
+                    await addDoc(collection(db, "notifications"), {
+                        userId: order.userId,
+                        type: "order_status",
+                        title: "Order Status Updated",
+                        message: `Your order #${order.id.slice(0, 8)} is now ${newStatus}.`,
+                        read: false,
+                        createdAt: serverTimestamp(),
+                        data: { orderId: order.id },
+                        link: `/account/orders/${order.id}`
+                    });
+                } catch (error) {
+                    console.error("Error creating notification:", error);
+                }
+            }
 
             // Send status update email (non-blocking)
             const customerEmail = order.customerDetails.email;
