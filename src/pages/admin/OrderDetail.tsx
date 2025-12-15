@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { doc, getDoc, updateDoc, addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, updateDoc, addDoc, collection, serverTimestamp, query, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -56,22 +56,52 @@ const OrderDetail = () => {
             await updateDoc(docRef, { status: newStatus });
             setOrder({ ...order, status: newStatus });
 
-            // Create in-app notification for the user
+            // Create in-app notification for the customer (only if they're not an admin)
             if (order.userId && order.userId !== "guest") {
                 try {
-                    await addDoc(collection(db, "notifications"), {
-                        userId: order.userId,
+                    // Check if the user is an admin
+                    const adminDocRef = doc(db, "admins", order.userId);
+                    const adminDoc = await getDoc(adminDocRef);
+
+                    // Only send customer notification if user is NOT an admin
+                    if (!adminDoc.exists()) {
+                        await addDoc(collection(db, "notifications"), {
+                            userId: order.userId,
+                            type: "order_status",
+                            title: "Order Status Updated",
+                            message: `Your order #${order.id.slice(0, 8)} is now ${newStatus}.`,
+                            read: false,
+                            createdAt: serverTimestamp(),
+                            data: { orderId: order.id },
+                            link: `/account/orders/${order.id}`
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error creating customer notification:", error);
+                }
+            }
+
+            // Notify all admins with admin-oriented message
+            try {
+                const adminsQuery = query(collection(db, "admins"));
+                const adminSnaps = await getDocs(adminsQuery);
+                const customerName = `${order.customerDetails.firstName} ${order.customerDetails.lastName}`;
+
+                const adminNotifications = adminSnaps.docs.map(adminDoc =>
+                    addDoc(collection(db, "notifications"), {
+                        userId: adminDoc.id,
                         type: "order_status",
                         title: "Order Status Updated",
-                        message: `Your order #${order.id.slice(0, 8)} is now ${newStatus}.`,
+                        message: `Order #${order.id.slice(0, 8)} from ${customerName} is now ${newStatus}.`,
                         read: false,
                         createdAt: serverTimestamp(),
                         data: { orderId: order.id },
-                        link: `/account/orders/${order.id}`
-                    });
-                } catch (error) {
-                    console.error("Error creating notification:", error);
-                }
+                        link: `/admin/orders/${order.id}`
+                    })
+                );
+                await Promise.all(adminNotifications);
+            } catch (error) {
+                console.error("Error creating admin notifications:", error);
             }
 
             // Send status update email (non-blocking)
@@ -119,39 +149,41 @@ const OrderDetail = () => {
 
     return (
         <div className="space-y-6 max-w-5xl mx-auto">
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
                 <Button variant="outline" size="icon" onClick={() => navigate("/admin/orders")} className="print:hidden">
                     <ArrowLeft className="h-4 w-4" />
                 </Button>
-                <div className="flex-1">
+                <div className="flex-1 w-full">
                     <div className="hidden print:block mb-6">
                         <h1 className="text-3xl font-bold">INVOICE</h1>
                         <p className="text-muted-foreground">Prestige Merch</p>
                     </div>
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div>
                             <h1 className="text-2xl font-bold tracking-tight print:text-xl">Order Details</h1>
-                            <p className="text-muted-foreground flex items-center gap-2 text-sm">
-                                ID: <span className="font-mono">{order.id}</span>
-                                <span className="text-gray-300 print:hidden">|</span>
-                                <span className="print:hidden"><Calendar className="h-3 w-3 inline mr-1" /></span>
-                                {order.createdAt?.seconds ? format(new Date(order.createdAt.seconds * 1000), "PPP p") : "N/A"}
+                            <p className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
+                                <span className="whitespace-nowrap">ID: <span className="font-mono">{order.id}</span></span>
+                                <span className="text-gray-300 print:hidden hidden sm:inline">|</span>
+                                <span className="print:hidden flex items-center whitespace-nowrap">
+                                    <Calendar className="h-3 w-3 inline mr-1" />
+                                    {order.createdAt?.seconds ? format(new Date(order.createdAt.seconds * 1000), "PPP p") : "N/A"}
+                                </span>
                             </p>
                         </div>
-                        <Button variant="outline" className="print:hidden gap-2" onClick={() => window.print()}>
+                        <Button variant="outline" className="print:hidden gap-2 w-full sm:w-auto" onClick={() => window.print()}>
                             <Printer className="h-4 w-4" />
                             Print Invoice
                         </Button>
                     </div>
                 </div>
-                <div className="ml-auto flex items-center gap-3 print:hidden">
-                    <span className="text-sm font-medium text-muted-foreground">Status:</span>
+                <div className="w-full md:w-auto md:ml-auto flex items-center justify-between md:justify-start gap-3 print:hidden">
+                    <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Status:</span>
                     <Select
                         value={order.status}
                         onValueChange={handleStatusUpdate}
                         disabled={updating}
                     >
-                        <SelectTrigger className="w-[180px]">
+                        <SelectTrigger className="w-full md:w-[180px]">
                             <SelectValue placeholder="Status" />
                         </SelectTrigger>
                         <SelectContent>

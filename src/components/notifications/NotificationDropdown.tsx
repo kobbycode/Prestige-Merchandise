@@ -13,9 +13,11 @@ import NotificationItem from "./NotificationItem";
 import { useNavigate } from "react-router-dom";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function NotificationDropdown({ className }: { className?: string }) {
     const { notifications, markAllAsRead, markAsRead } = useNotifications();
+    const { role } = useAuth();
     const navigate = useNavigate();
 
     const handleNotificationClick = async (notification: any) => {
@@ -33,6 +35,11 @@ export function NotificationDropdown({ className }: { className?: string }) {
             // But customer side: /account/orders
             // Admin side: /admin/orders/...
         }
+    };
+
+    const handleViewAllOrders = () => {
+        // Navigate to admin orders page if user is admin, otherwise customer orders
+        navigate(role ? '/admin/orders' : '/account/orders');
     };
 
     return (
@@ -74,7 +81,7 @@ export function NotificationDropdown({ className }: { className?: string }) {
                 </ScrollArea>
                 {notifications.length > 0 && (
                     <div className="p-2 border-t text-center">
-                        <Button variant="ghost" size="sm" className="w-full text-xs" onClick={() => navigate('/account/orders')}>
+                        <Button variant="ghost" size="sm" className="w-full text-xs" onClick={handleViewAllOrders}>
                             View all orders
                         </Button>
                     </div>

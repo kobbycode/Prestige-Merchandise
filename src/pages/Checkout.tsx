@@ -166,6 +166,7 @@ const Checkout = () => {
                 transaction.set(newOrderRef, { ...orderData, id: orderId }); // Ensure ID is in data if needed, or just rely on doc ID
             });
 
+
             // Post-transaction actions (Non-blocking)
 
             // 1. Send Order Confirmation Email
@@ -177,20 +178,45 @@ const Checkout = () => {
                     data.email
                 ).catch(err => console.error("Failed to send confirmation email:", err));
 
-                // Notify Admins
-                try {
-                    // Fetch all admins
-                    // Fetch all admins (including super_admin)
-                    const adminsQuery = query(collection(db, "admins")); // Fetch all from admins collection
-                    const adminSnaps = await getDocs(adminsQuery);
+                // 2. Notify Customer (only if they're not an admin)
+                if (user?.uid) {
+                    try {
+                        // Check if the user is an admin
+                        const adminDocRef = doc(db, "admins", user.uid);
+                        const adminDoc = await getDoc(adminDocRef);
 
+                        // Only send customer notification if user is NOT an admin
+                        if (!adminDoc.exists()) {
+                            await addDoc(collection(db, "notifications"), {
+                                userId: user.uid,
+                                type: "new_order",
+                                title: "Order Placed Successfully",
+                                message: `Your order #${orderId.slice(0, 8)} has been placed and is being processed.`,
+                                read: false,
+                                createdAt: serverTimestamp(),
+                                data: { orderId: orderId },
+                                link: `/account/orders/${orderId}`
+                            });
+                            console.log("Customer notification created successfully");
+                        }
+                    } catch (error) {
+                        console.error("Failed to create customer notification:", error);
+                        toast.error("Order placed but notification failed");
+                    }
+                }
+
+                // 3. Notify Admins
+                try {
+                    // Fetch all admins (including super_admin)
+                    const adminsQuery = query(collection(db, "admins"));
+                    const adminSnaps = await getDocs(adminsQuery);
 
                     const notificationPromises = adminSnaps.docs.map(adminDoc =>
                         addDoc(collection(db, "notifications"), {
                             userId: adminDoc.id,
                             type: "new_order",
                             title: "New Order",
-                            message: `New order #${orderId.slice(0, 8)} from ${data.firstName}`,
+                            message: `New order #${orderId.slice(0, 8)} from ${data.firstName} ${data.lastName}`,
                             read: false,
                             createdAt: serverTimestamp(),
                             data: { orderId: orderId },
@@ -198,10 +224,13 @@ const Checkout = () => {
                         })
                     );
                     await Promise.all(notificationPromises);
+                    console.log(`Admin notifications created for ${adminSnaps.docs.length} admins`);
                 } catch (error) {
                     console.error("Failed to notify admins:", error);
+                    toast.error("Order placed but admin notifications failed");
                 }
             }
+
 
             // 2. Check Low Stock Levels and Alert Admin
             // We need to check the *new* stock levels.

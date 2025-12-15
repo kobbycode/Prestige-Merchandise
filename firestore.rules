@@ -16,8 +16,15 @@ service cloud.firestore {
       // Public read access for storefront
       allow read: if true;
       
-      // Only authenticated admins can write
-      allow write: if request.auth != null && 
+      // Allow authenticated users to update stock during checkout
+      allow update: if request.auth != null &&
+        // Only allow updating the 'stock' field
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stock']) &&
+        // Stock can only decrease (prevent fraud)
+        request.resource.data.stock < resource.data.stock;
+      
+      // Only admins can create, delete, and fully modify products
+      allow create, delete: if request.auth != null && 
         get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role in ['super_admin', 'admin'];
     }
     

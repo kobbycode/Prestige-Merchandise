@@ -6,9 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
 import { ShieldCheck } from "lucide-react";
+import { getFirebaseErrorMessage } from "@/lib/firebaseErrors";
 
 const Profile = () => {
     const { user, role, changePassword } = useAuth();
+    const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [loading, setLoading] = useState(false);
@@ -22,13 +24,15 @@ const Profile = () => {
 
         setLoading(true);
         try {
-            await changePassword(newPassword);
+            await changePassword(currentPassword, newPassword);
             toast.success("Password updated successfully");
+            setCurrentPassword("");
             setNewPassword("");
             setConfirmPassword("");
         } catch (error: any) {
             console.error("Error updating password:", error);
-            toast.error("Failed to update password: " + error.message);
+            const friendlyMessage = getFirebaseErrorMessage(error);
+            toast.error(friendlyMessage);
         } finally {
             setLoading(false);
         }
@@ -81,6 +85,17 @@ const Profile = () => {
                     <CardContent>
                         <form onSubmit={handleChangePassword} className="space-y-4">
                             <div className="space-y-2">
+                                <Label htmlFor="currentPassword">Current Password</Label>
+                                <Input
+                                    id="currentPassword"
+                                    type="password"
+                                    value={currentPassword}
+                                    onChange={(e) => setCurrentPassword(e.target.value)}
+                                    required
+                                    placeholder="Enter your current password"
+                                />
+                            </div>
+                            <div className="space-y-2">
                                 <Label htmlFor="newPassword">New Password</Label>
                                 <Input
                                     id="newPassword"
@@ -89,10 +104,11 @@ const Profile = () => {
                                     onChange={(e) => setNewPassword(e.target.value)}
                                     required
                                     minLength={6}
+                                    placeholder="At least 6 characters"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                                <Label htmlFor="confirmPassword">Confirm New Password</Label>
                                 <Input
                                     id="confirmPassword"
                                     type="password"
@@ -100,6 +116,7 @@ const Profile = () => {
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                     required
                                     minLength={6}
+                                    placeholder="Re-enter new password"
                                 />
                             </div>
                             <div className="flex justify-end">

@@ -177,7 +177,6 @@ const Header = () => {
         </div>
 
         {/* Mobile Navigation */}
-        {/* Mobile Navigation */}
         {isMenuOpen && (
           <nav className="lg:hidden mt-4 pb-4 border-t pt-4 space-y-4">
             {/* Mobile Search */}

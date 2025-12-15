@@ -6,7 +6,9 @@ import {
     signOut as firebaseSignOut,
     createUserWithEmailAndPassword,
     getAuth,
-    updatePassword
+    updatePassword,
+    EmailAuthProvider,
+    reauthenticateWithCredential
 } from "firebase/auth";
 import {
     doc,
@@ -42,7 +44,7 @@ interface AuthContextType {
     logout: () => Promise<void>;
     createAdmin: (email: string, password: string, role?: UserRole) => Promise<any>;
     deleteAdmin: (uid: string) => Promise<void>;
-    changePassword: (password: string) => Promise<void>;
+    changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -217,9 +219,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         })();
     };
 
-    const changePassword = async (password: string) => {
-        if (auth.currentUser) {
-            await updatePassword(auth.currentUser, password);
+    const changePassword = async (currentPassword: string, newPassword: string) => {
+        if (!auth.currentUser || !auth.currentUser.email) {
+            throw new Error('No user is currently logged in');
+        }
+
+        try {
+            // Create credential with current password
+            const credential = EmailAuthProvider.credential(
+                auth.currentUser.email,
+                currentPassword
+            );
+
+            // Reauthenticate user
+            await reauthenticateWithCredential(auth.currentUser, credential);
+
+            // Now update password
+            await updatePassword(auth.currentUser, newPassword);
+        } catch (error) {
+            throw error;
         }
     };
 
