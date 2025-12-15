@@ -12,8 +12,9 @@ import NotificationBadge from "./NotificationBadge";
 import NotificationItem from "./NotificationItem";
 import { useNavigate } from "react-router-dom";
 import { Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export function NotificationDropdown() {
+export function NotificationDropdown({ className }: { className?: string }) {
     const { notifications, markAllAsRead, markAsRead } = useNotifications();
     const navigate = useNavigate();
 
@@ -37,7 +38,7 @@ export function NotificationDropdown() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative rounded-full">
+                <Button variant="ghost" size="icon" className={cn("relative rounded-full", className)}>
                     <NotificationBadge />
                 </Button>
             </DropdownMenuTrigger>
@@ -73,8 +74,8 @@ export function NotificationDropdown() {
                 </ScrollArea>
                 {notifications.length > 0 && (
                     <div className="p-2 border-t text-center">
-                        <Button variant="ghost" size="sm" className="w-full text-xs" onClick={() => navigate('/notifications')}>
-                            View all notifications
+                        <Button variant="ghost" size="sm" className="w-full text-xs" onClick={() => navigate('/account/orders')}>
+                            View all orders
                         </Button>
                     </div>
                 )}

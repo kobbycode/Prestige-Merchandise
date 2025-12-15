@@ -75,7 +75,7 @@ const Footer = () => {
                 className="p-3 bg-primary/10 rounded-full hover:bg-primary hover:text-primary-foreground transition-colors duration-300 ease-in-out transform hover:scale-110"
                 aria-label="Facebook"
               >
-                <FaFacebookF className="h-5 w-5" />
+                <FaFacebookF className="h-6 w-6" />
               </a>
               <a
                 href="https://instagram.com"
@@ -84,7 +84,7 @@ const Footer = () => {
                 className="p-3 bg-primary/10 rounded-full hover:bg-primary hover:text-primary-foreground transition-colors duration-300 ease-in-out transform hover:scale-110"
                 aria-label="Instagram"
               >
-                <FaInstagram className="h-5 w-5" />
+                <FaInstagram className="h-6 w-6" />
               </a>
               <a
                 href="https://tiktok.com"
@@ -93,7 +93,7 @@ const Footer = () => {
                 className="p-3 bg-primary/10 rounded-full hover:bg-primary hover:text-primary-foreground transition-colors duration-300 ease-in-out transform hover:scale-110"
                 aria-label="TikTok"
               >
-                <FaTiktok className="h-5 w-5" />
+                <FaTiktok className="h-6 w-6" />
               </a>
             </div>
           </div>

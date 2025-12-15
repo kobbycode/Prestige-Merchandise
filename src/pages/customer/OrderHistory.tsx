@@ -136,14 +136,18 @@ const OrderHistory = () => {
             <Header />
 
             <main className="flex-1 bg-muted/30">
-                <div className="container mx-auto px-4 py-8">
-                    <div className="flex items-center justify-between mb-8">
-                        <h1 className="text-3xl font-bold">Order History</h1>
+                <div className="container mx-auto px-4 py-6 md:py-8">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 md:mb-8">
+                        <div>
+                            <h1 className="text-2xl md:text-3xl font-bold">Order History</h1>
+                            <p className="text-sm text-muted-foreground mt-1">Track and manage your recent orders</p>
+                        </div>
                         {orders.length > 0 && (
                             <Button
                                 variant="destructive"
                                 size="sm"
                                 onClick={() => setIsDeletingAll(true)}
+                                className="w-full md:w-auto"
                             >
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 Clear History
@@ -156,65 +160,82 @@ const OrderHistory = () => {
                             <Loader2 className="h-8 w-8 animate-spin text-primary" />
                         </div>
                     ) : orders.length === 0 ? (
-                        <Card>
-                            <CardContent className="text-center py-12">
-                                <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                        <Card className="border-dashed">
+                            <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+                                <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                                    <Package className="h-8 w-8 text-muted-foreground" />
+                                </div>
                                 <h3 className="text-lg font-semibold mb-2">No orders yet</h3>
-                                <p className="text-muted-foreground mb-4">
-                                    Start shopping to see your orders here
+                                <p className="text-muted-foreground mb-6 max-w-sm">
+                                    You haven't placed any orders yet. Start shopping to find great parts for your vehicle.
                                 </p>
                                 <Link to="/shop">
-                                    <Button>Browse Products</Button>
+                                    <Button size="lg" className="min-w-[150px]">Browse Shop</Button>
                                 </Link>
                             </CardContent>
                         </Card>
                     ) : (
-                        <div className="space-y-4">
+                        <div className="grid gap-4">
                             {orders.map((order) => (
-                                <Card key={order.id}>
-                                    <CardHeader>
-                                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                            <div>
-                                                <CardTitle className="text-base">
-                                                    Order #{order.id.substring(0, 8).toUpperCase()}
-                                                </CardTitle>
-                                                <p className="text-sm text-muted-foreground mt-1">
-                                                    {order.createdAt?.seconds
-                                                        ? format(new Date(order.createdAt.seconds * 1000), "PPP")
+                                <Card key={order.id} className="overflow-hidden bg-card transition-all hover:shadow-md">
+                                    <div className="p-4 md:p-6 flex flex-col gap-4">
+                                        {/* Order Header: ID, Date, Status */}
+                                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="font-semibold text-base md:text-lg">
+                                                        #{order.id.substring(0, 8).toUpperCase()}
+                                                    </span>
+                                                    <Badge className={`w-fit px-2 py-0.5 text-xs font-medium rounded-full ${getStatusClassName(order.status)}`} variant="outline">
+                                                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                                                    </Badge>
+                                                </div>
+                                                <p className="text-xs md:text-sm text-muted-foreground">
+                                                    Placed on {order.createdAt?.seconds
+                                                        ? format(new Date(order.createdAt.seconds * 1000), "PPP 'at' p")
                                                         : "N/A"}
                                                 </p>
                                             </div>
-                                            <Badge className={`w-fit ${getStatusClassName(order.status)}`} variant="outline">
-                                                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                                            </Badge>
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                            <div>
-                                                <p className="text-sm text-muted-foreground">
-                                                    {order.items.length} item{order.items.length !== 1 ? 's' : ''}
-                                                </p>
-                                                <p className="text-lg font-bold">GH₵ {order.amount.toFixed(2)}</p>
+                                            <div className="flex items-center gap-2 md:hidden">
+                                                {/* Mobile-only status moved next to ID above, or keep separate? 
+                                                   Actually I put badge next to ID above. */}
                                             </div>
-                                            <div className="flex items-center gap-2">
-                                                <Link to={`/account/orders/${order.id}`} className="flex-1 md:flex-none">
-                                                    <Button variant="outline" size="sm" className="w-full md:w-auto">
-                                                        <Eye className="mr-2 h-4 w-4" />
-                                                        View
+                                        </div>
+
+                                        <div className="border-t border-border/50 my-1" />
+
+                                        {/* Order Details: Items, Price, Actions */}
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                            <div className="flex items-center justify-between sm:justify-start gap-6">
+                                                <div>
+                                                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Items</p>
+                                                    <p className="font-medium text-foreground">{order.items.length}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Total</p>
+                                                    <p className="font-bold text-primary text-lg">GH₵ {order.amount.toFixed(2)}</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center gap-3 pt-2 sm:pt-0">
+                                                <Link to={`/account/orders/${order.id}`} className="flex-1 sm:flex-none">
+                                                    <Button variant="default" size="default" className="w-full sm:w-auto gap-2">
+                                                        <Eye className="h-4 w-4" />
+                                                        View Details
                                                     </Button>
                                                 </Link>
                                                 <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="text-muted-foreground hover:text-red-600 hover:bg-red-50 hover:border-red-200"
                                                     onClick={() => setDeleteId(order.id)}
+                                                    title="Delete Order History"
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
                                             </div>
                                         </div>
-                                    </CardContent>
+                                    </div>
                                 </Card>
                             ))}
                         </div>

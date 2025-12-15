@@ -44,15 +44,15 @@ const Header = () => {
   ];
 
   return (
-    <header className="bg-secondary text-secondary-foreground sticky top-0 z-50 shadow-md">
-      <div className="container mx-auto px-4 py-4">
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-secondary/90 backdrop-blur-md supports-[backdrop-filter]:bg-secondary/60 text-secondary-foreground shadow-sm">
+      <div className="container mx-auto px-4 py-2 md:py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
-            <img src={logo} alt="Prestige Merchandise" className="h-28 w-auto bg-white rounded-full p-1" />
+          <Link to="/" className="flex items-center gap-2 md:gap-3 hover:opacity-90 transition-opacity">
+            <img src={logo} alt="Prestige Merchandise" className="h-12 w-auto md:h-20 transition-all" />
             <div className="hidden sm:block">
-              <h1 className="text-xl font-bold text-primary-foreground">The Prestige Merchandise</h1>
-              <p className="text-xs text-secondary-foreground/80">Genuine Auto Parts</p>
+              <h1 className="text-lg md:text-xl font-bold text-secondary-foreground">The Prestige Merchandise</h1>
+              <p className="text-[10px] md:text-xs text-secondary-foreground/80">Genuine Auto Parts</p>
             </div>
           </Link>
 
@@ -61,11 +61,11 @@ const Header = () => {
 
             {/* Global Search Bar */}
             <form onSubmit={handleSearch} className="relative w-64">
-              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-blue-950" />
+              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="text"
                 placeholder="Search parts..."
-                className="pl-8 h-9 bg-background/50 border-secondary-foreground/20 focus:border-primary placeholder:text-blue-950 text-blue-950"
+                className="pl-8 h-9 bg-background/90 border-transparent focus:border-primary placeholder:text-muted-foreground text-foreground"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -75,8 +75,8 @@ const Header = () => {
                 key={link.to}
                 to={link.to}
                 className={`font-medium transition-colors ${location.pathname === link.to
-                  ? "text-primary"
-                  : "text-secondary-foreground hover:text-primary"
+                  ? "text-white font-bold"
+                  : "text-secondary-foreground/80 hover:text-white"
                   }`}
               >
                 {link.label}
@@ -86,7 +86,7 @@ const Header = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="relative"
+              className="relative text-secondary-foreground hover:text-white hover:bg-white/10"
               onClick={() => setIsCartOpen(true)}
             >
               <ShoppingBag className="h-5 w-5" />
@@ -104,7 +104,7 @@ const Header = () => {
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="icon" className="text-secondary-foreground hover:text-white hover:bg-white/10">
                     <User className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -130,26 +130,44 @@ const Header = () => {
               </DropdownMenu>
             ) : (
               <Link to="/login">
-                <Button variant="ghost" size="icon" title="Login">
+                <Button variant="ghost" size="icon" title="Login" className="text-secondary-foreground hover:text-white hover:bg-white/10">
                   <User className="h-5 w-5" />
                 </Button>
               </Link>
             )}
           </nav>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 lg:hidden">
+            {/* Mobile Notification */}
+            {isAuthenticated && <NotificationDropdown className="text-secondary-foreground hover:text-white hover:bg-white/10" />}
+
+            {/* Mobile Cart Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative text-secondary-foreground hover:text-white"
+              onClick={() => setIsCartOpen(true)}
+            >
+              <ShoppingBag className="h-5 w-5" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] font-bold text-primary-foreground flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </Button>
+
             <a
               href="https://wa.me/233247654321"
               target="_blank"
               rel="noopener noreferrer"
               className="text-green-500 hover:scale-110 transition-transform"
             >
-              <FaWhatsapp className="h-8 w-8" />
+              <FaWhatsapp className="h-6 w-6 md:h-8 md:w-8" />
             </a>
 
             {/* Mobile Menu Button */}
             <button
-              className="lg:hidden p-2 text-secondary-foreground"
+              className="p-2 text-secondary-foreground hover:text-white transition-colors"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label="Toggle menu"
             >
@@ -159,21 +177,60 @@ const Header = () => {
         </div>
 
         {/* Mobile Navigation */}
+        {/* Mobile Navigation */}
         {isMenuOpen && (
-          <nav className="lg:hidden mt-4 pb-4 border-t border-secondary-foreground/20 pt-4">
-            {navLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className={`block py-2 font-medium transition-colors ${location.pathname === link.to
-                  ? "text-primary"
-                  : "text-secondary-foreground hover:text-primary"
-                  }`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {link.label}
-              </Link>
-            ))}
+          <nav className="lg:hidden mt-4 pb-4 border-t pt-4 space-y-4">
+            {/* Mobile Search */}
+            <form onSubmit={handleSearch} className="relative">
+              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search parts..."
+                className="pl-8 h-10 w-full bg-background/90 text-foreground"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </form>
+
+            <div className="space-y-2">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={`block py-2 px-3 rounded-md font-medium transition-colors ${location.pathname === link.to
+                    ? "bg-primary/10 text-primary"
+                    : "text-foreground/80 hover:bg-muted hover:text-foreground"
+                    }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              ))}
+              {!isAuthenticated && (
+                <Link
+                  to="/login"
+                  className="block py-2 px-3 rounded-md font-medium text-foreground/80 hover:bg-muted hover:text-foreground"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Login / Register
+                </Link>
+              )}
+              {isAuthenticated && (
+                <>
+                  <Link
+                    to="/account"
+                    className="block py-2 px-3 rounded-md font-medium text-foreground/80 hover:bg-muted hover:text-foreground"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    My Profile
+                  </Link>
+                  <Button variant="ghost" className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50 px-3" onClick={() => { logout(); setIsMenuOpen(false); }}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </Button>
+                </>
+              )}
+            </div>
           </nav>
         )}
         <CartSheet />

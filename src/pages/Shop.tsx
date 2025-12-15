@@ -20,6 +20,8 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { useCart } from "@/contexts/CartContext";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Filter as FilterIcon } from "lucide-react";
 
 const Shop = () => {
   const navigate = useNavigate();
@@ -109,20 +111,93 @@ const Shop = () => {
     setPriceRange({ min: "", max: "" });
   };
 
+
+
+  // ... inside component ...
+
+  const FilterContent = () => (
+    <div className="space-y-6">
+      <div>
+        <h3 className="font-bold text-lg mb-4">Filter By</h3>
+        {/* Category Filter */}
+        <div className="mb-6">
+          <h4 className="font-semibold mb-3 text-sm text-muted-foreground">CATEGORY</h4>
+          <div className="space-y-1">
+            {categories.map((category, index) => (
+              <button
+                key={index}
+                onClick={() => setSelectedCategory(category === "All Products" ? "all" : category)}
+                className={`block w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${(
+                  selectedCategory === category ||
+                  (selectedCategory === "all" && category === "All Products")
+                )
+                  ? "bg-primary text-primary-foreground font-medium"
+                  : "hover:bg-muted text-muted-foreground hover:text-foreground"
+                  }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Price Range Filter */}
+        <div>
+          <h4 className="font-semibold mb-3 text-sm text-muted-foreground">PRICE RANGE</h4>
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">Min Price (GH₵)</label>
+              <Input
+                type="number"
+                placeholder="0"
+                value={priceRange.min}
+                onChange={(e) => setPriceRange({ ...priceRange, min: e.target.value })}
+                min="0"
+                step="10"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">Max Price (GH₵)</label>
+              <Input
+                type="number"
+                placeholder="Any"
+                value={priceRange.max}
+                onChange={(e) => setPriceRange({ ...priceRange, max: e.target.value })}
+                min="0"
+                step="10"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Clear Filters */}
+        {(searchQuery || selectedCategory !== "all" || priceRange.min || priceRange.max) && (
+          <Button
+            variant="outline"
+            className="w-full mt-6"
+            onClick={clearFilters}
+          >
+            Clear All Filters
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
 
       <main className="flex-1">
         {/* Page Header */}
-        <section className="bg-secondary text-secondary-foreground py-12">
+        <section className="bg-secondary text-secondary-foreground py-8 md:py-12">
           <div className="container mx-auto px-4">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Shop Auto Parts</h1>
-            <p className="text-xl opacity-90">Browse our complete catalog of genuine spare parts</p>
+            <h1 className="text-3xl md:text-5xl font-bold mb-2 md:mb-4">Shop Auto Parts</h1>
+            <p className="text-lg md:text-xl opacity-90">Browse our complete catalog of genuine spare parts</p>
           </div>
         </section>
 
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-6 md:py-8">
           {loading ? (
             <div className="flex items-center justify-center h-[50vh]">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -130,102 +205,60 @@ const Shop = () => {
           ) : (
             <>
               {/* Search Bar & Sort */}
-              <div className="mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
+              <div className="mb-6 md:mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
                 <div className="relative w-full max-w-xl">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
                   <Input
                     type="text"
                     placeholder="Search for parts..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 py-6 text-lg"
+                    className="pl-9 md:pl-10 py-5 md:py-6 text-base md:text-lg"
                   />
                 </div>
 
-                <div className="w-full md:w-auto flex items-center gap-2">
-                  <span className="text-sm font-medium whitespace-nowrap">Sort by:</span>
-                  <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Sort by" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="newest">Newest Arrivals</SelectItem>
-                      <SelectItem value="price-asc">Price: Low to High</SelectItem>
-                      <SelectItem value="price-desc">Price: High to Low</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="w-full md:w-auto flex items-center justify-between md:justify-end gap-3">
+                  {/* Mobile Filter Button */}
+                  <Sheet>
+                    <SheetTrigger asChild>
+                      <Button variant="outline" className="lg:hidden gap-2">
+                        <FilterIcon className="h-4 w-4" />
+                        Filters
+                      </Button>
+                    </SheetTrigger>
+                    <SheetContent side="left" className="w-[300px] sm:w-[400px] overflow-y-auto">
+                      <SheetHeader>
+                        <SheetTitle>Filters</SheetTitle>
+                      </SheetHeader>
+                      <div className="mt-6">
+                        <FilterContent />
+                      </div>
+                    </SheetContent>
+                  </Sheet>
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium whitespace-nowrap hidden sm:inline-block">Sort by:</span>
+                    <Select value={sortBy} onValueChange={setSortBy}>
+                      <SelectTrigger className="w-[140px] md:w-[180px]">
+                        <SelectValue placeholder="Sort by" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="newest">Newest</SelectItem>
+                        <SelectItem value="price-asc">Price: Low to High</SelectItem>
+                        <SelectItem value="price-desc">Price: High to Low</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
 
-                {/* Filters Sidebar */}
-                <aside className="lg:col-span-1">
+                {/* Desktop Filters Sidebar */}
+                <aside className="hidden lg:block lg:col-span-1">
                   <Card className="sticky top-24">
                     <CardContent className="p-6">
-                      <h3 className="font-bold text-lg mb-4">Filter By</h3>
-
-                      {/* Category Filter */}
-                      <div className="mb-6">
-                        <h4 className="font-semibold mb-3 text-sm text-muted-foreground">CATEGORY</h4>
-                        <div className="space-y-2">
-                          {categories.map((category, index) => (
-                            <button
-                              key={index}
-                              onClick={() => setSelectedCategory(category === "All Products" ? "all" : category)}
-                              className={`block w-full text-left px-3 py-2 rounded transition-colors ${(
-                                selectedCategory === category ||
-                                (selectedCategory === "all" && category === "All Products")
-                              )
-                                ? "bg-primary text-primary-foreground"
-                                : "hover:bg-muted"
-                                }`}
-                            >
-                              {category}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Price Range Filter */}
-                      <div>
-                        <h4 className="font-semibold mb-3 text-sm text-muted-foreground">PRICE RANGE</h4>
-                        <div className="space-y-3">
-                          <div>
-                            <label className="text-xs text-muted-foreground mb-1 block">Min Price (GH₵)</label>
-                            <Input
-                              type="number"
-                              placeholder="0"
-                              value={priceRange.min}
-                              onChange={(e) => setPriceRange({ ...priceRange, min: e.target.value })}
-                              min="0"
-                              step="10"
-                            />
-                          </div>
-                          <div>
-                            <label className="text-xs text-muted-foreground mb-1 block">Max Price (GH₵)</label>
-                            <Input
-                              type="number"
-                              placeholder="Any"
-                              value={priceRange.max}
-                              onChange={(e) => setPriceRange({ ...priceRange, max: e.target.value })}
-                              min="0"
-                              step="10"
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Clear Filters */}
-                      {(searchQuery || selectedCategory !== "all" || priceRange.min || priceRange.max) && (
-                        <Button
-                          variant="outline"
-                          className="w-full mt-4"
-                          onClick={clearFilters}
-                        >
-                          Clear All Filters
-                        </Button>
-                      )}
+                      <FilterContent />
                     </CardContent>
                   </Card>
                 </aside>
@@ -233,13 +266,13 @@ const Shop = () => {
                 {/* Products Grid */}
                 <div className="lg:col-span-3">
                   <div className="mb-4 flex items-center justify-between">
-                    <p className="text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'}
                     </p>
                   </div>
 
                   {filteredProducts.length === 0 ? (
-                    <Card className="p-12 text-center">
+                    <Card className="p-8 md:p-12 text-center">
                       <p className="text-muted-foreground text-lg">No products found matching your criteria.</p>
                       <Button
                         onClick={clearFilters}
@@ -249,42 +282,47 @@ const Shop = () => {
                       </Button>
                     </Card>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                       {filteredProducts.map((product) => (
                         <Card
                           key={product.id}
                           className="shadow-card hover:shadow-hover transition-all overflow-hidden group cursor-pointer"
                           onClick={() => navigate(`/product/${product.id}`)}
                         >
-                          <div className="aspect-square overflow-hidden bg-muted">
+                          <div className="aspect-square overflow-hidden bg-muted relative">
                             {product.images && product.images[0] ? (
                               <img
                                 src={product.images[0]}
                                 alt={product.name}
-                                className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-300"
+                                className="w-full h-full object-contain p-2 md:p-4 group-hover:scale-110 transition-transform duration-300"
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
-                                <Package className="h-16 w-16 text-muted-foreground" />
+                                <Package className="h-10 w-10 md:h-16 md:w-16 text-muted-foreground" />
                               </div>
                             )}
+                            {product.stock <= 5 && (
+                              <span className="absolute top-2 right-2 bg-red-500 text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded-full">
+                                Low Stock
+                              </span>
+                            )}
                           </div>
-                          <CardContent className="p-4">
-                            <h3 className="font-semibold mb-1 line-clamp-2 min-h-[3rem]">{product.name}</h3>
-                            <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{product.description}</p>
-                            <div className="flex items-baseline gap-2 mb-4">
-                              <p className="text-2xl font-bold text-primary">GHS {product.price.toFixed(2)}</p>
+                          <CardContent className="p-3 md:p-4">
+                            <h3 className="font-semibold mb-1 md:mb-2 line-clamp-2 text-sm md:text-base min-h-[2.5rem] md:min-h-[3rem]">{product.name}</h3>
+                            <p className="text-xs text-muted-foreground mb-2 line-clamp-2 hidden md:block">{product.description}</p>
+                            <div className="flex flex-col md:flex-row md:items-baseline gap-1 md:gap-2 mb-3 md:mb-4">
+                              <p className="text-base md:text-2xl font-bold text-primary">GH₵{product.price.toFixed(2)}</p>
                               {product.compareAtPrice && (
-                                <p className="text-sm text-muted-foreground line-through">GHS {product.compareAtPrice.toFixed(2)}</p>
+                                <p className="text-xs md:text-sm text-muted-foreground line-through">GH₵{product.compareAtPrice.toFixed(2)}</p>
                               )}
                             </div>
                             <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
                               <Button
-                                className="w-full gap-2"
+                                className="w-full gap-2 text-xs md:text-sm h-8 md:h-10"
                                 size="sm"
                                 onClick={() => addToCart(product, 1)}
                               >
-                                <ShoppingCart className="h-4 w-4" />
+                                <ShoppingCart className="h-3 w-3 md:h-4 md:w-4" />
                                 Add to Cart
                               </Button>
                               <a
@@ -293,8 +331,8 @@ const Shop = () => {
                                 rel="noopener noreferrer"
                                 className="block"
                               >
-                                <Button variant="outline" className="w-full gap-2" size="sm">
-                                  <MessageCircle className="h-4 w-4" />
+                                <Button variant="outline" className="w-full gap-2 text-xs md:text-sm h-8 md:h-10" size="sm">
+                                  <MessageCircle className="h-3 w-3 md:h-4 md:w-4" />
                                   Order on WhatsApp
                                 </Button>
                               </a>

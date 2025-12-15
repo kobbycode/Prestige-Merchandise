@@ -71,7 +71,7 @@ const Index = () => {
 
       <main>
         {/* Hero Section */}
-        <section className="relative h-[600px] bg-secondary overflow-hidden">
+        <section className="relative h-[450px] md:h-[600px] bg-secondary overflow-hidden">
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${heroImage})` }}
@@ -80,16 +80,16 @@ const Index = () => {
           </div>
 
           <div className="relative container mx-auto px-4 h-full flex items-center">
-            <div className="max-w-2xl text-secondary-foreground">
-              <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight">
+            <div className="max-w-2xl text-secondary-foreground pt-8 md:pt-0">
+              <h1 className="text-3xl md:text-6xl font-bold mb-4 leading-tight">
                 Your Trusted Auto Parts Dealer at <span className="text-primary">Abossey Okai</span>
               </h1>
-              <p className="text-xl md:text-2xl mb-8 text-secondary-foreground/90">
+              <p className="text-lg md:text-2xl mb-6 md:mb-8 text-secondary-foreground/90">
                 Genuine Power Steering Pumps, Racks & Lubricants — Delivered Nationwide!
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link to="/shop">
-                  <Button size="lg" className="gap-2">
+                  <Button size="lg" className="gap-2 w-full sm:w-auto text-base">
                     <ShoppingCart className="h-5 w-5" />
                     Shop Now
                   </Button>
@@ -100,9 +100,9 @@ const Index = () => {
         </section>
 
         {/* Why Choose Us Section */}
-        <section className="py-16 bg-muted">
+        <section className="py-10 md:py-16 bg-muted">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">Why Choose Us?</h2>
+            <h2 className="text-2xl md:text-4xl font-bold text-center mb-8 md:mb-12">Why Choose Us?</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {features.map((feature, index) => {
                 const Icon = feature.icon;
@@ -123,51 +123,56 @@ const Index = () => {
         </section>
 
         {/* Featured Products */}
-        <section className="py-16">
+        <section className="py-10 md:py-16">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">Featured Products</h2>
-            <p className="text-center text-muted-foreground mb-12">Browse our most popular auto parts</p>
+            <h2 className="text-2xl md:text-4xl font-bold text-center mb-3">Featured Products</h2>
+            <p className="text-center text-muted-foreground mb-8 md:mb-12">Browse our most popular auto parts</p>
 
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
               </div>
             ) : featuredProducts.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-8">
                 {featuredProducts.map((product) => (
                   <Card
                     key={product.id}
                     className="shadow-card hover:shadow-hover transition-all overflow-hidden group cursor-pointer"
                     onClick={() => navigate(`/product/${product.id}`)}
                   >
-                    <div className="aspect-square overflow-hidden bg-muted">
+                    <div className="aspect-square overflow-hidden bg-muted relative">
                       {product.images && product.images[0] ? (
                         <img
                           src={product.images[0]}
                           alt={product.name}
-                          className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-300"
+                          className="w-full h-full object-contain p-2 md:p-4 group-hover:scale-110 transition-transform duration-300"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <Package className="h-16 w-16 text-muted-foreground" />
+                          <Package className="h-10 w-10 md:h-16 md:w-16 text-muted-foreground" />
                         </div>
                       )}
+                      {product.stock <= 5 && (
+                        <span className="absolute top-2 right-2 bg-red-500 text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded-full">
+                          Low Stock
+                        </span>
+                      )}
                     </div>
-                    <CardContent className="p-4">
-                      <h3 className="font-semibold mb-2 line-clamp-2 min-h-[3rem]">{product.name}</h3>
-                      <div className="flex items-baseline gap-2 mb-4">
-                        <p className="text-2xl font-bold text-primary">GHS {product.price.toFixed(2)}</p>
+                    <CardContent className="p-3 md:p-4">
+                      <h3 className="font-semibold mb-1 md:mb-2 line-clamp-2 text-sm md:text-base min-h-[2.5rem] md:min-h-[3rem]">{product.name}</h3>
+                      <div className="flex flex-col md:flex-row md:items-baseline gap-1 md:gap-2 mb-3 md:mb-4">
+                        <p className="text-base md:text-2xl font-bold text-primary">GH₵{product.price.toFixed(2)}</p>
                         {product.compareAtPrice && (
-                          <p className="text-sm text-muted-foreground line-through">GHS {product.compareAtPrice.toFixed(2)}</p>
+                          <p className="text-xs md:text-sm text-muted-foreground line-through">GH₵{product.compareAtPrice.toFixed(2)}</p>
                         )}
                       </div>
                       <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
                         <Button
-                          className="w-full gap-2"
+                          className="w-full gap-2 text-xs md:text-sm h-8 md:h-10"
                           size="sm"
                           onClick={() => addToCart(product, 1)}
                         >
-                          <ShoppingCart className="h-4 w-4" />
+                          <ShoppingCart className="h-3 w-3 md:h-4 md:w-4" />
                           Add to Cart
                         </Button>
                         <a
@@ -176,8 +181,8 @@ const Index = () => {
                           rel="noopener noreferrer"
                           className="block"
                         >
-                          <Button variant="outline" className="w-full gap-2" size="sm">
-                            <MessageCircle className="h-4 w-4" />
+                          <Button variant="outline" className="w-full gap-2 text-xs md:text-sm h-8 md:h-10" size="sm">
+                            <MessageCircle className="h-3 w-3 md:h-4 md:w-4" />
                             Order on WhatsApp
                           </Button>
                         </a>
@@ -194,20 +199,20 @@ const Index = () => {
 
             <div className="text-center">
               <Link to="/shop">
-                <Button size="lg">View All Products</Button>
+                <Button size="lg" className="w-full sm:w-auto">View All Products</Button>
               </Link>
             </div>
           </div>
         </section>
 
         {/* Testimonial Section */}
-        <section className="py-16 bg-secondary text-secondary-foreground">
+        <section className="py-10 md:py-16 bg-secondary text-secondary-foreground">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">What Our Customers Say</h2>
+            <h2 className="text-2xl md:text-4xl font-bold text-center mb-8 md:mb-12">What Our Customers Say</h2>
             <Card className="max-w-3xl mx-auto shadow-card">
-              <CardContent className="p-8 text-center">
-                <div className="text-5xl text-primary mb-4">"</div>
-                <p className="text-xl mb-6 italic">
+              <CardContent className="p-6 md:p-8 text-center">
+                <div className="text-4xl md:text-5xl text-primary mb-2 md:mb-4">"</div>
+                <p className="text-lg md:text-xl mb-4 md:mb-6 italic">
                   I've been buying from Prestige for years. Always genuine and fast delivery!
                 </p>
                 <p className="font-semibold">— Yaw, Kumasi</p>
@@ -217,18 +222,18 @@ const Index = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="py-16 bg-hero-gradient text-primary-foreground">
+        <section className="py-10 md:py-16 bg-hero-gradient text-primary-foreground">
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Get Started?</h2>
-            <p className="text-xl mb-8 opacity-90">Contact us today for the best auto parts deals in Ghana</p>
-            <div className="flex flex-wrap gap-4 justify-center">
+            <h2 className="text-2xl md:text-4xl font-bold mb-3 md:mb-4">Ready to Get Started?</h2>
+            <p className="text-lg md:text-xl mb-6 md:mb-8 opacity-90">Contact us today for the best auto parts deals in Ghana</p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/shop">
-                <Button size="lg" variant="secondary" className="min-w-[150px]">
+                <Button size="lg" variant="secondary" className="w-full sm:w-[150px]">
                   Browse Shop
                 </Button>
               </Link>
               <Link to="/contact">
-                <Button size="lg" variant="secondary" className="min-w-[150px]">
+                <Button size="lg" variant="secondary" className="w-full sm:w-[150px]">
                   Get in Touch
                 </Button>
               </Link>
