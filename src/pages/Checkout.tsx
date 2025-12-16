@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { collection, addDoc, serverTimestamp, runTransaction, doc, getDocs, query, where } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, runTransaction, doc, getDocs, query, where, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -57,6 +57,54 @@ const Checkout = () => {
     useState(() => {
         initEmailJS();
     });
+
+    const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
+
+    // Fetch user details and addresses
+    useEffect(() => {
+        if (user) {
+            // Pred-fill email
+            if (user.email) {
+                form.setValue("email", user.email);
+            }
+
+            const fetchAddresses = async () => {
+                try {
+                    const q = query(
+                        collection(db, "users", user.uid, "addresses"),
+                        orderBy("createdAt", "desc")
+                    );
+                    const snapshot = await getDocs(q);
+                    const addressList: any[] = [];
+                    snapshot.forEach((doc) => {
+                        addressList.push({ id: doc.id, ...doc.data() });
+                    });
+                    // Sort default first
+                    addressList.sort((a, b) => (a.isDefault === b.isDefault ? 0 : a.isDefault ? -1 : 1));
+
+                    setSavedAddresses(addressList);
+
+                    // Auto-fill default address
+                    const defaultAddr = addressList.find(a => a.isDefault);
+                    if (defaultAddr) {
+                        fillFormWithAddress(defaultAddr);
+                    }
+                } catch (error) {
+                    console.error("Error fetching addresses", error);
+                }
+            };
+            fetchAddresses();
+        }
+    }, [user, form]);
+
+    const fillFormWithAddress = (addr: any) => {
+        form.setValue("firstName", addr.firstName);
+        form.setValue("lastName", addr.lastName);
+        form.setValue("phone", addr.phone);
+        form.setValue("address", addr.address);
+        form.setValue("city", addr.city);
+        form.setValue("region", addr.region);
+    };
 
     const onSubmit = async (data: CheckoutValues) => {
         if (items.length === 0) {
@@ -300,6 +348,40 @@ const Checkout = () => {
                                 <CardContent>
                                     <Form {...form}>
                                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+
+                                            {/* Saved Addresses Selector */}
+                                            {user && savedAddresses.length > 0 && (
+                                                <div className="mb-6 p-4 border rounded-lg bg-muted/30">
+                                                    <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
+                                                        <ShieldCheck className="h-4 w-4 text-primary" />
+                                                        Load from Address Book
+                                                    </h3>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {savedAddresses.map((addr) => (
+                                                            <Button
+                                                                key={addr.id}
+                                                                type="button"
+                                                                variant="outline"
+                                                                size="sm"
+                                                                className="h-auto py-2 px-3 text-left flex flex-col items-start gap-1"
+                                                                onClick={() => {
+                                                                    fillFormWithAddress(addr);
+                                                                    toast.success("Address loaded");
+                                                                }}
+                                                            >
+                                                                <div className="font-semibold text-xs flex items-center gap-2">
+                                                                    {addr.firstName} {addr.lastName}
+                                                                    {addr.isDefault && <span className="text-[10px] bg-primary/10 text-primary px-1 rounded">Default</span>}
+                                                                </div>
+                                                                <div className="text-[10px] text-muted-foreground truncate max-w-[150px]">
+                                                                    {addr.address}, {addr.city}
+                                                                </div>
+                                                            </Button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
                                             <div className="grid grid-cols-2 gap-4">
                                                 <FormField
                                                     control={form.control}

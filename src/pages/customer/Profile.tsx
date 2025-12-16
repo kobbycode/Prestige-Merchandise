@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import { User, Lock, Package } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import AddressBook from "@/components/account/AddressBook";
 
 const Profile = () => {
     const { user, changePassword } = useAuth();
@@ -56,70 +58,84 @@ const Profile = () => {
                 <div className="container mx-auto px-4 py-8">
                     <h1 className="text-3xl font-bold mb-8">My Account</h1>
 
-                    <div className="grid gap-6 md:grid-cols-2 max-w-4xl">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <User className="h-5 w-5" />
-                                    Account Info
-                                </CardTitle>
-                                <CardDescription>Your account details</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="p-4 border rounded-lg bg-muted/50">
-                                    <p className="text-sm text-muted-foreground mb-1">Email</p>
-                                    <p className="font-medium">{user?.email}</p>
-                                </div>
-                                <Button
-                                    variant="outline"
-                                    className="w-full"
-                                    onClick={() => navigate("/account/orders")}
-                                >
-                                    <Package className="mr-2 h-4 w-4" />
-                                    View Order History
-                                </Button>
-                            </CardContent>
-                        </Card>
+                    <Tabs defaultValue="account" className="max-w-4xl">
+                        <TabsList className="mb-6 grid w-full grid-cols-3 lg:w-[400px]">
+                            <TabsTrigger value="account">Account</TabsTrigger>
+                            <TabsTrigger value="addresses">Addresses</TabsTrigger>
+                            <TabsTrigger value="security">Security</TabsTrigger>
+                        </TabsList>
 
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Lock className="h-5 w-5" />
-                                    Change Password
-                                </CardTitle>
-                                <CardDescription>Update your password</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <form onSubmit={handleChangePassword} className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="newPassword">New Password</Label>
-                                        <Input
-                                            id="newPassword"
-                                            type="password"
-                                            value={newPassword}
-                                            onChange={(e) => setNewPassword(e.target.value)}
-                                            required
-                                            minLength={6}
-                                        />
+                        <TabsContent value="account">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <User className="h-5 w-5" />
+                                        Account Info
+                                    </CardTitle>
+                                    <CardDescription>Your account details</CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="p-4 border rounded-lg bg-muted/50">
+                                        <p className="text-sm text-muted-foreground mb-1">Email</p>
+                                        <p className="font-medium">{user?.email}</p>
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="confirmPassword">Confirm Password</Label>
-                                        <Input
-                                            id="confirmPassword"
-                                            type="password"
-                                            value={confirmPassword}
-                                            onChange={(e) => setConfirmPassword(e.target.value)}
-                                            required
-                                            minLength={6}
-                                        />
-                                    </div>
-                                    <Button type="submit" disabled={loading} className="w-full">
-                                        {loading ? "Updating..." : "Update Password"}
+                                    <Button
+                                        variant="outline"
+                                        className="w-full"
+                                        onClick={() => navigate("/account/orders")}
+                                    >
+                                        <Package className="mr-2 h-4 w-4" />
+                                        View Order History
                                     </Button>
-                                </form>
-                            </CardContent>
-                        </Card>
-                    </div>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+
+                        <TabsContent value="addresses">
+                            <AddressBook />
+                        </TabsContent>
+
+                        <TabsContent value="security">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <Lock className="h-5 w-5" />
+                                        Change Password
+                                    </CardTitle>
+                                    <CardDescription>Update your password</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <form onSubmit={handleChangePassword} className="space-y-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="newPassword">New Password</Label>
+                                            <Input
+                                                id="newPassword"
+                                                type="password"
+                                                value={newPassword}
+                                                onChange={(e) => setNewPassword(e.target.value)}
+                                                required
+                                                minLength={6}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="confirmPassword">Confirm Password</Label>
+                                            <Input
+                                                id="confirmPassword"
+                                                type="password"
+                                                value={confirmPassword}
+                                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                                required
+                                                minLength={6}
+                                            />
+                                        </div>
+                                        <Button type="submit" disabled={loading} className="w-full">
+                                            {loading ? "Updating..." : "Update Password"}
+                                        </Button>
+                                    </form>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+                    </Tabs>
                 </div>
             </main>
 

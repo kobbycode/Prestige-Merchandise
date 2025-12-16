@@ -565,18 +565,47 @@ const Dashboard = () => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {/* Ideally we filter this from the main products list we fetched */}
-                                        {/* Since we don't have the full product list in state (only count), we might need to fetch or filter if we kept them. */}
-                                        {/* Wait, we only fetched counts in the original code, except 'recent'. 
-                                        Actually, the original code DID get all products into a local array 'products' but only set 'recentProducts' to state. 
-                                        I should improve the state to hold 'lowStockItems' 
-                                     */}
-                                        {/* Placeholder for now to show structure, will need to update state logic above to populate this. */}
-                                        <tr>
-                                            <td className="px-4 py-3" colSpan={4}>
-                                                <div className="text-center text-muted-foreground">Detailed list requires state update. (Updating next step)</div>
-                                            </td>
-                                        </tr>
+                                        {lowStockItems.length === 0 ? (
+                                            <tr>
+                                                <td className="px-4 py-8 text-center text-muted-foreground" colSpan={4}>
+                                                    No items are currently low on stock.
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            lowStockItems.map((product) => (
+                                                <tr key={product.id} className="border-b bg-white/50 hover:bg-white last:border-0">
+                                                    <td className="px-4 py-3">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="h-10 w-10 rounded bg-white border flex items-center justify-center overflow-hidden shrink-0">
+                                                                {product.images && product.images[0] ? (
+                                                                    <img src={product.images[0]} alt="" className="h-full w-full object-cover" />
+                                                                ) : (
+                                                                    <Package className="h-5 w-5 text-gray-300" />
+                                                                )}
+                                                            </div>
+                                                            <div className="font-medium text-sm">{product.name}</div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600">
+                                                        {product.category || "Uncategorized"}
+                                                    </td>
+                                                    <td className="px-4 py-3">
+                                                        <Badge variant="outline" className="bg-red-100 text-red-700 border-red-200">
+                                                            {product.stock} left
+                                                        </Badge>
+                                                    </td>
+                                                    <td className="px-4 py-3 text-right">
+                                                        <div className="flex justify-end gap-2">
+                                                            <Link to={`/admin/products/${product.id}/edit`}>
+                                                                <Button variant="ghost" size="sm" className="h-8 text-primary hover:text-primary hover:bg-primary/10">
+                                                                    Restock
+                                                                </Button>
+                                                            </Link>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
                                     </tbody>
                                 </table>
                             </div>
