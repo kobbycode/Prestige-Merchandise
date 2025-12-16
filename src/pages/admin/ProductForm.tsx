@@ -47,6 +47,8 @@ const ProductForm = () => {
         status: "draft",
         featured: false,
         tags: [],
+        specifications: "",
+        shippingInfo: "",
     });
 
     useEffect(() => {
@@ -95,6 +97,8 @@ const ProductForm = () => {
                     status: product.status,
                     featured: product.featured,
                     tags: product.tags,
+                    specifications: product.specifications || "",
+                    shippingInfo: product.shippingInfo || "",
                 });
                 setImagePreviews(product.images);
             } else {
@@ -389,6 +393,37 @@ const ProductForm = () => {
                                         No variants added. Click "Add Variant" to create size, color, or other options.
                                     </p>
                                 )}
+                            </CardContent>
+                        </Card>
+
+                        {/* Additional Details */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Additional Details</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div>
+                                    <Label htmlFor="specifications">Specifications</Label>
+                                    <Textarea
+                                        id="specifications"
+                                        placeholder="Enter product specifications (e.g., Manufacturer: OEM, Condition: Brand New, Warranty: 1 Year)"
+                                        value={formData.specifications || ""}
+                                        onChange={(e) => setFormData({ ...formData, specifications: e.target.value })}
+                                        rows={4}
+                                    />
+                                    <p className="text-xs text-muted-foreground mt-1">Each line will be displayed as a bullet point</p>
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="shippingInfo">Shipping Information</Label>
+                                    <Textarea
+                                        id="shippingInfo"
+                                        placeholder="Enter shipping details (e.g., Ships within 24 hours. Nationwide delivery available.)"
+                                        value={formData.shippingInfo || ""}
+                                        onChange={(e) => setFormData({ ...formData, shippingInfo: e.target.value })}
+                                        rows={3}
+                                    />
+                                </div>
                             </CardContent>
                         </Card>
                     </div>

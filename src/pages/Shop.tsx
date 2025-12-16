@@ -22,6 +22,7 @@ import {
 import { useCart } from "@/contexts/CartContext";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Filter as FilterIcon } from "lucide-react";
+import WishlistButton from "@/components/wishlist/WishlistButton";
 
 const Shop = () => {
   const navigate = useNavigate();
@@ -306,6 +307,13 @@ const Shop = () => {
                                 Low Stock
                               </span>
                             )}
+                            {/* Wishlist Button */}
+                            <div className="absolute top-2 left-2" onClick={(e) => e.stopPropagation()}>
+                              <WishlistButton
+                                productId={product.id}
+                                className="bg-white/80 hover:bg-white shadow-sm"
+                              />
+                            </div>
                           </div>
                           <CardContent className="p-3 md:p-4">
                             <h3 className="font-semibold mb-1 md:mb-2 line-clamp-2 text-sm md:text-base min-h-[2.5rem] md:min-h-[3rem]">{product.name}</h3>

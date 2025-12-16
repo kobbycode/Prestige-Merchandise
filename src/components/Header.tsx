@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Phone, MessageCircle, User, LogOut, ShoppingBag, Search } from "lucide-react";
+import { Menu, X, Phone, MessageCircle, User, LogOut, ShoppingBag, Search, Heart } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FaWhatsapp } from "react-icons/fa";
 import logo from "@/assets/logo.png";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
+import { useWishlist } from "@/contexts/WishlistContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +21,7 @@ import { NotificationDropdown } from "./notifications/NotificationDropdown";
 const Header = () => {
   const { isAuthenticated, logout } = useAuth();
   const { cartCount, setIsCartOpen } = useCart();
+  const { wishlistCount } = useWishlist();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const location = useLocation();
@@ -97,6 +99,22 @@ const Header = () => {
               )}
             </Button>
 
+            {/* Wishlist Button */}
+            <Link to="/account/wishlist">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative text-secondary-foreground hover:text-white hover:bg-white/10"
+              >
+                <Heart className="h-5 w-5" />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
+                    {wishlistCount}
+                  </span>
+                )}
+              </Button>
+            </Link>
+
             {/* Notification Dropdown */}
             {isAuthenticated && <NotificationDropdown />}
 
@@ -121,6 +139,12 @@ const Header = () => {
                       My Orders
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/account/wishlist" className="cursor-pointer">
+                      <Heart className="mr-2 h-4 w-4" />
+                      My Wishlist
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={logout} className="text-red-600 cursor-pointer">
                     <LogOut className="mr-2 h-4 w-4" />
@@ -140,6 +164,22 @@ const Header = () => {
           <div className="flex items-center gap-2 lg:hidden">
             {/* Mobile Notification */}
             {isAuthenticated && <NotificationDropdown className="text-secondary-foreground hover:text-white hover:bg-white/10" />}
+
+            {/* Mobile Wishlist Button */}
+            <Link to="/account/wishlist">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative text-secondary-foreground hover:text-white"
+              >
+                <Heart className="h-5 w-5" />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
+                    {wishlistCount}
+                  </span>
+                )}
+              </Button>
+            </Link>
 
             {/* Mobile Cart Button */}
             <Button

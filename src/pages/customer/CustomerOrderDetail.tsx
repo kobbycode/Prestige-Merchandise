@@ -13,6 +13,9 @@ import { format } from "date-fns";
 import { Order } from "@/types/order";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import OrderTimeline from "@/components/order/OrderTimeline";
+import { generateInvoice } from "@/lib/invoiceGenerator";
+import { Printer } from "lucide-react";
 
 const CustomerOrderDetail = () => {
     const { id } = useParams();
@@ -101,10 +104,23 @@ const CustomerOrderDetail = () => {
                                 {order.createdAt?.seconds ? format(new Date(order.createdAt.seconds * 1000), "PPP") : "N/A"}
                             </p>
                         </div>
-                        <Badge className={getStatusClassName(order.status)} variant="outline">
-                            {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                        </Badge>
+                        <div className="flex gap-2">
+                            <Button variant="outline" size="sm" onClick={() => generateInvoice(order)}>
+                                <Printer className="mr-2 h-4 w-4" />
+                                Download Invoice
+                            </Button>
+                            <Badge className={getStatusClassName(order.status)} variant="outline">
+                                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                            </Badge>
+                        </div>
                     </div>
+
+                    {/* Order Timeline */}
+                    <Card className="mb-6">
+                        <CardContent className="pt-4">
+                            <OrderTimeline order={order} />
+                        </CardContent>
+                    </Card>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {/* Order Items */}
@@ -176,11 +192,11 @@ const CustomerOrderDetail = () => {
                             </Card>
                         </div>
                     </div>
-                </div>
-            </main>
+                </div >
+            </main >
 
             <Footer />
-        </div>
+        </div >
     );
 };
 

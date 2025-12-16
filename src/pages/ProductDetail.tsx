@@ -19,6 +19,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Reviews from "@/components/product/Reviews";
+import WishlistButton from "@/components/wishlist/WishlistButton";
+import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { toast } from "sonner";
 import { useCart } from "@/contexts/CartContext";
 
@@ -26,6 +28,7 @@ const ProductDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { addToCart } = useCart();
+    const { addToRecentlyViewed } = useRecentlyViewed();
     const [product, setProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -43,7 +46,10 @@ const ProductDetail = () => {
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
-                setProduct({ id: docSnap.id, ...docSnap.data() } as Product);
+                const productData = { id: docSnap.id, ...docSnap.data() } as Product;
+                setProduct(productData);
+                // Track this product as recently viewed
+                addToRecentlyViewed(productData.id);
             } else {
                 toast.error("Product not found");
                 navigate("/shop");
@@ -69,29 +75,38 @@ const ProductDetail = () => {
     };
 
     const handleVariantChange = (variantName: string, option: string) => {
-        setSelectedVariants(prev => ({
-            ...prev,
-            [variantName]: option
-        }));
+        setSelectedVariants(prev => {
+            // If clicking the same option, unselect it (toggle off)
+            if (prev[variantName] === option) {
+                const { [variantName]: removed, ...rest } = prev;
+                return rest;
+            }
+            // Otherwise, select the new option
+            return {
+                ...prev,
+                [variantName]: option
+            };
+        });
     };
 
     const handleAddToCart = () => {
         if (!product) return;
 
-        // Check availability logic if needed (e.g. max stock)
-
-        // Validate variants
+        // Build variant string only from selected variants
         let variantString = "";
         if (product.variants && product.variants.length > 0) {
-            const missingVariants = product.variants.filter(v => !selectedVariants[v.name]);
-            if (missingVariants.length > 0) {
-                toast.error(`Please select ${missingVariants.map(v => v.name).join(", ")}`);
+            // Only include variants that have been selected
+            const selectedOptions = product.variants
+                .filter(v => selectedVariants[v.name])
+                .map(v => selectedVariants[v.name]);
+
+            // Require at least one variant to be selected
+            if (selectedOptions.length === 0) {
+                toast.error("Please select at least one option");
                 return;
             }
-            // Generate deterministic variant string based on variants order
-            variantString = product.variants
-                .map(v => selectedVariants[v.name])
-                .join(" / ");
+
+            variantString = selectedOptions.join(" / ");
         }
 
         addToCart(product, 1, variantString || undefined);
@@ -236,11 +251,10 @@ const ProductDetail = () => {
                                             <span>SKU: {product.sku}</span>
                                         </div>
                                     </div>
-                                    <div className="flex gap-2">
-                                        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-red-500">
-                                            <Heart className="h-5 w-5" />
-                                        </Button>
-                                    </div>
+                                    <WishlistButton
+                                        productId={product.id}
+                                        className="h-10 w-10"
+                                    />
                                 </div>
 
                                 {/* Price Block */}
@@ -367,16 +381,24 @@ const ProductDetail = () => {
                                     <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
                                             <h4 className="font-semibold mb-2">Specifications</h4>
-                                            <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
-                                                <li>Manufacturer: Genuine OEM</li>
-                                                <li>Condition: Brand New</li>
-                                                <li>Warranty: 1 Year</li>
-                                            </ul>
+                                            {product.specifications ? (
+                                                <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                                                    {product.specifications.split('\n').filter(line => line.trim()).map((line, index) => (
+                                                        <li key={index}>{line.trim()}</li>
+                                                    ))}
+                                                </ul>
+                                            ) : (
+                                                <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                                                    <li>Manufacturer: Genuine OEM</li>
+                                                    <li>Condition: Brand New</li>
+                                                    <li>Warranty: 1 Year</li>
+                                                </ul>
+                                            )}
                                         </div>
                                         <div>
                                             <h4 className="font-semibold mb-2">Shipping Info</h4>
                                             <p className="text-muted-foreground">
-                                                Ships within 24 hours. Nationwide delivery available via our trusted partners.
+                                                {product.shippingInfo || "Ships within 24 hours. Nationwide delivery available via our trusted partners."}
                                             </p>
                                         </div>
                                     </div>

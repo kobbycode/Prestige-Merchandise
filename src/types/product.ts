@@ -18,6 +18,8 @@ export interface Product {
     status: 'active' | 'draft' | 'archived';
     featured: boolean;
     tags: string[];
+    specifications?: string; // Additional product specifications (multiline)
+    shippingInfo?: string; // Shipping/delivery information
     createdAt: string;
     updatedAt: string;
     createdBy: string; // Admin UID
@@ -55,6 +57,13 @@ export interface Review {
     comment: string;
     createdAt: string;
     isVerifiedPurchase?: boolean;
+}
+
+export interface WishlistItem {
+    id: string;
+    productId: string;
+    userId?: string; // Optional for guest users
+    addedAt: string;
 }
 
 export type ProductFormData = Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>;

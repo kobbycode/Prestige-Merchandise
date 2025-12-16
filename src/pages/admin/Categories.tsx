@@ -125,9 +125,13 @@ const Categories = () => {
         try {
             await deleteDoc(doc(db, "categories", deleteId));
             toast.success("Category deleted successfully");
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error deleting category:", error);
-            toast.error("Failed to delete category");
+            if (error.code === 'permission-denied') {
+                toast.error("Permission Denied: You must be an admin to delete categories.");
+            } else {
+                toast.error("Failed to delete category: " + (error.message || "Unknown error"));
+            }
         } finally {
             setDeleteId(null);
         }
@@ -339,7 +343,7 @@ const Categories = () => {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDelete} className="bg-destuctive text-destructive-foreground hover:bg-destructive/90">
+                        <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
                             Delete
                         </AlertDialogAction>
                     </AlertDialogFooter>

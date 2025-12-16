@@ -1,89 +1,127 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // =========================
     // Admin collection rules
+    // =========================
     match /admins/{adminId} {
-      // Allow super admins to read and write all admin documents
-      allow read, write: if request.auth != null && 
-        get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role == 'super_admin';
-      
-      // Allow any authenticated user to read admin documents (needed for sending notifications)
-      // This allows customers to query admins when placing orders
-      allow read: if request.auth != null;
-      
-      // Only admins/super_admins can write
-      allow write: if request.auth != null && 
-        get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role in ['super_admin', 'admin'];
-    }
-    
-    // Products collection rules
-    match /products/{productId} {
-      // Public read access for storefront
+
+      // Super admins can read & write all admin docs
+      allow read, write: if request.auth != null &&
+        get(/databases/$(database)/documents/admins/$(request.auth.uid))
+          .data.role == 'super_admin';
+
+      // Any user can read admin docs (needed for checkout notifications)
       allow read: if true;
-      
-      // Allow authenticated users to update stock during checkout
-      allow update: if request.auth != null &&
-        // Only allow updating the 'stock' field
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stock']) &&
-        // Stock can only decrease (prevent fraud)
-        request.resource.data.stock < resource.data.stock;
-      
-      // Only admins can create, delete, and fully modify products
-      allow create, delete: if request.auth != null && 
-        get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role in ['super_admin', 'admin'];
-    }
-    
-    // Categories collection rules
-    match /categories/{categoryId} {
-      // Public read access
-      allow read: if true;
-      
-      // Only authenticated admins can write
-      allow write: if request.auth != null && 
-        get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role in ['super_admin', 'admin'];
-    }
-    
-    // Blog Posts collection rules
-    match /blog_posts/{postId} {
-      allow read: if true;
-      allow write: if request.auth != null && 
-        get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role in ['super_admin', 'admin'];
+
+      // Admins & super admins can write
+      allow write: if request.auth != null &&
+        get(/databases/$(database)/documents/admins/$(request.auth.uid))
+          .data.role in ['super_admin', 'admin'];
     }
 
+    // =========================
+    // Products collection rules
+    // =========================
+    match /products/{productId} {
+
+      // Public read access
+      allow read: if true;
+
+      // Admins can fully manage products
+      allow create, update, delete: if request.auth != null &&
+        get(/databases/$(database)/documents/admins/$(request.auth.uid))
+          .data.role in ['super_admin', 'admin'];
+
+      // Customers (and guests) can only decrease stock during checkout
+      allow update: if 
+        request.resource.data.diff(resource.data)
+          .affectedKeys().hasOnly(['stock']) &&
+        request.resource.data.stock < resource.data.stock;
+    }
+
+    // =========================
+    // Categories collection rules
+    // =========================
+    match /categories/{categoryId} {
+
+      // Public read access
+      allow read: if true;
+
+      // Only admins can write
+      allow write: if request.auth != null &&
+        get(/databases/$(database)/documents/admins/$(request.auth.uid))
+          .data.role in ['super_admin', 'admin'];
+    }
+
+    // =========================
+    // Blog Posts collection rules
+    // =========================
+    match /blog_posts/{postId} {
+      allow read: if true;
+      allow write: if request.auth != null &&
+        get(/databases/$(database)/documents/admins/$(request.auth.uid))
+          .data.role in ['super_admin', 'admin'];
+    }
+
+    // =========================
     // Orders collection rules
+    // =========================
     match /orders/{orderId} {
-      // Allow anyone to create orders (including guests)
+
+      // Anyone can create orders
       allow create: if true;
-      
-      // Allow admins to read, update, and delete orders
-      allow read, update, delete: if request.auth != null && 
-        get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role in ['super_admin', 'admin'];
-      
-      // Allow authenticated customers to read and delete their own orders
-      allow read, delete: if request.auth != null && 
+
+      // Admins can fully manage orders
+      allow read, update, delete: if request.auth != null &&
+        get(/databases/$(database)/documents/admins/$(request.auth.uid))
+          .data.role in ['super_admin', 'admin'];
+
+      // Customers can read & delete their own orders
+      allow read, delete: if request.auth != null &&
         request.auth.uid == resource.data.userId;
     }
 
+    // =========================
+    // Reviews collection rules
+    // =========================
     match /reviews/{reviewId} {
       allow read: if true;
       allow create: if request.auth != null;
-      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null &&
+        resource.data.userId == request.auth.uid;
     }
 
+    // =========================
     // Notifications collection rules
+    // =========================
     match /notifications/{notificationId} {
       allow create: if true;
-      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow read, update, delete: if request.auth != null &&
+        resource.data.userId == request.auth.uid;
     }
-
-    match /users/{userId} {
+    
+    // =========================
+    // Wishlists collection rules
+    // =========================
+    match /wishlists/{userId}/items/{itemId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Default: deny all other access
+    // =========================
+    // Users collection rules
+    // =========================
+    match /users/{userId} {
+      allow read, write: if request.auth != null &&
+        request.auth.uid == userId;
+    }
+
+    // =========================
+    // Default deny
+    // =========================
     match /{document=**} {
       allow read, write: if false;
     }
   }
 }
-

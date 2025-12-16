@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { doc, getDoc, updateDoc, addDoc, collection, serverTimestamp, query, getDocs } from "firebase/firestore";
+import { doc, getDoc, updateDoc, addDoc, collection, serverTimestamp, query, getDocs, arrayUnion, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { Order } from "@/types/order";
 import { initEmailJS, sendOrderStatusUpdate } from "@/lib/emailService";
+import { generateInvoice } from "@/lib/invoiceGenerator";
 
 const OrderDetail = () => {
     const { id } = useParams();
@@ -53,8 +54,22 @@ const OrderDetail = () => {
         setUpdating(true);
         try {
             const docRef = doc(db, "orders", order.id);
-            await updateDoc(docRef, { status: newStatus });
-            setOrder({ ...order, status: newStatus });
+
+            // Create status history entry
+            const statusHistoryEntry = {
+                status: newStatus,
+                timestamp: Timestamp.now(),
+            };
+
+            // Update both status and statusHistory
+            await updateDoc(docRef, {
+                status: newStatus,
+                statusHistory: arrayUnion(statusHistoryEntry)
+            });
+
+            // Update local state with new statusHistory
+            const updatedHistory = [...(order.statusHistory || []), statusHistoryEntry];
+            setOrder({ ...order, status: newStatus, statusHistory: updatedHistory });
 
             // Create in-app notification for the customer (only if they're not an admin)
             if (order.userId && order.userId !== "guest") {
@@ -174,6 +189,10 @@ const OrderDetail = () => {
                             <Printer className="h-4 w-4" />
                             Print Invoice
                         </Button>
+                        <Button variant="outline" className="print:hidden gap-2 w-full sm:w-auto" onClick={() => generateInvoice(order!)}>
+                            <Printer className="h-4 w-4" />
+                            Download PDF
+                        </Button>
                     </div>
                 </div>
                 <div className="w-full md:w-auto md:ml-auto flex items-center justify-between md:justify-start gap-3 print:hidden">
@@ -290,7 +309,7 @@ const OrderDetail = () => {
                     </Card>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

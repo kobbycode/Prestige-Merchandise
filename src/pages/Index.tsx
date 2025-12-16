@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Wrench, Truck, DollarSign, FileText, MessageCircle, ShoppingCart, Package } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import RecentlyViewed from "@/components/product/RecentlyViewed";
 import heroImage from "@/assets/hero-mechanic.jpg";
 
 const Index = () => {
@@ -204,6 +205,9 @@ const Index = () => {
             </div>
           </div>
         </section>
+
+        {/* Recently Viewed Products */}
+        <RecentlyViewed />
 
         {/* Testimonial Section */}
         <section className="py-10 md:py-16 bg-secondary text-secondary-foreground">

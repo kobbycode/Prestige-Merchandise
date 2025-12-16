@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Outlet, useNavigate, useLocation, Link } from "react-router-dom";
+import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,10 +37,16 @@ const AdminLayout = () => {
     const { isAuthenticated, loading, logout, role } = useAuth();
 
     useEffect(() => {
-        if (!loading && !isAuthenticated) {
-            navigate("/admin/login");
+        if (!loading) {
+            if (!isAuthenticated) {
+                navigate("/admin/login");
+            } else if (role !== 'admin' && role !== 'super_admin') {
+                // If user is authenticated as customer but access admin panel, deny access
+                toast.error("Access Denied: You do not have admin permissions.");
+                navigate("/"); // Redirect to shop home
+            }
         }
-    }, [isAuthenticated, loading, navigate]);
+    }, [isAuthenticated, role, loading, navigate]);
 
     const handleLogout = async () => {
         await logout();
@@ -149,7 +156,7 @@ const AdminLayout = () => {
             </aside>
 
             {/* Main Content */}
-            <div className="flex-1 flex flex-col min-w-0">
+            <div className="flex-1 flex flex-col min-w-0 print:block print:h-auto print:overflow-visible">
                 <header className="bg-secondary text-secondary-foreground border-b border-white/10 h-16 flex items-center px-4 justify-between print:hidden">
                     <div className="flex items-center">
                         <Button variant="ghost" size="icon" className="lg:hidden hover:bg-white/10 hover:text-white mr-2" onClick={() => setIsSidebarOpen(true)}>
@@ -163,7 +170,7 @@ const AdminLayout = () => {
                     </div>
                 </header>
 
-                <main className="flex-1 p-4 lg:p-8 overflow-y-auto">
+                <main className="flex-1 p-4 lg:p-8 overflow-y-auto print:overflow-visible print:p-0 print:h-auto">
                     <Outlet />
                 </main>
             </div>

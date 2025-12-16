@@ -1,3 +1,9 @@
+export interface StatusHistoryItem {
+    status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+    timestamp: any;
+    note?: string;
+}
+
 export interface Order {
     id: string;
     userId: string;
@@ -12,6 +18,8 @@ export interface Order {
     };
     amount: number;
     status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+    statusHistory?: StatusHistoryItem[];
     createdAt: any;
     items: any[];
 }
+
