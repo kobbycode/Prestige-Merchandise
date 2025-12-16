@@ -89,10 +89,8 @@ const Contact = () => {
                       </div>
                       <div>
                         <h3 className="font-bold mb-1">Address</h3>
-                        <p className="text-muted-foreground">
-                          Abossey Okai, Near Total Filling Station
-                          <br />
-                          Accra, Ghana
+                        <p className="text-muted-foreground whitespace-pre-line">
+                          {settings.location}
                         </p>
                       </div>
                     </div>
@@ -108,9 +106,9 @@ const Contact = () => {
                       <div>
                         <h3 className="font-bold mb-1">Phone</h3>
                         <p className="text-muted-foreground">
-                          📞 <a href="tel:0541234567" className="hover:text-primary">054 123 4567</a>
+                          📞 <a href={`tel:${settings.phone?.replace(/\s/g, '')}`} className="hover:text-primary">{settings.phone}</a>
                           <br />
-                          📱 WhatsApp: <a href="https://wa.me/233247654321" className="hover:text-primary">024 765 4321</a>
+                          📱 WhatsApp: <a href={`https://wa.me/${settings.whatsappNumber}`} className="hover:text-primary">{settings.whatsappNumber}</a>
                         </p>
                       </div>
                     </div>
@@ -126,8 +124,8 @@ const Contact = () => {
                       <div>
                         <h3 className="font-bold mb-1">Email</h3>
                         <p className="text-muted-foreground">
-                          <a href="mailto:sales@prestigemerchgh.com" className="hover:text-primary">
-                            sales@prestigemerchgh.com
+                          <a href={`mailto:${settings.email}`} className="hover:text-primary">
+                            {settings.email}
                           </a>
                         </p>
                       </div>
@@ -144,9 +142,9 @@ const Contact = () => {
                       <div>
                         <h3 className="font-bold mb-1">Business Hours</h3>
                         <p className="text-muted-foreground">
-                          Monday - Saturday: 8:00 AM - 6:00 PM
+                          Monday - Saturday: {settings.businessHours?.monSat}
                           <br />
-                          Sunday: Closed
+                          Sunday: {settings.businessHours?.sunday}
                         </p>
                       </div>
                     </div>
