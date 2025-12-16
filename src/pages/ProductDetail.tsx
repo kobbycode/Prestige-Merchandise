@@ -348,7 +348,7 @@ const ProductDetail = () => {
 
 
                                 <div className="flex items-center gap-4 mt-6">
-                                    <span className="text-sm font-medium text-muted-foreground mr-2">Share via:</span>
+                                    <span className="text-sm font-medium text-muted-foreground mr-2">Inquire Via:</span>
                                     <a
                                         href={`https://wa.me/${settings.whatsappNumber}?text=I'm interested in ${product.name}: ${window.location.href}`}
                                         target="_blank"
