@@ -57,6 +57,7 @@ export interface Review {
     comment: string;
     createdAt: string;
     isVerifiedPurchase?: boolean;
+    status?: 'pending' | 'approved' | 'rejected';
 }
 
 export interface WishlistItem {

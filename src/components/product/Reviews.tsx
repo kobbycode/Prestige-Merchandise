@@ -35,6 +35,7 @@ const Reviews = ({ productId }: ReviewsProps) => {
             const q = query(
                 reviewsRef,
                 where("productId", "==", productId),
+                where("status", "==", "approved"),
                 orderBy("createdAt", "desc")
             );
 
@@ -73,14 +74,16 @@ const Reviews = ({ productId }: ReviewsProps) => {
                 userName: user?.displayName || user?.email?.split('@')[0] || "Customer",
                 rating,
                 comment,
-                createdAt: new Date().toISOString(), // Use ISO string for client consistency
-                // We'll trust client date for now, or use serverTimestamp if strictly needed
-                isVerifiedPurchase: false // Placeholder for future logic
+                createdAt: new Date().toISOString(),
+                isVerifiedPurchase: false,
+                status: 'pending' // Default status
             };
 
             await addDoc(collection(db, "reviews"), newReview);
 
-            toast.success("Review submitted successfully!");
+            await addDoc(collection(db, "reviews"), newReview);
+
+            toast.success("Review submitted! It will appear after approval.");
             setRating(0);
             setComment("");
             fetchReviews(); // Refresh list

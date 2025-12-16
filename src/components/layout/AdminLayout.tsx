@@ -13,7 +13,7 @@ import {
     Settings,
     Shield,
     FolderTree,
-
+    Star,
     ShoppingBag
 } from "lucide-react";
 import { NotificationDropdown } from "../notifications/NotificationDropdown";
@@ -66,6 +66,7 @@ const AdminLayout = () => {
         { icon: ShoppingBag, label: "Orders", path: "/admin/orders" },
         { icon: Package, label: "Products", path: "/admin/products" },
         { icon: FolderTree, label: "Categories", path: "/admin/categories" },
+        { icon: Star, label: "Reviews", path: "/admin/reviews" },
         { icon: FileText, label: "Blog Posts", path: "/admin/blog" },
         // Only show Admins management to super_admin
         ...(role === 'super_admin' ? [{ icon: Shield, label: "Manage Admins", path: "/admin/admins" }] : []),

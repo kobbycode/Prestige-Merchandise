@@ -25,6 +25,7 @@ import Admins from "./pages/admin/Admins";
 import Profile from "./pages/admin/Profile";
 import ProductForm from "./pages/admin/ProductForm";
 import AdminOrders from "./pages/admin/AdminOrders";
+import AdminReviews from "./pages/admin/Reviews";
 import OrderDetail from "./pages/admin/OrderDetail";
 import AdminLayout from "./components/layout/AdminLayout";
 import CustomerProfile from "./pages/customer/Profile";
@@ -81,6 +82,7 @@ const App = () => (
                     <Route path="categories" element={<Categories />} />
                     <Route path="orders" element={<AdminOrders />} />
                     <Route path="orders/:id" element={<OrderDetail />} />
+                    <Route path="reviews" element={<AdminReviews />} />
                     <Route path="blog" element={<BlogAdmin />} />
                     <Route path="blog/new" element={<BlogPostForm />} />
                     <Route path="blog/:id/edit" element={<BlogPostForm />} />
