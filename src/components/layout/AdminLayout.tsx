@@ -14,7 +14,8 @@ import {
     Shield,
     FolderTree,
     Star,
-    ShoppingBag
+    ShoppingBag,
+    User
 } from "lucide-react";
 import { NotificationDropdown } from "../notifications/NotificationDropdown";
 import logo from "@/assets/logo.png";
@@ -70,7 +71,8 @@ const AdminLayout = () => {
         { icon: FileText, label: "Blog Posts", path: "/admin/blog" },
         // Only show Admins management to super_admin
         ...(role === 'super_admin' ? [{ icon: Shield, label: "Manage Admins", path: "/admin/admins" }] : []),
-        { icon: Settings, label: "Profile", path: "/admin/profile" },
+        { icon: Settings, label: "Settings", path: "/admin/settings" },
+        { icon: User, label: "Profile", path: "/admin/profile" },
     ];
 
     return (

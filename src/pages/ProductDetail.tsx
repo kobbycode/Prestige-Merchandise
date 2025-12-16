@@ -23,12 +23,15 @@ import WishlistButton from "@/components/wishlist/WishlistButton";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { toast } from "sonner";
 import { useCart } from "@/contexts/CartContext";
+import { Facebook, Share2 } from "lucide-react";
+import { useStoreSettings } from "@/hooks/useStoreSettings";
 
 const ProductDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { addToCart } = useCart();
     const { addToRecentlyViewed } = useRecentlyViewed();
+    const { settings } = useStoreSettings();
     const [product, setProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -110,6 +113,11 @@ const ProductDetail = () => {
         }
 
         addToCart(product, 1, variantString || undefined);
+    };
+
+    const handleCopyLink = () => {
+        navigator.clipboard.writeText(window.location.href);
+        toast.success("Link copied to clipboard!");
     };
 
     if (loading) {
@@ -311,17 +319,43 @@ const ProductDetail = () => {
                                     <ShoppingCart className="h-5 w-5 mr-2" />
                                     {product.stock > 0 ? "Add to Cart" : "Out of Stock"}
                                 </Button>
-                                <a
-                                    href={`https://wa.me/233247654321?text=I'm interested in ${product.name}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="block"
-                                >
-                                    <Button variant="outline" className="w-full h-12 text-base border-primary/20 hover:bg-primary/5 hover:text-primary transition-colors" size="lg">
-                                        <MessageCircle className="h-5 w-5 mr-2" />
-                                        Inquire via WhatsApp
+
+
+                                <div className="grid grid-cols-2 gap-3">
+                                    <a
+                                        href={`https://wa.me/${settings.whatsappNumber}?text=I'm interested in ${product.name}: ${window.location.href}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="col-span-2"
+                                    >
+                                        <Button variant="outline" className="w-full h-12 text-base border-primary/20 hover:bg-green-50 hover:text-green-600 transition-colors">
+                                            <MessageCircle className="h-5 w-5 mr-2" />
+                                            WhatsApp
+                                        </Button>
+                                    </a>
+
+                                    {settings.facebookUrl && (
+                                        <a
+                                            href={settings.facebookUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            <Button variant="outline" className="w-full h-12 border-primary/20 hover:bg-blue-50 hover:text-blue-600">
+                                                <Facebook className="h-5 w-5 mr-2" />
+                                                Facebook
+                                            </Button>
+                                        </a>
+                                    )}
+
+                                    <Button
+                                        variant="outline"
+                                        className={`w-full h-12 border-primary/20 hover:bg-gray-50 ${!settings.facebookUrl ? 'col-span-2' : ''}`}
+                                        onClick={handleCopyLink}
+                                    >
+                                        <Share2 className="h-5 w-5 mr-2" />
+                                        Copy Link
                                     </Button>
-                                </a>
+                                </div>
                             </div>
 
                             {/* Trust Signals */}
@@ -410,10 +444,10 @@ const ProductDetail = () => {
                         </Tabs>
                     </div>
                 </div>
-            </main>
+            </main >
 
             <Footer />
-        </div>
+        </div >
     );
 };
 
