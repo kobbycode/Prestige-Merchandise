@@ -1,8 +1,45 @@
 import { Link } from "react-router-dom";
-
+import { useEffect, useState } from "react";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { StoreSettings } from "@/types/settings";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const [settings, setSettings] = useState<StoreSettings>({
+    location: "Abossey Okai, Near Total Filling Station",
+    phone: "054 123 4567",
+    whatsappNumber: "024 765 4321",
+    email: "sales@prestigemerchgh.com",
+    businessHours: {
+      monSat: "8am - 6pm",
+      sunday: "Closed"
+    }
+  });
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const docRef = doc(db, "settings", "general");
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data() as StoreSettings;
+          setSettings(prev => ({
+            ...prev,
+            ...data,
+            businessHours: {
+              ...prev.businessHours,
+              ...data.businessHours
+            }
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching footer settings:", error);
+      }
+    };
+
+    fetchSettings();
+  }, []);
 
   return (
     <footer className="bg-secondary text-secondary-foreground mt-auto">
@@ -49,16 +86,16 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-bold mb-4 text-primary-foreground">Contact Us</h3>
             <ul className="space-y-2 text-sm">
-              <li>📍 Abossey Okai, Near Total Filling Station</li>
-              <li>📞 054 123 4567</li>
-              <li>📱 WhatsApp: 024 765 4321</li>
-              <li>📧 sales@prestigemerchgh.com</li>
+              <li>📍 {settings.location}</li>
+              <li>📞 {settings.phone}</li>
+              <li>📱 WhatsApp: {settings.whatsappNumber}</li>
+              <li>📧 {settings.email}</li>
               <li className="pt-2">
                 <strong>Business Hours:</strong>
                 <br />
-                Mon-Sat: 8am - 6pm
+                Mon-Sat: {settings.businessHours?.monSat}
                 <br />
-                Sunday: Closed
+                Sunday: {settings.businessHours?.sunday}
               </li>
             </ul>
           </div>

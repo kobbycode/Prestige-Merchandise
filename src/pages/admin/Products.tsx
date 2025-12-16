@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Search, Pencil, Trash2, Package } from "lucide-react";
+import { FaFacebook } from "react-icons/fa";
 import { toast } from "sonner";
 
 const Products = () => {
@@ -196,6 +197,20 @@ const Products = () => {
                                             </div>
 
                                             <div className="flex gap-1">
+                                                <a
+                                                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${window.location.origin}/product/${product.id}`)}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                >
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-8"
+                                                        title="Share to Facebook"
+                                                    >
+                                                        <FaFacebook className="h-4 w-4 text-[#1877F2]" />
+                                                    </Button>
+                                                </a>
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
@@ -276,6 +291,19 @@ const Products = () => {
                                                 <TableCell>{getStatusBadge(product.status)}</TableCell>
                                                 <TableCell className="text-right">
                                                     <div className="flex items-center justify-end gap-2">
+                                                        <a
+                                                            href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${window.location.origin}/product/${product.id}`)}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                        >
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                title="Share to Facebook"
+                                                            >
+                                                                <FaFacebook className="h-4 w-4 text-[#1877F2]" />
+                                                            </Button>
+                                                        </a>
                                                         <Button
                                                             variant="ghost"
                                                             size="sm"
@@ -299,7 +327,8 @@ const Products = () => {
                                 </Table>
                             </div>
                         </div>
-                    )}
+                    )
+                    }
                 </CardContent>
             </Card>
 
@@ -317,7 +346,7 @@ const Products = () => {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </div>
+        </div >
     );
 };
 
