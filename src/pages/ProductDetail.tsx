@@ -359,18 +359,16 @@ const ProductDetail = () => {
                                         </Button>
                                     </a>
 
-                                    {settings.facebookUrl && (
-                                        <a
-                                            href={settings.facebookUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                        >
-                                            <Button variant="outline" className="w-full h-12 border-primary/20 hover:bg-blue-50 hover:text-blue-600">
-                                                <Facebook className="h-5 w-5 mr-2" />
-                                                Facebook
-                                            </Button>
-                                        </a>
-                                    )}
+                                    <a
+                                        href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        <Button variant="outline" className="w-full h-12 border-primary/20 hover:bg-blue-50 hover:text-blue-600">
+                                            <Facebook className="h-5 w-5 mr-2" />
+                                            Share
+                                        </Button>
+                                    </a>
 
                                     <Button
                                         variant="outline"
