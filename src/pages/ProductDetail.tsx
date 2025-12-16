@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import { useCart } from "@/contexts/CartContext";
 import { Facebook, Share2 } from "lucide-react";
 import { useStoreSettings } from "@/hooks/useStoreSettings";
+import { Helmet } from "react-helmet-async";
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -143,6 +144,30 @@ const ProductDetail = () => {
 
     return (
         <div className="flex flex-col min-h-screen bg-background text-foreground">
+            {product && (
+                <Helmet>
+                    <title>{product.name} | The Prestige Merchandise</title>
+                    <meta name="description" content={product.description.substring(0, 160)} />
+
+                    {/* Open Graph / Facebook */}
+                    <meta property="og:type" content="product" />
+                    <meta property="og:url" content={window.location.href} />
+                    <meta property="og:title" content={`${product.name} - GH₵${product.price.toFixed(2)}`} />
+                    <meta property="og:description" content={product.description.substring(0, 160)} />
+                    {product.images && product.images.length > 0 && (
+                        <meta property="og:image" content={product.images[0]} />
+                    )}
+
+                    {/* Twitter */}
+                    <meta name="twitter:card" content="summary_large_image" />
+                    <meta name="twitter:url" content={window.location.href} />
+                    <meta name="twitter:title" content={`${product.name} - GH₵${product.price.toFixed(2)}`} />
+                    <meta name="twitter:description" content={product.description.substring(0, 160)} />
+                    {product.images && product.images.length > 0 && (
+                        <meta name="twitter:image" content={product.images[0]} />
+                    )}
+                </Helmet>
+            )}
             <Header />
 
             <main className="flex-1">
