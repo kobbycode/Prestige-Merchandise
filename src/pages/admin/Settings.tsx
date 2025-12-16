@@ -16,13 +16,13 @@ const Settings = () => {
     // Form State
     const [settings, setSettings] = useState<StoreSettings>({
         facebookUrl: "",
-        whatsappNumber: "",
-        location: "",
-        phone: "",
-        email: "",
+        whatsappNumber: "0247654321",
+        location: "Abossey Okai, Near Total Filling Station",
+        phone: "054 123 4567",
+        email: "sales@prestigemerchgh.com",
         businessHours: {
-            monSat: "",
-            sunday: ""
+            monSat: "8am - 6pm",
+            sunday: "Closed"
         }
     });
 

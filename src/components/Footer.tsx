@@ -1,45 +1,9 @@
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
-import { StoreSettings } from "@/types/settings";
+import { useStoreSettings } from "@/hooks/useStoreSettings";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  const [settings, setSettings] = useState<StoreSettings>({
-    location: "Abossey Okai, Near Total Filling Station",
-    phone: "054 123 4567",
-    whatsappNumber: "024 765 4321",
-    email: "sales@prestigemerchgh.com",
-    businessHours: {
-      monSat: "8am - 6pm",
-      sunday: "Closed"
-    }
-  });
-
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const docRef = doc(db, "settings", "general");
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data() as StoreSettings;
-          setSettings(prev => ({
-            ...prev,
-            ...data,
-            businessHours: {
-              ...prev.businessHours,
-              ...data.businessHours
-            }
-          }));
-        }
-      } catch (error) {
-        console.error("Error fetching footer settings:", error);
-      }
-    };
-
-    fetchSettings();
-  }, []);
+  const { settings } = useStoreSettings();
 
   return (
     <footer className="bg-secondary text-secondary-foreground mt-auto">
