@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/product/(.*)",
-      "destination": "/api/product-meta"
+      "destination": "/api/product-meta?id=$1"
     },
     {
       "source": "/(.*)",
