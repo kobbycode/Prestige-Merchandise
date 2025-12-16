@@ -19,7 +19,7 @@ const Contact = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Simple validation
     if (!formData.name || !formData.message) {
       toast({
@@ -59,7 +59,7 @@ const Contact = () => {
             <div>
               <h2 className="text-3xl font-bold mb-6">Get in Touch</h2>
               <p className="text-lg text-muted-foreground mb-8">
-                Have questions about our products or services? We'd love to hear from you. 
+                Have questions about our products or services? We'd love to hear from you.
                 Send us a message and we'll respond as soon as possible.
               </p>
 
@@ -138,7 +138,7 @@ const Contact = () => {
               </div>
 
               {/* Quick WhatsApp Button */}
-              <a 
+              <a
                 href="https://wa.me/233247654321?text=Hello, I'd like to inquire about your auto parts"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -226,7 +226,7 @@ const Contact = () => {
             <Card className="shadow-card overflow-hidden">
               <div className="aspect-video w-full">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3970.7634474359706!2d-0.2294476!3d5.6037168!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNcKwMzYnMTMuNCJOIDDCsDEzJzQ2LjAiVw!5e0!3m2!1sen!2sgh!4v1234567890"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3970.9785673620366!2d-0.23194468523385496!3d5.583348195952327!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfdf998495c024dd%3A0xe5c1c46395701c95!2sAbossey%20Okai%20Spare%20Parts!5e0!3m2!1sen!2sgh!4v1710593456789!5m2!1sen!2sgh"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
