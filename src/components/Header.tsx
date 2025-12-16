@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, Phone, MessageCircle, User, LogOut, ShoppingBag, Search, Heart } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { FaWhatsapp } from "react-icons/fa";
+
 import logo from "@/assets/logo.png";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
@@ -196,14 +196,7 @@ const Header = () => {
               )}
             </Button>
 
-            <a
-              href="https://wa.me/233247654321"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-green-500 hover:scale-110 transition-transform"
-            >
-              <FaWhatsapp className="h-6 w-6 md:h-8 md:w-8" />
-            </a>
+
 
             {/* Mobile Menu Button */}
             <button

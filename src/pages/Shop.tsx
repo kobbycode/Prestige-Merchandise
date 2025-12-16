@@ -24,10 +24,13 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Filter as FilterIcon } from "lucide-react";
 import WishlistButton from "@/components/wishlist/WishlistButton";
 
+import { useStoreSettings } from "@/hooks/useStoreSettings";
+
 const Shop = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { addToCart } = useCart();
+  const { settings } = useStoreSettings();
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [priceRange, setPriceRange] = useState({ min: "", max: "" });
@@ -334,7 +337,7 @@ const Shop = () => {
                                 Add to Cart
                               </Button>
                               <a
-                                href={`https://wa.me/233247654321?text=I'm interested in ${product.name}`}
+                                href={`https://wa.me/${settings.whatsappNumber}?text=I am interested in this product: ${window.location.origin}/product/${product.id}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="block"

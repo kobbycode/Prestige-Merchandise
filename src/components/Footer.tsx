@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
-import { Facebook, Instagram } from "lucide-react";
-import { FaFacebookF, FaInstagram, FaTiktok } from "react-icons/fa";
+
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -8,7 +7,7 @@ const Footer = () => {
   return (
     <footer className="bg-secondary text-secondary-foreground mt-auto">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Quick Links */}
           <div>
             <h3 className="text-lg font-bold mb-4 text-primary-foreground">Quick Links</h3>
@@ -62,40 +61,6 @@ const Footer = () => {
                 Sunday: Closed
               </li>
             </ul>
-          </div>
-
-          {/* Social Media */}
-          <div>
-            <h3 className="text-lg font-bold mb-4 text-primary-foreground">Follow Us</h3>
-            <div className="flex gap-4">
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-3 bg-primary/10 rounded-full hover:bg-primary hover:text-primary-foreground transition-colors duration-300 ease-in-out transform hover:scale-110"
-                aria-label="Facebook"
-              >
-                <FaFacebookF className="h-6 w-6" />
-              </a>
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-3 bg-primary/10 rounded-full hover:bg-primary hover:text-primary-foreground transition-colors duration-300 ease-in-out transform hover:scale-110"
-                aria-label="Instagram"
-              >
-                <FaInstagram className="h-6 w-6" />
-              </a>
-              <a
-                href="https://tiktok.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-3 bg-primary/10 rounded-full hover:bg-primary hover:text-primary-foreground transition-colors duration-300 ease-in-out transform hover:scale-110"
-                aria-label="TikTok"
-              >
-                <FaTiktok className="h-6 w-6" />
-              </a>
-            </div>
           </div>
         </div>
 

@@ -23,9 +23,10 @@ import WishlistButton from "@/components/wishlist/WishlistButton";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { toast } from "sonner";
 import { useCart } from "@/contexts/CartContext";
-import { Facebook, Share2 } from "lucide-react";
+import { Share2 } from "lucide-react";
 import { useStoreSettings } from "@/hooks/useStoreSettings";
 import { Helmet } from "react-helmet-async";
+import { FaWhatsapp, FaFacebook, FaLink } from "react-icons/fa";
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -346,38 +347,37 @@ const ProductDetail = () => {
                                 </Button>
 
 
-                                <div className="grid grid-cols-2 gap-3">
+                                <div className="flex items-center gap-4 mt-6">
+                                    <span className="text-sm font-medium text-muted-foreground mr-2">Share via:</span>
                                     <a
                                         href={`https://wa.me/${settings.whatsappNumber}?text=I'm interested in ${product.name}: ${window.location.href}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="col-span-2"
+                                        className="transition-transform hover:scale-110"
+                                        title="Share on WhatsApp"
                                     >
-                                        <Button variant="outline" className="w-full h-12 text-base border-primary/20 hover:bg-green-50 hover:text-green-600 transition-colors">
-                                            <MessageCircle className="h-5 w-5 mr-2" />
-                                            WhatsApp
-                                        </Button>
+                                        <FaWhatsapp size={32} color="#25D366" />
                                     </a>
 
                                     <a
                                         href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
+                                        className="transition-transform hover:scale-110"
+                                        title="Share on Facebook"
                                     >
-                                        <Button variant="outline" className="w-full h-12 border-primary/20 hover:bg-blue-50 hover:text-blue-600">
-                                            <Facebook className="h-5 w-5 mr-2" />
-                                            Share
-                                        </Button>
+                                        <FaFacebook size={32} color="#1877F2" />
                                     </a>
 
-                                    <Button
-                                        variant="outline"
-                                        className={`w-full h-12 border-primary/20 hover:bg-gray-50 ${!settings.facebookUrl ? 'col-span-2' : ''}`}
+                                    <button
                                         onClick={handleCopyLink}
+                                        className="transition-transform hover:scale-110"
+                                        title="Copy Link"
                                     >
-                                        <Share2 className="h-5 w-5 mr-2" />
-                                        Copy Link
-                                    </Button>
+                                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-700">
+                                            <FaLink size={16} />
+                                        </div>
+                                    </button>
                                 </div>
                             </div>
 
