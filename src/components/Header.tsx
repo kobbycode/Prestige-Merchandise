@@ -51,10 +51,12 @@ const Header = () => {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 md:gap-3 hover:opacity-90 transition-opacity">
-            <img src={logo} alt="Prestige Merchandise" className="h-12 w-auto md:h-20 transition-all" />
+            <div className="bg-white p-1 rounded-md">
+              <img src={logo} alt="Prestige Merchandise" className="h-12 w-auto md:h-20 transition-all" />
+            </div>
             <div className="hidden sm:block">
               <h1 className="text-lg md:text-xl font-bold text-secondary-foreground">The Prestige Merchandise</h1>
-              <p className="text-[10px] md:text-xs text-secondary-foreground/80">Genuine Auto Parts</p>
+              <p className="text-left text-[10px] md:text-xs text-secondary-foreground/80">Genuine Auto Parts</p>
             </div>
           </Link>
 
@@ -77,7 +79,7 @@ const Header = () => {
                 key={link.to}
                 to={link.to}
                 className={`font-medium transition-colors ${location.pathname === link.to
-                  ? "text-white font-bold"
+                  ? "text-yellow-400 font-bold"
                   : "text-secondary-foreground/80 hover:text-white"
                   }`}
               >
