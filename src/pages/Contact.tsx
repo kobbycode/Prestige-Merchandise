@@ -8,13 +8,30 @@ import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
+import { useStoreSettings } from "@/hooks/useStoreSettings";
+import { useEffect } from "react";
+
 const Contact = () => {
   const { toast } = useToast();
+  const { settings } = useStoreSettings();
+  const [locations, setLocations] = useState<string[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState("");
+
+  useEffect(() => {
+    if (settings.location) {
+      const locs = settings.location.split('/').map(l => l.trim()).filter(Boolean);
+      setLocations(locs);
+      if (locs.length > 0) {
+        setSelectedLocation(locs[0]);
+      }
+    }
+  }, [settings.location]);
+
   const [formData, setFormData] = useState({
     name: "",
+    message: "",
     email: "",
-    phone: "",
-    message: ""
+    phone: ""
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -223,23 +240,52 @@ const Contact = () => {
           {/* Google Map */}
           <div className="mt-16">
             <h2 className="text-3xl font-bold mb-6 text-center">Find Us on the Map</h2>
+
+            {locations.length > 1 && (
+              <div className="flex justify-center gap-4 mb-6 flex-wrap">
+                {locations.map((loc, index) => (
+                  <Button
+                    key={index}
+                    variant={selectedLocation === loc ? "default" : "outline"}
+                    onClick={() => setSelectedLocation(loc)}
+                    className="min-w-[120px]"
+                  >
+                    <MapPin className="mr-2 h-4 w-4" />
+                    {loc.split(',')[0]} {/* Show first part of address as label */}
+                  </Button>
+                ))}
+              </div>
+            )}
+
             <Card className="shadow-card overflow-hidden">
-              <div className="aspect-video w-full">
+              <div className="aspect-video w-full relative">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3970.9785673620366!2d-0.23194468523385496!3d5.583348195952327!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfdf998495c024dd%3A0xe5c1c46395701c95!2sAbossey%20Okai%20Spare%20Parts!5e0!3m2!1sen!2sgh!4v1710593456789!5m2!1sen!2sgh"
+                  key={selectedLocation}
+                  src={`https://maps.google.com/maps?q=${encodeURIComponent(selectedLocation.trim())}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
                   allowFullScreen
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
-                  title="The Prestige Merchandise Location"
+                  title={`Map showing ${selectedLocation}`}
                 />
               </div>
             </Card>
-            <p className="text-center text-muted-foreground mt-4">
-              Located at Abossey Okai, near Total Filling Station
-            </p>
+            <div className="flex flex-col items-center mt-4 gap-2">
+              <p className="text-center text-muted-foreground">
+                Showing location: <span className="font-medium text-foreground">{selectedLocation}</span>
+              </p>
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedLocation)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button variant="link" className="text-primary gap-2">
+                  Get Directions <div className="h-4 w-4 ml-1">↗</div>
+                </Button>
+              </a>
+            </div>
           </div>
         </div>
       </main>
