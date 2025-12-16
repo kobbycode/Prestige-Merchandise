@@ -1,26 +1,26 @@
-const admin = require('firebase-admin');
-const fs = require('fs');
-const path = require('path');
+import admin from 'firebase-admin';
+import { getApps, initializeApp, cert } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
 
 // Initialize Firebase Admin only once
-if (!admin.apps.length) {
+if (!getApps().length) {
     try {
         const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT || '{}');
         if (Object.keys(serviceAccount).length > 0) {
-            admin.initializeApp({
-                credential: admin.credential.cert(serviceAccount)
+            initializeApp({
+                credential: cert(serviceAccount)
             });
         } else {
             console.warn("FIREBASE_SERVICE_ACCOUNT env var missing or empty. Firestore fetch may fail.");
-            admin.initializeApp();
+            initializeApp();
         }
     } catch (e) {
         console.error("Error parsing FIREBASE_SERVICE_ACCOUNT", e);
-        admin.initializeApp();
+        initializeApp();
     }
 }
 
-const db = admin.firestore();
+const db = getFirestore();
 
 // Helper to get the base HTML
 async function getIndexHtml(siteUrl) {
@@ -47,7 +47,7 @@ async function getIndexHtml(siteUrl) {
 </html>`;
 }
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
     const { id } = req.query;
     const productId = id;
 
