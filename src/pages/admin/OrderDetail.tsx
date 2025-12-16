@@ -169,10 +169,7 @@ const OrderDetail = () => {
                     <ArrowLeft className="h-4 w-4" />
                 </Button>
                 <div className="flex-1 w-full">
-                    <div className="hidden print:block mb-6">
-                        <h1 className="text-3xl font-bold">INVOICE</h1>
-                        <p className="text-muted-foreground">Prestige Merch</p>
-                    </div>
+
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div>
                             <h1 className="text-2xl font-bold tracking-tight print:text-xl">Order Details</h1>
@@ -185,10 +182,7 @@ const OrderDetail = () => {
                                 </span>
                             </p>
                         </div>
-                        <Button variant="outline" className="print:hidden gap-2 w-full sm:w-auto" onClick={() => window.print()}>
-                            <Printer className="h-4 w-4" />
-                            Print Invoice
-                        </Button>
+
                         <Button variant="outline" className="print:hidden gap-2 w-full sm:w-auto" onClick={() => generateInvoice(order!)}>
                             <Printer className="h-4 w-4" />
                             Download PDF

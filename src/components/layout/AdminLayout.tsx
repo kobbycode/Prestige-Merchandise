@@ -74,26 +74,7 @@ const AdminLayout = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 flex">
-            <style>{`
-                @media print {
-                    body, #root, .min-h-screen {
-                        height: auto !important;
-                        overflow: visible !important;
-                        display: block !important;
-                    }
-                    aside, header, button.print\\:hidden {
-                        display: none !important;
-                    }
-                    main {
-                        height: auto !important;
-                        overflow: visible !important;
-                        display: block !important;
-                        width: 100% !important;
-                        padding: 0 !important;
-                        margin: 0 !important;
-                    }
-                }
-            `}</style>
+
             {/* Mobile Sidebar Overlay */}
             <div
                 className={cn(
@@ -176,7 +157,7 @@ const AdminLayout = () => {
             </aside>
 
             {/* Main Content */}
-            <div className="flex-1 flex flex-col min-w-0 print:block print:h-auto print:overflow-visible">
+            <div className="flex-1 flex flex-col min-w-0">
                 <header className="bg-secondary text-secondary-foreground border-b border-white/10 h-16 flex items-center px-4 justify-between print:hidden">
                     <div className="flex items-center">
                         <Button variant="ghost" size="icon" className="lg:hidden hover:bg-white/10 hover:text-white mr-2" onClick={() => setIsSidebarOpen(true)}>
@@ -190,7 +171,7 @@ const AdminLayout = () => {
                     </div>
                 </header>
 
-                <main className="flex-1 p-4 lg:p-8 overflow-y-auto print:overflow-visible print:p-0 print:h-auto">
+                <main className="flex-1 p-4 lg:p-8 overflow-y-auto">
                     <Outlet />
                 </main>
             </div>
