@@ -74,6 +74,26 @@ const AdminLayout = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 flex">
+            <style>{`
+                @media print {
+                    body, #root, .min-h-screen {
+                        height: auto !important;
+                        overflow: visible !important;
+                        display: block !important;
+                    }
+                    aside, header, button.print\\:hidden {
+                        display: none !important;
+                    }
+                    main {
+                        height: auto !important;
+                        overflow: visible !important;
+                        display: block !important;
+                        width: 100% !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                    }
+                }
+            `}</style>
             {/* Mobile Sidebar Overlay */}
             <div
                 className={cn(

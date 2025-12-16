@@ -27,6 +27,7 @@ export function generateInvoice(order: Order): void {
     doc.setTextColor(mutedColor);
     doc.text("Abossey Okai, Accra, Ghana", 20, 40);
     doc.text("Phone: +233 247 654 321", 20, 45);
+    doc.text("Email: support@prestigemerch.com", 20, 50);
 
     // Invoice Details (right side)
     doc.setTextColor(textColor);
