@@ -26,7 +26,7 @@ import { useCart } from "@/contexts/CartContext";
 import { Share2 } from "lucide-react";
 import { useStoreSettings } from "@/hooks/useStoreSettings";
 import { Helmet } from "react-helmet-async";
-import { FaWhatsapp, FaFacebook, FaLink } from "react-icons/fa";
+import { FaWhatsapp, FaLink } from "react-icons/fa";
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -359,15 +359,7 @@ const ProductDetail = () => {
                                         <FaWhatsapp size={32} color="#25D366" />
                                     </a>
 
-                                    <a
-                                        href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="transition-transform hover:scale-110"
-                                        title="Share on Facebook"
-                                    >
-                                        <FaFacebook size={32} color="#1877F2" />
-                                    </a>
+
 
                                     <button
                                         onClick={handleCopyLink}
