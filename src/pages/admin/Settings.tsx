@@ -131,6 +131,20 @@ const Settings = () => {
                                 onChange={(e) => handleChange('facebookUrl', e.target.value)}
                             />
                         </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="whatsapp" className="flex items-center gap-2">
+                                <Phone className="h-4 w-4 text-green-600" />
+                                WhatsApp Number
+                            </Label>
+                            <Input
+                                id="whatsapp"
+                                placeholder="233247654321"
+                                value={settings.whatsappNumber}
+                                onChange={(e) => handleChange('whatsappNumber', e.target.value)}
+                            />
+                            <p className="text-xs text-muted-foreground">International format without '+' (e.g., 233...)</p>
+                        </div>
                     </CardContent>
                 </Card>
 
@@ -157,19 +171,6 @@ const Settings = () => {
                                 />
                             </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="whatsapp" className="flex items-center gap-2">
-                                    <Phone className="h-4 w-4 text-green-600" />
-                                    WhatsApp Number
-                                </Label>
-                                <Input
-                                    id="whatsapp"
-                                    placeholder="233247654321"
-                                    value={settings.whatsappNumber}
-                                    onChange={(e) => handleChange('whatsappNumber', e.target.value)}
-                                />
-                                <p className="text-xs text-muted-foreground">International format without '+'</p>
-                            </div>
                         </div>
 
                         <div className="space-y-2">
