@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -26,9 +28,10 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Loader2, ArrowLeft, ShieldCheck } from "lucide-react";
+import { Loader2, ArrowLeft, ShieldCheck, CreditCard, Banknote } from "lucide-react";
 import { initEmailJS, sendOrderConfirmation } from "@/lib/emailService";
 import { checkAndAlertLowStock } from "@/lib/stockMonitor";
+import { usePaystackPayment } from "react-paystack";
 
 const checkoutSchema = z.object({
     firstName: z.string().min(2, "First name is required"),
@@ -45,11 +48,12 @@ type CheckoutValues = z.infer<typeof checkoutSchema>;
 
 const Checkout = () => {
     const navigate = useNavigate();
-    const { formatPrice, currency, exchangeRate } = useCurrency();
-    const location = useLocation(); // Add useLocation
+    const { formatPrice, currency, exchangeRate, convertPrice } = useCurrency();
+    const location = useLocation();
     const { items, cartTotal, clearCart } = useCart();
     const { user } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState<"cod" | "paystack">("cod");
 
     const form = useForm<CheckoutValues>({
         resolver: zodResolver(checkoutSchema),
@@ -65,14 +69,13 @@ const Checkout = () => {
         },
     });
 
-    // Initialize EmailJS on component mount
+    // Initialize EmailJS
     useState(() => {
         initEmailJS();
     });
 
     const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
 
-    // Restore form data from redirect if available
     useEffect(() => {
         if (location.state?.checkoutData) {
             const data = location.state.checkoutData;
@@ -87,10 +90,8 @@ const Checkout = () => {
         }
     }, [location.state, form]);
 
-    // Fetch user details and addresses
     useEffect(() => {
         if (user) {
-            // Pred-fill email if not already filled by checkoutData
             if (user.email && !form.getValues("email")) {
                 form.setValue("email", user.email);
             }
@@ -106,12 +107,8 @@ const Checkout = () => {
                     snapshot.forEach((doc) => {
                         addressList.push({ id: doc.id, ...doc.data() });
                     });
-                    // Sort default first
                     addressList.sort((a, b) => (a.isDefault === b.isDefault ? 0 : a.isDefault ? -1 : 1));
-
                     setSavedAddresses(addressList);
-
-                    // Auto-fill default address ONLY if form is empty (don't overwrite persisted data)
                     const defaultAddr = addressList.find(a => a.isDefault);
                     if (defaultAddr && !form.getValues("firstName")) {
                         fillFormWithAddress(defaultAddr);
@@ -136,6 +133,33 @@ const Checkout = () => {
     const [showAuthDialog, setShowAuthDialog] = useState(false);
     const [pendingData, setPendingData] = useState<CheckoutValues | null>(null);
 
+    // Calculate total in GHS for Paystack (Paystack expects amount in pesewas)
+    // If currency is USD, convert to GHS first
+    const totalInGhs = currency === 'GHS' ? cartTotal : cartTotal * exchangeRate;
+    const paystackAmount = Math.round(totalInGhs * 100);
+
+    const paystackConfig = {
+        reference: (new Date()).getTime().toString(),
+        email: form.getValues("email"),
+        amount: paystackAmount, // Amount is in kobo (pesewas)
+        publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || '',
+        currency: 'GHS',
+    };
+
+    const initializePayment = usePaystackPayment(paystackConfig);
+
+    const onSuccess = (reference: any) => {
+        // Implementation for whatever you want to do with reference and after success call.
+        console.log(reference);
+        const data = form.getValues();
+        processOrder(data, "prepaid", reference.reference);
+    };
+
+    const onClose = () => {
+        toast.info("Payment cancelled");
+        setIsSubmitting(false);
+    };
+
     const onSubmit = async (data: CheckoutValues) => {
         if (items.length === 0) {
             toast.error("Your cart is empty");
@@ -143,19 +167,30 @@ const Checkout = () => {
             return;
         }
 
-        // Check if user is logged in
         if (!user) {
             setPendingData(data);
             setShowAuthDialog(true);
             return;
         }
 
-        await processOrder(data);
-    };
-
-    const processOrder = async (data: CheckoutValues) => {
         setIsSubmitting(true);
 
+        if (paymentMethod === 'paystack') {
+            // Check if key is present
+            if (!import.meta.env.VITE_PAYSTACK_PUBLIC_KEY) {
+                toast.error("Payment configuration missing. Please contact support.");
+                setIsSubmitting(false);
+                return;
+            }
+            // Trigger Paystack Popup
+            initializePayment({ onSuccess, onClose });
+        } else {
+            // Cash on Delivery
+            await processOrder(data, "cod");
+        }
+    };
+
+    const processOrder = async (data: CheckoutValues, paymentMethodType: "cod" | "prepaid", paymentReference?: string) => {
         try {
             const orderData = {
                 userId: user?.uid || "guest",
@@ -170,7 +205,9 @@ const Checkout = () => {
                 })),
                 amount: cartTotal,
                 status: "pending",
-                paymentMethod: "cod", // Cash on Delivery
+                paymentMethod: paymentMethodType,
+                paymentStatus: paymentMethodType === "prepaid" ? "paid" : "unpaid",
+                paymentReference: paymentReference || null,
                 currency,
                 exchangeRate,
                 createdAt: serverTimestamp(),
@@ -178,9 +215,7 @@ const Checkout = () => {
 
             let orderId = "";
 
-            // Use a transaction to ensure stock is available and update it atomically
             await runTransaction(db, async (transaction) => {
-                // 1. Check stock for all items
                 for (const item of items) {
                     const productRef = doc(db, "products", item.product.id);
                     const productDoc = await transaction.get(productRef);
@@ -195,39 +230,27 @@ const Checkout = () => {
                     }
                 }
 
-                // 2. Reduce stock
-                // We need to fetch docs effectively for updates inside map
                 const productRefs = items.map(item => doc(db, "products", item.product.id));
                 const productDocs = await Promise.all(productRefs.map(ref => transaction.get(ref)));
 
-                // Check availability (double check within transaction context of bulk read)
                 productDocs.forEach((doc, index) => {
-                    if (!doc.exists()) {
-                        throw new Error(`Product ${items[index].product.name} not found.`);
-                    }
+                    if (!doc.exists()) throw new Error(`Product not found.`);
                     const stock = doc.data().stock;
                     if (stock < items[index].quantity) {
-                        throw new Error(`Insufficient stock for ${items[index].product.name}. Available: ${stock}`);
+                        throw new Error(`Insufficient stock for ${items[index].product.name}.`);
                     }
                 });
 
-
-                // Deduct stock
                 items.forEach((item, index) => {
                     const newStock = productDocs[index].data().stock - item.quantity;
                     transaction.update(productRefs[index], { stock: newStock });
                 });
 
-                // Create Order
                 const newOrderRef = doc(collection(db, "orders"));
                 orderId = newOrderRef.id;
                 transaction.set(newOrderRef, { ...orderData, id: orderId });
             });
 
-
-            // Post-transaction actions (Non-blocking)
-
-            // 1. Send Order Confirmation Email
             if (orderId) {
                 sendOrderConfirmation(
                     { ...orderData, orderId: orderId },
@@ -235,7 +258,6 @@ const Checkout = () => {
                     formatPrice
                 ).catch(err => console.error("Failed to send confirmation email:", err));
 
-                // 2. Notify Customer (only if they're not an admin)
                 if (user?.uid) {
                     try {
                         const adminDocRef = doc(db, "admins", user.uid);
@@ -246,7 +268,7 @@ const Checkout = () => {
                                 userId: user.uid,
                                 type: "new_order",
                                 title: "Order Placed Successfully",
-                                message: `Your order #${orderId.slice(0, 8)} has been placed and is being processed.`,
+                                message: `Your order #${orderId.slice(0, 8)} has been placed.`,
                                 read: false,
                                 createdAt: serverTimestamp(),
                                 data: { orderId: orderId },
@@ -254,17 +276,16 @@ const Checkout = () => {
                             });
                         }
                     } catch (error) {
-                        console.error("Failed to create customer notification:", error);
+                        console.error("Failed to create notification:", error);
                     }
                 }
 
-                // 3. Notify Admins (Role-based)
                 try {
                     await addDoc(collection(db, "notifications"), {
                         recipientRole: "admin",
                         type: "new_order",
                         title: "New Order",
-                        message: `New order #${orderId.slice(0, 8)} from ${data.firstName} ${data.lastName}`,
+                        message: `New order #${orderId.slice(0, 8)} (${formatPrice(cartTotal)})`,
                         read: false,
                         createdAt: serverTimestamp(),
                         data: { orderId: orderId },
@@ -275,15 +296,12 @@ const Checkout = () => {
                 }
             }
 
-
-            // 2. Check Low Stock Levels and Alert Admin
             items.forEach(async (item) => {
                 try {
                     const productRef = doc(db, "products", item.product.id);
                     const snap = await import("firebase/firestore").then(m => m.getDoc(productRef));
                     if (snap.exists()) {
-                        const currentStock = snap.data().stock;
-                        checkAndAlertLowStock(item.product.id, currentStock);
+                        checkAndAlertLowStock(item.product.id, snap.data().stock);
                     }
                 } catch (e) {
                     console.error("Error monitoring stock:", e);
@@ -297,8 +315,7 @@ const Checkout = () => {
         } catch (error: any) {
             console.error("Error placing order:", error);
             toast.error(error.message || "Failed to place order. Please try again.");
-        } finally {
-            setIsSubmitting(false);
+            setIsSubmitting(false); // Reset submitting state on error
         }
     };
 
@@ -339,7 +356,6 @@ const Checkout = () => {
                     <h1 className="text-3xl font-bold mb-8">Checkout</h1>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* Checkout Form */}
                         <div className="lg:col-span-2 space-y-6">
                             <Card>
                                 <CardHeader>
@@ -347,9 +363,7 @@ const Checkout = () => {
                                 </CardHeader>
                                 <CardContent>
                                     <Form {...form}>
-                                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-
-                                            {/* Saved Addresses Selector */}
+                                        <form className="space-y-4">
                                             {user && savedAddresses.length > 0 && (
                                                 <div className="mb-6 p-4 border rounded-lg bg-muted/30">
                                                     <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
@@ -383,118 +397,38 @@ const Checkout = () => {
                                             )}
 
                                             <div className="grid grid-cols-2 gap-4">
-                                                <FormField
-                                                    control={form.control}
-                                                    name="firstName"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>First Name</FormLabel>
-                                                            <FormControl>
-                                                                <Input placeholder="Daniel" {...field} />
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                                <FormField
-                                                    control={form.control}
-                                                    name="lastName"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Last Name</FormLabel>
-                                                            <FormControl>
-                                                                <Input placeholder="Mensah" {...field} />
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
+                                                <FormField control={form.control} name="firstName" render={({ field }) => (
+                                                    <FormItem><FormLabel>First Name</FormLabel><FormControl><Input placeholder="Daniel" {...field} /></FormControl><FormMessage /></FormItem>
+                                                )} />
+                                                <FormField control={form.control} name="lastName" render={({ field }) => (
+                                                    <FormItem><FormLabel>Last Name</FormLabel><FormControl><Input placeholder="Mensah" {...field} /></FormControl><FormMessage /></FormItem>
+                                                )} />
                                             </div>
 
-                                            <FormField
-                                                control={form.control}
-                                                name="email"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Email</FormLabel>
-                                                        <FormControl>
-                                                            <Input type="email" placeholder="daniel.mensah@example.com" {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
+                                            <FormField control={form.control} name="email" render={({ field }) => (
+                                                <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" placeholder="daniel.mensah@example.com" {...field} /></FormControl><FormMessage /></FormItem>
+                                            )} />
 
-                                            <FormField
-                                                control={form.control}
-                                                name="phone"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Phone Number</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="024 XXX XXXX" {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
+                                            <FormField control={form.control} name="phone" render={({ field }) => (
+                                                <FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input placeholder="024 XXX XXXX" {...field} /></FormControl><FormMessage /></FormItem>
+                                            )} />
 
-                                            <FormField
-                                                control={form.control}
-                                                name="address"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Delivery Address</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="Street name, landmark..." {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
+                                            <FormField control={form.control} name="address" render={({ field }) => (
+                                                <FormItem><FormLabel>Delivery Address</FormLabel><FormControl><Input placeholder="Street name, landmark..." {...field} /></FormControl><FormMessage /></FormItem>
+                                            )} />
 
                                             <div className="grid grid-cols-2 gap-4">
-                                                <FormField
-                                                    control={form.control}
-                                                    name="city"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>City</FormLabel>
-                                                            <FormControl>
-                                                                <Input placeholder="Accra" {...field} />
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                                <FormField
-                                                    control={form.control}
-                                                    name="region"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Region</FormLabel>
-                                                            <FormControl>
-                                                                <Input placeholder="Greater Accra" {...field} />
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
+                                                <FormField control={form.control} name="city" render={({ field }) => (
+                                                    <FormItem><FormLabel>City</FormLabel><FormControl><Input placeholder="Accra" {...field} /></FormControl><FormMessage /></FormItem>
+                                                )} />
+                                                <FormField control={form.control} name="region" render={({ field }) => (
+                                                    <FormItem><FormLabel>Region</FormLabel><FormControl><Input placeholder="Greater Accra" {...field} /></FormControl><FormMessage /></FormItem>
+                                                )} />
                                             </div>
 
-                                            <FormField
-                                                control={form.control}
-                                                name="notes"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Order Notes (Optional)</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="Any special instructions..." {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
+                                            <FormField control={form.control} name="notes" render={({ field }) => (
+                                                <FormItem><FormLabel>Order Notes (Optional)</FormLabel><FormControl><Input placeholder="Any special instructions..." {...field} /></FormControl><FormMessage /></FormItem>
+                                            )} />
                                         </form>
                                     </Form>
                                 </CardContent>
@@ -505,18 +439,32 @@ const Checkout = () => {
                                     <CardTitle>Payment Method</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="flex items-center gap-4 p-4 border rounded-lg bg-secondary/10 border-primary/20">
-                                        <ShieldCheck className="h-6 w-6 text-primary" />
-                                        <div>
-                                            <p className="font-semibold">Cash on Delivery</p>
-                                            <p className="text-sm text-muted-foreground">Pay when your items are delivered.</p>
+                                    <RadioGroup value={paymentMethod} onValueChange={(val: "cod" | "paystack") => setPaymentMethod(val)}>
+                                        <div className="flex items-center space-x-2 border p-4 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors">
+                                            <RadioGroupItem value="cod" id="cod" />
+                                            <Label htmlFor="cod" className="flex-1 flex items-center cursor-pointer">
+                                                <Banknote className="mr-4 h-6 w-6 text-primary" />
+                                                <div>
+                                                    <span className="font-semibold block">Cash on Delivery</span>
+                                                    <span className="text-secondary-foreground text-sm">Pay with cash upon delivery</span>
+                                                </div>
+                                            </Label>
                                         </div>
-                                    </div>
+                                        <div className="flex items-center space-x-2 border p-4 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors">
+                                            <RadioGroupItem value="paystack" id="paystack" />
+                                            <Label htmlFor="paystack" className="flex-1 flex items-center cursor-pointer">
+                                                <CreditCard className="mr-4 h-6 w-6 text-primary" />
+                                                <div>
+                                                    <span className="font-semibold block">Pay Online (Mobile Money / Card)</span>
+                                                    <span className="text-secondary-foreground text-sm">MTN MomO, Telecel Cash, AirtelTigo, Visa/Mastercard</span>
+                                                </div>
+                                            </Label>
+                                        </div>
+                                    </RadioGroup>
                                 </CardContent>
                             </Card>
                         </div>
 
-                        {/* Order Summary */}
                         <div className="lg:col-span-1">
                             <Card className="sticky top-24">
                                 <CardHeader>
@@ -571,7 +519,7 @@ const Checkout = () => {
                                                 Processing...
                                             </>
                                         ) : (
-                                            "Place Order"
+                                            paymentMethod === 'paystack' ? `Pay ${formatPrice(cartTotal)} Now` : "Place Order"
                                         )}
                                     </Button>
                                 </CardFooter>
