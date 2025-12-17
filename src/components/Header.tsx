@@ -53,7 +53,7 @@ const Header = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 md:gap-3 hover:opacity-90 transition-opacity">
             <div className="bg-white p-1 rounded-md">
-              <img src={logo} alt="Prestige Merchandise" className="h-12 w-auto md:h-20 transition-all" />
+              <img src={logo} alt="Prestige Merchandise" className="h-16 w-auto md:h-20 transition-all" />
             </div>
             <div className="hidden sm:block">
               <h1 className="text-lg md:text-xl font-bold text-secondary-foreground">The Prestige Merchandise</h1>
