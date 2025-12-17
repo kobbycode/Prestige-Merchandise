@@ -6,7 +6,7 @@ import { Product, Category } from "@/types/product";
 import { Order } from "@/types/order";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Package, FolderTree, AlertTriangle, TrendingUp, CheckCircle, ArrowRight, ShoppingCart, Clock, DollarSign } from "lucide-react";
+import { Package, FolderTree, AlertTriangle, TrendingUp, CheckCircle, ArrowRight, ShoppingCart, Clock, DollarSign, Eye } from "lucide-react";
 import {
     BarChart,
     Bar,
@@ -47,7 +47,8 @@ const Dashboard = () => {
         totalValue: 0,
         totalOrders: 0,
         pendingOrders: 0,
-        totalRevenue: 0
+        totalRevenue: 0,
+        totalViews: 0
     });
     const [recentProducts, setRecentProducts] = useState<Product[]>([]);
     const [recentOrders, setRecentOrders] = useState<Order[]>([]);
@@ -68,6 +69,7 @@ const Dashboard = () => {
                 let activeCount = 0;
                 let lowStockCount = 0;
                 let value = 0;
+                let totalViews = 0;
                 const catCounts: Record<string, number> = {};
 
                 productsSnap.forEach(doc => {
@@ -79,6 +81,7 @@ const Dashboard = () => {
                         lowStockList.push(p);
                     }
                     value += p.price * p.stock;
+                    totalViews += (p.views || 0);
 
                     // Category counts
                     if (p.category) {
@@ -131,7 +134,8 @@ const Dashboard = () => {
                     totalValue: value,
                     totalOrders: orders.length,
                     pendingOrders: pendingCount,
-                    totalRevenue: revenue
+                    totalRevenue: revenue,
+                    totalViews
                 });
 
                 setRecentProducts(recent);
@@ -273,7 +277,13 @@ const Dashboard = () => {
             {/* Product Stats */}
             <div>
                 <h2 className="text-lg font-semibold mb-3">Inventory</h2>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+                    <StatCard
+                        title="Total Product Views"
+                        value={stats.totalViews}
+                        icon={Eye}
+                        description="Total views across all products"
+                    />
                     <StatCard
                         title="Total Products"
                         value={stats.totalProducts}
