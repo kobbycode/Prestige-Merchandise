@@ -147,6 +147,15 @@ service cloud.firestore {
     }
 
     // =========================
+    // Helper Functions
+    // =========================
+    function isAdmin() {
+      return request.auth != null &&
+        get(/databases/$(database)/documents/admins/$(request.auth.uid))
+          .data.role in ['super_admin', 'admin'];
+    }
+
+    // =========================
     // Default deny
     // =========================
     match /{document=**} {
