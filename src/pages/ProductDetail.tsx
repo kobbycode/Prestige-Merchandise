@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, increment } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Product } from "@/types/product";
 import { Button } from "@/components/ui/button";
@@ -55,6 +55,16 @@ const ProductDetail = () => {
                 setProduct(productData);
                 // Track this product as recently viewed
                 addToRecentlyViewed(productData.id);
+
+                // Increment view count if not already viewed in this session
+                const sessionKey = `viewed_product_${productId}`;
+                if (!sessionStorage.getItem(sessionKey)) {
+                    await updateDoc(docRef, {
+                        views: increment(1)
+                    });
+                    sessionStorage.setItem(sessionKey, 'true');
+                }
+
             } else {
                 toast.error("Product not found");
                 navigate("/shop");

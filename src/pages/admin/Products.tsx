@@ -173,8 +173,11 @@ const Products = () => {
                                                 <p className="text-sm text-muted-foreground line-clamp-1">
                                                     {product.category}
                                                 </p>
-                                                <p className="text-xs font-mono text-muted-foreground">
+                                                <p className="text-sm text-muted-foreground">
                                                     SKU: {product.sku}
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {product.views || 0} views
                                                 </p>
                                             </div>
                                         </div>
@@ -242,6 +245,7 @@ const Products = () => {
                                             <TableHead>SKU</TableHead>
                                             <TableHead>Category</TableHead>
                                             <TableHead>Stock</TableHead>
+                                            <TableHead>Views</TableHead>
                                             <TableHead>Price</TableHead>
                                             <TableHead>Status</TableHead>
                                             <TableHead className="text-right">Actions</TableHead>
@@ -277,6 +281,9 @@ const Products = () => {
                                                     <span className={product.stock < 10 ? 'text-destructive font-medium' : ''}>
                                                         {product.stock}
                                                     </span>
+                                                </TableCell>
+                                                <TableCell className="text-muted-foreground">
+                                                    {product.views || 0}
                                                 </TableCell>
                                                 <TableCell>
                                                     <div>

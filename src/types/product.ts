@@ -23,6 +23,7 @@ export interface Product {
     createdAt: string;
     updatedAt: string;
     createdBy: string; // Admin UID
+    views?: number;
 }
 
 export interface Category {

@@ -55,6 +55,7 @@ const Dashboard = () => {
     const [orderStatusData, setOrderStatusData] = useState<{ name: string, value: number }[]>([]);
     const [revenueChartData, setRevenueChartData] = useState<{ date: string, revenue: number }[]>([]);
     const [lowStockItems, setLowStockItems] = useState<Product[]>([]);
+    const [mostViewedProducts, setMostViewedProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -135,6 +136,12 @@ const Dashboard = () => {
 
                 setRecentProducts(recent);
                 setRecentOrders(recentOrdersList);
+
+                // Most Viewed Products
+                const mostViewed = [...products]
+                    .sort((a, b) => (b.views || 0) - (a.views || 0))
+                    .slice(0, 5);
+                setMostViewedProducts(mostViewed);
 
                 // For chart: Use all orders, sort by date
                 setRecentOrders(orders.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)).slice(0, 7)); // Just showing last 7 for chart? 
@@ -542,7 +549,42 @@ const Dashboard = () => {
                         </div>
                     </CardContent>
                 </Card>
+
             </div >
+
+            {/* Most Viewed Products */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+                <Card className="col-span-12">
+                    <CardHeader>
+                        <CardTitle>Most Viewed Products</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-8">
+                            {mostViewedProducts.map((product) => (
+                                <div key={product.id} className="flex items-center">
+                                    <div className="h-9 w-9 rounded overflow-hidden bg-muted shrink-0">
+                                        {product.images && product.images[0] ? (
+                                            <img src={product.images[0]} alt="" className="h-full w-full object-cover" />
+                                        ) : (
+                                            <div className="h-full w-full flex items-center justify-center bg-gray-100">
+                                                <Package className="h-4 w-4 text-gray-400" />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="ml-4 space-y-1">
+                                        <p className="text-sm font-medium leading-none">{product.name}</p>
+                                        <p className="text-xs text-muted-foreground">{product.category || "Uncategorized"}</p>
+                                    </div>
+                                    <div className="ml-auto font-medium text-sm">
+                                        {product.views || 0} views
+                                    </div>
+                                </div>
+                            ))}
+                            {mostViewedProducts.length === 0 && <p className="text-sm text-muted-foreground text-center">No views yet.</p>}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
             {/* Low Stock Detailed List */}
             {
                 stats.lowStockProducts > 0 && (
