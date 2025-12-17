@@ -4,6 +4,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Product } from "@/types/product";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Package, ChevronLeft, ChevronRight, X } from "lucide-react";
@@ -11,6 +12,7 @@ import { useRef } from "react";
 
 const RecentlyViewed = () => {
     const { recentlyViewed, clearRecentlyViewed } = useRecentlyViewed();
+    const { formatPrice } = useCurrency();
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -140,7 +142,7 @@ const RecentlyViewed = () => {
                                                 {product.name}
                                             </h3>
                                             <p className="text-primary font-bold">
-                                                GH₵ {product.price.toFixed(2)}
+                                                {formatPrice(product.price)}
                                             </p>
                                         </CardContent>
                                     </Card>

@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import CartSheet from "./cart/CartSheet";
 import { NotificationDropdown } from "./notifications/NotificationDropdown";
+import CurrencySelector from "./CurrencySelector";
 
 const Header = () => {
   const { isAuthenticated, logout } = useAuth();
@@ -86,6 +87,9 @@ const Header = () => {
                 {link.label}
               </Link>
             ))}
+
+            <CurrencySelector />
+
             {/* Cart Button */}
             <Button
               variant="ghost"
@@ -240,6 +244,11 @@ const Header = () => {
                   {link.label}
                 </Link>
               ))}
+
+              <div className="pt-2">
+                <CurrencySelector />
+              </div>
+
               {!isAuthenticated && (
                 <Link
                   to="/login"

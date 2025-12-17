@@ -6,7 +6,7 @@ import { format } from "date-fns";
  * Generates a PDF invoice for an order
  * @param order - The order to generate invoice for
  */
-export function generateInvoice(order: Order): void {
+export function generateInvoice(order: Order, formatPrice?: (price: number) => string): void {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
 
@@ -14,6 +14,8 @@ export function generateInvoice(order: Order): void {
     const primaryColor = "#D4AF37"; // Gold color matching brand
     const textColor = "#333333";
     const mutedColor = "#666666";
+
+    const formatCurrency = formatPrice || ((p: number) => `GH₵ ${p.toFixed(2)}`);
 
     // Header
     doc.setFontSize(24);
@@ -85,8 +87,9 @@ export function generateInvoice(order: Order): void {
         doc.setTextColor(textColor);
         doc.text(displayName, 25, yPosition);
         doc.text(item.quantity.toString(), 125, yPosition);
-        doc.text(`GH₵ ${item.price.toFixed(2)}`, 140, yPosition);
-        doc.text(`GH₵ ${(item.price * item.quantity).toFixed(2)}`, pageWidth - 35, yPosition);
+        doc.text(item.quantity.toString(), 125, yPosition);
+        doc.text(formatCurrency(item.price), 140, yPosition);
+        doc.text(formatCurrency(item.price * item.quantity), pageWidth - 35, yPosition);
 
         yPosition += 8;
 
@@ -108,7 +111,7 @@ export function generateInvoice(order: Order): void {
     doc.setTextColor(textColor);
     doc.text("Total Amount:", 120, yPosition);
     doc.setTextColor(primaryColor);
-    doc.text(`GH₵ ${order.amount.toFixed(2)}`, pageWidth - 35, yPosition);
+    doc.text(formatCurrency(order.amount), pageWidth - 35, yPosition);
 
     // Footer
     const footerY = 280;

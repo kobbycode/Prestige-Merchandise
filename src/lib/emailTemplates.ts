@@ -30,9 +30,10 @@ export interface LowStockAlertParams {
 }
 
 // Helper function to format order items for email
-export const formatOrderItems = (items: any[]): string => {
+export const formatOrderItems = (items: any[], formatPrice?: (price: number) => string): string => {
+    const format = formatPrice || ((p: number) => `GH₵ ${p.toFixed(2)}`);
     return items.map((item, index) =>
-        `${index + 1}. ${item.name}${item.variant ? ` (${item.variant})` : ''} - Qty: ${item.quantity} - GH₵ ${(item.price * item.quantity).toFixed(2)}`
+        `${index + 1}. ${item.name}${item.variant ? ` (${item.variant})` : ''} - Qty: ${item.quantity} - ${format(item.price * item.quantity)}`
     ).join('\n');
 };
 

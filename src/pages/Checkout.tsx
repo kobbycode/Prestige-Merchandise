@@ -8,6 +8,7 @@ import { collection, addDoc, serverTimestamp, runTransaction, doc, getDocs, quer
 import { db } from "@/lib/firebase";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -44,6 +45,7 @@ type CheckoutValues = z.infer<typeof checkoutSchema>;
 
 const Checkout = () => {
     const navigate = useNavigate();
+    const { formatPrice, currency, exchangeRate } = useCurrency();
     const location = useLocation(); // Add useLocation
     const { items, cartTotal, clearCart } = useCart();
     const { user } = useAuth();
@@ -169,6 +171,8 @@ const Checkout = () => {
                 amount: cartTotal,
                 status: "pending",
                 paymentMethod: "cod", // Cash on Delivery
+                currency,
+                exchangeRate,
                 createdAt: serverTimestamp(),
             };
 
@@ -227,7 +231,8 @@ const Checkout = () => {
             if (orderId) {
                 sendOrderConfirmation(
                     { ...orderData, orderId: orderId },
-                    data.email
+                    data.email,
+                    formatPrice
                 ).catch(err => console.error("Failed to send confirmation email:", err));
 
                 // 2. Notify Customer (only if they're not an admin)
@@ -528,7 +533,7 @@ const Checkout = () => {
                                                     <p className="font-medium line-clamp-1">{item.product.name}</p>
                                                     <p className="text-muted-foreground text-xs">Qty: {item.quantity} {item.variant && `• ${item.variant}`}</p>
                                                 </div>
-                                                <p className="font-medium">GH₵ {(item.product.price * item.quantity).toFixed(2)}</p>
+                                                <p className="font-medium">{formatPrice(item.product.price * item.quantity)}</p>
                                             </div>
                                         ))}
                                     </div>
@@ -538,7 +543,7 @@ const Checkout = () => {
                                     <div className="space-y-2">
                                         <div className="flex justify-between">
                                             <span className="text-muted-foreground">Subtotal</span>
-                                            <span>GH₵ {cartTotal.toFixed(2)}</span>
+                                            <span>{formatPrice(cartTotal)}</span>
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-muted-foreground">Shipping</span>
@@ -550,7 +555,7 @@ const Checkout = () => {
 
                                     <div className="flex justify-between font-bold text-lg">
                                         <span>Total</span>
-                                        <span>GH₵ {cartTotal.toFixed(2)}</span>
+                                        <span>{formatPrice(cartTotal)}</span>
                                     </div>
                                 </CardContent>
                                 <CardFooter>

@@ -13,9 +13,11 @@ import { useCart } from "@/contexts/CartContext";
 import CartItem from "./CartItem";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Link } from "react-router-dom";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 const CartSheet = () => {
     const { items, cartTotal, isCartOpen, setIsCartOpen } = useCart();
+    const { formatPrice } = useCurrency();
 
     return (
         <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
@@ -63,7 +65,7 @@ const CartSheet = () => {
                         <div className="flex justify-between items-center font-medium">
                             <span>Subtotal</span>
                             <span className="text-lg">
-                                GH₵ {cartTotal.toLocaleString()}
+                                {formatPrice(cartTotal)}
                             </span>
                         </div>
                         <p className="text-xs text-muted-foreground text-center">

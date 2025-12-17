@@ -25,5 +25,7 @@ export interface Order {
     trackingUrl?: string;
     createdAt: any;
     items: any[];
+    currency?: string;
+    exchangeRate?: number;
 }
 

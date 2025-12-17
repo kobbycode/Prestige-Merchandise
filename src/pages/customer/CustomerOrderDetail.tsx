@@ -7,7 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, ArrowLeft, MapPin, Phone, Calendar } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Loader2, ArrowLeft, MapPin, Phone, Calendar, Truck } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { Order } from "@/types/order";
@@ -21,6 +22,7 @@ const CustomerOrderDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { formatPrice } = useCurrency();
     const [order, setOrder] = useState<Order | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -115,6 +117,37 @@ const CustomerOrderDetail = () => {
                         </div>
                     </div>
 
+                    {/* Tracking Information */}
+                    {order.trackingNumber && (
+                        <Card className="mb-6 bg-primary/5 border-primary/20">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-lg flex items-center gap-2">
+                                    <Truck className="h-5 w-5 text-primary" />
+                                    Shipment Tracking
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">Carrier</p>
+                                        <p className="font-medium">{order.trackingCarrier || "Unknown Carrier"}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">Tracking Number</p>
+                                        <p className="font-medium font-mono">{order.trackingNumber}</p>
+                                    </div>
+                                </div>
+                                {order.trackingUrl && (
+                                    <Button className="w-full mt-4" asChild>
+                                        <a href={order.trackingUrl} target="_blank" rel="noopener noreferrer">
+                                            Track Shipment
+                                        </a>
+                                    </Button>
+                                )}
+                            </CardContent>
+                        </Card>
+                    )}
+
                     {/* Order Timeline */}
                     <Card className="mb-6">
                         <CardContent className="pt-4">
@@ -148,7 +181,7 @@ const CustomerOrderDetail = () => {
                                                     </p>
                                                 </div>
                                                 <div className="text-right font-medium">
-                                                    GH₵ {(item.price * item.quantity).toFixed(2)}
+                                                    {formatPrice(item.price * item.quantity)}
                                                 </div>
                                             </div>
                                         ))}
@@ -156,7 +189,7 @@ const CustomerOrderDetail = () => {
                                     <Separator className="my-4" />
                                     <div className="flex justify-between items-center font-bold text-lg">
                                         <span>Total Amount</span>
-                                        <span>GH₵ {order.amount.toFixed(2)}</span>
+                                        <span>{formatPrice(order.amount)}</span>
                                     </div>
                                 </CardContent>
                             </Card>

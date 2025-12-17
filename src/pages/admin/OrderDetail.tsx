@@ -6,20 +6,26 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, ArrowLeft, MapPin, Phone, User, Calendar, CreditCard, Printer } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { Order } from "@/types/order";
 import { initEmailJS, sendOrderStatusUpdate } from "@/lib/emailService";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { generateInvoice } from "@/lib/invoiceGenerator";
 
 const OrderDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { formatPrice } = useCurrency();
     const [order, setOrder] = useState<Order | null>(null);
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
+    const [trackingNumber, setTrackingNumber] = useState("");
+    const [trackingCarrier, setTrackingCarrier] = useState("");
+    const [trackingUrl, setTrackingUrl] = useState("");
 
     useEffect(() => {
         if (id) {
@@ -28,6 +34,14 @@ const OrderDetail = () => {
         // Initialize EmailJS
         initEmailJS();
     }, [id]);
+
+    useEffect(() => {
+        if (order) {
+            setTrackingNumber(order.trackingNumber || "");
+            setTrackingCarrier(order.trackingCarrier || "");
+            setTrackingUrl(order.trackingUrl || "");
+        }
+    }, [order]);
 
     const fetchOrder = async (orderId: string) => {
         try {
@@ -45,6 +59,33 @@ const OrderDetail = () => {
             toast.error("Failed to load order");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleTrackingUpdate = async () => {
+        if (!order) return;
+        setUpdating(true);
+        try {
+            const docRef = doc(db, "orders", order.id);
+            await updateDoc(docRef, {
+                trackingNumber,
+                trackingCarrier,
+                trackingUrl
+            });
+
+            setOrder({
+                ...order,
+                trackingNumber,
+                trackingCarrier,
+                trackingUrl
+            });
+
+            toast.success("Tracking information saved");
+        } catch (error) {
+            console.error("Error updating tracking:", error);
+            toast.error("Failed to save tracking information");
+        } finally {
+            setUpdating(false);
         }
     };
 
@@ -171,7 +212,7 @@ const OrderDetail = () => {
                             </p>
                         </div>
 
-                        <Button variant="outline" className="print:hidden gap-2 w-full sm:w-auto" onClick={() => generateInvoice(order!)}>
+                        <Button variant="outline" className="print:hidden gap-2 w-full sm:w-auto" onClick={() => generateInvoice(order!, formatPrice)}>
                             <Printer className="h-4 w-4" />
                             Download PDF
                         </Button>
@@ -224,7 +265,7 @@ const OrderDetail = () => {
                                             </p>
                                         </div>
                                         <div className="text-right font-medium">
-                                            GH₵ {(item.price * item.quantity).toFixed(2)}
+                                            {formatPrice(item.price * item.quantity)}
                                         </div>
                                     </div>
                                 ))}
@@ -232,7 +273,7 @@ const OrderDetail = () => {
                             <Separator className="my-4" />
                             <div className="flex justify-between items-center font-bold text-lg">
                                 <span>Total Amount</span>
-                                <span>GH₵ {order.amount.toFixed(2)}</span>
+                                <span>{formatPrice(order.amount)}</span>
                             </div>
                         </CardContent>
                     </Card>
@@ -300,6 +341,47 @@ const OrderDetail = () => {
                                     </p>
                                 </div>
                             </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Shipping & Tracking */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Shipment Tracking</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Carrier</label>
+                                <Input
+                                    placeholder="DHL, FedEx, Ghana Post..."
+                                    value={trackingCarrier}
+                                    onChange={(e) => setTrackingCarrier(e.target.value)}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Tracking Number</label>
+                                <Input
+                                    placeholder="Enter tracking number"
+                                    value={trackingNumber}
+                                    onChange={(e) => setTrackingNumber(e.target.value)}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Tracking URL</label>
+                                <Input
+                                    placeholder="https://..."
+                                    value={trackingUrl}
+                                    onChange={(e) => setTrackingUrl(e.target.value)}
+                                />
+                            </div>
+                            <Button
+                                className="w-full"
+                                onClick={handleTrackingUpdate}
+                                disabled={updating}
+                            >
+                                {updating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Save Tracking Info
+                            </Button>
                         </CardContent>
                     </Card>
                 </div>

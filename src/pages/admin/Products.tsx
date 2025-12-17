@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { collection, getDocs, deleteDoc, doc, query, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Product } from "@/types/product";
@@ -28,6 +29,7 @@ import { toast } from "sonner";
 
 const Products = () => {
     const navigate = useNavigate();
+    const { formatPrice } = useCurrency();
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
@@ -185,7 +187,7 @@ const Products = () => {
                                         <div className="flex justify-between items-center pt-2 border-t">
                                             <div className="space-y-0.5">
                                                 <div className="font-semibold">
-                                                    GH₵ {product.price.toFixed(2)}
+                                                    {formatPrice(product.price)}
                                                 </div>
                                                 {product.stock < 10 && (
                                                     <div className="text-xs text-destructive font-medium">
@@ -287,10 +289,10 @@ const Products = () => {
                                                 </TableCell>
                                                 <TableCell>
                                                     <div>
-                                                        <div className="font-medium">GH₵ {product.price.toFixed(2)}</div>
+                                                        <div className="font-medium">{formatPrice(product.price)}</div>
                                                         {product.compareAtPrice && (
                                                             <div className="text-xs text-muted-foreground line-through">
-                                                                GH₵ {product.compareAtPrice.toFixed(2)}
+                                                                {formatPrice(product.compareAtPrice)}
                                                             </div>
                                                         )}
                                                     </div>

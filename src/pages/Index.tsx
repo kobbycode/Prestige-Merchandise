@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useCart } from "@/contexts/CartContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { Link, useNavigate } from "react-router-dom";
 import { collection, query, where, limit, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -17,6 +18,7 @@ import { ProductCardSkeleton } from "@/components/product/ProductCardSkeleton";
 const Index = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { formatPrice } = useCurrency();
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -196,9 +198,9 @@ const Index = () => {
                     <CardContent className="p-3 md:p-4">
                       <h3 className="font-semibold mb-1 md:mb-2 line-clamp-2 text-sm md:text-base min-h-[2.5rem] md:min-h-[3rem]">{product.name}</h3>
                       <div className="flex flex-col md:flex-row md:items-baseline gap-1 md:gap-2 mb-3 md:mb-4">
-                        <p className="text-base md:text-2xl font-bold text-primary">GH₵{product.price.toFixed(2)}</p>
+                        <p className="text-base md:text-2xl font-bold text-primary">{formatPrice(product.price)}</p>
                         {product.compareAtPrice && (
-                          <p className="text-xs md:text-sm text-muted-foreground line-through">GH₵{product.compareAtPrice.toFixed(2)}</p>
+                          <p className="text-xs md:text-sm text-muted-foreground line-through">{formatPrice(product.compareAtPrice)}</p>
                         )}
                       </div>
                       <div className="space-y-2" onClick={(e) => e.stopPropagation()}>

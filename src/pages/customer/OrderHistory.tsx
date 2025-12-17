@@ -12,6 +12,7 @@ import { Order } from "@/types/order";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { toast } from "sonner";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -25,6 +26,7 @@ import {
 
 const OrderHistory = () => {
     const { user } = useAuth();
+    const { formatPrice } = useCurrency();
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -205,7 +207,7 @@ const OrderHistory = () => {
                                                 </div>
                                                 <div>
                                                     <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Total</p>
-                                                    <p className="font-bold text-primary text-lg">GH₵ {order.amount.toFixed(2)}</p>
+                                                    <p className="font-bold text-primary text-lg">{formatPrice(order.amount)}</p>
                                                 </div>
                                             </div>
 

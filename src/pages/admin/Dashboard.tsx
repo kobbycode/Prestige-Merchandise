@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { collection, query, orderBy, limit, getDocs, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Product, Category } from "@/types/product";
@@ -39,6 +40,7 @@ const StatCard = ({ title, value, icon: Icon, description, alert }: any) => (
 );
 
 const Dashboard = () => {
+    const { formatPrice } = useCurrency();
     const [stats, setStats] = useState({
         totalProducts: 0,
         activeProducts: 0,
@@ -298,7 +300,7 @@ const Dashboard = () => {
                     />
                     <StatCard
                         title="Inventory Value"
-                        value={`GH₵ ${stats.totalValue.toLocaleString()}`}
+                        value={formatPrice(stats.totalValue)}
                         icon={TrendingUp}
                         description="Total stock value"
                     />
@@ -331,7 +333,7 @@ const Dashboard = () => {
                     />
                     <StatCard
                         title="Total Revenue"
-                        value={`GH₵ ${stats.totalRevenue.toLocaleString()}`}
+                        value={formatPrice(stats.totalRevenue)}
                         icon={DollarSign}
                         description="All time revenue"
                     />
@@ -354,7 +356,7 @@ const Dashboard = () => {
                                     </linearGradient>
                                 </defs>
                                 <XAxis dataKey="date" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                                <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₵${value}`} />
+                                <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => formatPrice(value)} />
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                                 <Tooltip />
                                 <Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorRevenue)" />
@@ -389,7 +391,7 @@ const Dashboard = () => {
                                                 <p className="text-xs text-muted-foreground">{product.category || "Uncategorized"}</p>
                                                 <div className="flex justify-between items-center mt-1.5">
                                                     <div className="font-bold text-sm">
-                                                        GH₵ {product.price.toLocaleString()}
+                                                        {formatPrice(product.price)}
                                                     </div>
                                                     {product.stock <= 5 && (
                                                         <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full">Low Stock</span>
@@ -421,7 +423,7 @@ const Dashboard = () => {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="ml-auto font-medium text-sm">GH₵ {product.price.toLocaleString()}</div>
+                                        <div className="ml-auto font-medium text-sm">{formatPrice(product.price)}</div>
                                     </div>
                                 </div>
                             ))}
@@ -510,7 +512,7 @@ const Dashboard = () => {
                                             <div className="text-right flex items-center gap-3">
                                                 <div className="mr-2">
                                                     <p className="text-xs text-muted-foreground">Total</p>
-                                                    <p className="text-sm font-bold">GH₵ {order.amount.toFixed(2)}</p>
+                                                    <p className="text-sm font-bold">{formatPrice(order.amount)}</p>
                                                 </div>
                                                 <Link to={`/admin/orders/${order.id}`}>
                                                     <Button variant="outline" size="sm" className="h-8 w-8 p-0 rounded-full">
@@ -538,7 +540,7 @@ const Dashboard = () => {
                                         </div>
                                         <div className="flex items-center justify-end gap-3">
                                             <div className="text-right">
-                                                <p className="text-sm font-medium">GH₵ {order.amount.toFixed(2)}</p>
+                                                <p className="text-sm font-medium">{formatPrice(order.amount)}</p>
                                                 <p className="text-xs text-muted-foreground">{order.items.length} items</p>
                                             </div>
                                             <Link to={`/admin/orders/${order.id}`}>

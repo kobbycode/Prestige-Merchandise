@@ -29,12 +29,15 @@ import SEOHead from "@/components/SEOHead";
 import { FaWhatsapp, FaLink } from "react-icons/fa";
 import { ProductDetailSkeleton } from "@/components/product/ProductDetailSkeleton";
 
+import { useCurrency } from "@/contexts/CurrencyContext";
+
 const ProductDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { addToCart } = useCart();
     const { addToRecentlyViewed } = useRecentlyViewed();
     const { settings } = useStoreSettings();
+    const { formatPrice } = useCurrency();
     const [product, setProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -316,12 +319,12 @@ const ProductDetail = () => {
                                 {/* Price Block */}
                                 <div className="flex items-end gap-3 mt-4">
                                     <p className="text-4xl font-bold text-primary">
-                                        GH₵{product.price.toFixed(2)}
+                                        {formatPrice(product.price)}
                                     </p>
                                     {product.compareAtPrice && (
                                         <div className="mb-1 flex items-center gap-2">
                                             <p className="text-xl text-muted-foreground line-through">
-                                                GH₵{product.compareAtPrice.toFixed(2)}
+                                                {formatPrice(product.compareAtPrice)}
                                             </p>
                                             <Badge variant="destructive" className="rounded-md px-2 py-0.5 text-xs">
                                                 -{discount}%

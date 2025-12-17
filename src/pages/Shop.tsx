@@ -25,10 +25,12 @@ import { Filter as FilterIcon } from "lucide-react";
 import WishlistButton from "@/components/wishlist/WishlistButton";
 import { ProductGridSkeleton } from "@/components/product/ProductCardSkeleton";
 import { useStoreSettings } from "@/hooks/useStoreSettings";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 const Shop = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { formatPrice } = useCurrency(); // Use currency formatter
   const { addToCart } = useCart();
   const { settings } = useStoreSettings();
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
@@ -425,9 +427,9 @@ const Shop = () => {
                             <h3 className="font-semibold mb-1 md:mb-2 line-clamp-2 text-sm md:text-base min-h-[2.5rem] md:min-h-[3rem]">{product.name}</h3>
                             <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{product.description}</p>
                             <div className="flex flex-col md:flex-row md:items-baseline gap-1 md:gap-2 mb-3 md:mb-4">
-                              <p className="text-base md:text-2xl font-bold text-primary">GH₵{product.price.toFixed(2)}</p>
+                              <p className="text-base md:text-2xl font-bold text-primary">{formatPrice(product.price)}</p>
                               {product.compareAtPrice && (
-                                <p className="text-xs md:text-sm text-muted-foreground line-through">GH₵{product.compareAtPrice.toFixed(2)}</p>
+                                <p className="text-xs md:text-sm text-muted-foreground line-through">{formatPrice(product.compareAtPrice)}</p>
                               )}
                             </div>
                             <div className="space-y-2" onClick={(e) => e.stopPropagation()}>

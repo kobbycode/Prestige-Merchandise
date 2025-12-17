@@ -23,7 +23,8 @@ export const initEmailJS = () => {
 // Send order confirmation email
 export const sendOrderConfirmation = async (
     orderData: any,
-    customerEmail: string
+    customerEmail: string,
+    formatPrice?: (price: number) => string
 ): Promise<boolean> => {
     try {
         const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
@@ -39,8 +40,8 @@ export const sendOrderConfirmation = async (
             to_name: formatCustomerName(orderData.customerDetails),
             order_id: orderData.orderId,
             order_date: format(new Date(), 'PPP'),
-            order_items: formatOrderItems(orderData.items),
-            order_total: `GH₵ ${orderData.amount.toFixed(2)}`,
+            order_items: formatOrderItems(orderData.items, formatPrice),
+            order_total: formatPrice ? formatPrice(orderData.amount) : `GH₵ ${orderData.amount.toFixed(2)}`,
             delivery_address: formatDeliveryAddress(orderData.customerDetails),
             customer_phone: orderData.customerDetails.phone,
         };

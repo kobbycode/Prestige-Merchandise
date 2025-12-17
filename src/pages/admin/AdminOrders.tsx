@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import {
@@ -42,6 +43,7 @@ import {
 import { Order } from "@/types/order";
 
 const AdminOrders = () => {
+    const { formatPrice } = useCurrency();
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
@@ -318,7 +320,7 @@ const AdminOrders = () => {
                                             </div>
                                             <div className="text-right">
                                                 <div className="text-muted-foreground">Total</div>
-                                                <div className="font-semibold">GH₵ {order.amount.toFixed(2)}</div>
+                                                <div className="font-semibold">{formatPrice(order.amount)}</div>
                                             </div>
                                         </div>
 
@@ -372,7 +374,7 @@ const AdminOrders = () => {
                                                 <TableCell>
                                                     {order.createdAt?.seconds ? format(new Date(order.createdAt.seconds * 1000), "PPP") : "N/A"}
                                                 </TableCell>
-                                                <TableCell>GH₵ {order.amount.toFixed(2)}</TableCell>
+                                                <TableCell>{formatPrice(order.amount)}</TableCell>
                                                 <TableCell>
                                                     <Badge className={getStatusClassName(order.status)} variant="outline">
                                                         {order.status.charAt(0).toUpperCase() + order.status.slice(1)}

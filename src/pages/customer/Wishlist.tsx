@@ -5,6 +5,7 @@ import { db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { useCart } from "@/contexts/CartContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { Product } from "@/types/product";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ const Wishlist = () => {
     const { user, isAuthenticated } = useAuth();
     const { items, removeFromWishlist, clearWishlist, loading: wishlistLoading } = useWishlist();
     const { addToCart } = useCart();
+    const { formatPrice } = useCurrency();
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -147,11 +149,11 @@ const Wishlist = () => {
                                         </Link>
                                         <div className="flex items-center gap-2 mb-4">
                                             <span className="text-lg font-bold text-primary">
-                                                GH₵ {product.price.toFixed(2)}
+                                                {formatPrice(product.price)}
                                             </span>
                                             {product.compareAtPrice && product.compareAtPrice > product.price && (
                                                 <span className="text-sm text-muted-foreground line-through">
-                                                    GH₵ {product.compareAtPrice.toFixed(2)}
+                                                    {formatPrice(product.compareAtPrice)}
                                                 </span>
                                             )}
                                         </div>
