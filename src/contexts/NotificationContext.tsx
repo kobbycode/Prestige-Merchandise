@@ -17,55 +17,87 @@ interface NotificationContextType {
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
 export const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
-    const { user } = useAuth();
+    const { user, role } = useAuth();
     const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [userNotifications, setUserNotifications] = useState<Notification[]>([]);
+    const [roleNotifications, setRoleNotifications] = useState<Notification[]>([]);
     const [loading, setLoading] = useState(true);
 
+    // Merge notifications whenever sources change
     useEffect(() => {
-        let unsubscribe: () => void;
+        const merged = [...userNotifications, ...roleNotifications].sort((a, b) =>
+            b.createdAt.toMillis() - a.createdAt.toMillis()
+        );
+        // Deduplicate by ID just in case
+        const unique = Array.from(new Map(merged.map(item => [item.id, item])).values());
+        setNotifications(unique);
+    }, [userNotifications, roleNotifications]);
+
+    useEffect(() => {
+        let unsubscribeUser: () => void;
+        let unsubscribeRole: () => void;
 
         if (user) {
             setLoading(true);
             try {
-                // Query notifications for the current user, ordered by date
-                // Note: This requires a composite index in Firestore: userId ASC, createdAt DESC
-                const q = query(
+                // 1. User-specific notifications
+                const qUser = query(
                     collection(db, "notifications"),
                     where("userId", "==", user.uid),
                     orderBy("createdAt", "desc"),
                     limit(50)
                 );
 
-                unsubscribe = onSnapshot(q, (snapshot) => {
-                    console.log("Notification listener update. Docs found:", snapshot.size);
+                unsubscribeUser = onSnapshot(qUser, (snapshot) => {
                     const newNotifications: Notification[] = [];
                     snapshot.forEach((doc) => {
                         newNotifications.push({ id: doc.id, ...doc.data() } as Notification);
                     });
-                    console.log("Notifications processed:", newNotifications);
-                    setNotifications(newNotifications);
+                    setUserNotifications(newNotifications);
                     setLoading(false);
                 }, (error) => {
-                    console.error("Error fetching notifications debug:", error);
+                    console.error("Error fetching user notifications:", error);
                     setLoading(false);
-                    // Handle index-required error gracefully or warn
-                    if (error.code === 'failed-precondition') {
-                        console.warn("Firestore index missing for notifications. Please check console for link to create it.");
-                    }
                 });
+
+                // 2. Role-based notifications (if admin)
+                if (role === 'admin' || role === 'super_admin') {
+                    const qRole = query(
+                        collection(db, "notifications"),
+                        where("recipientRole", "==", "admin"),
+                        orderBy("createdAt", "desc"),
+                        limit(50)
+                    );
+
+                    unsubscribeRole = onSnapshot(qRole, (snapshot) => {
+                        const newNotifications: Notification[] = [];
+                        snapshot.forEach((doc) => {
+                            newNotifications.push({ id: doc.id, ...doc.data() } as Notification);
+                        });
+                        setRoleNotifications(newNotifications);
+                    }, (error) => {
+                        console.error("Error fetching role notifications:", error);
+                    });
+                } else {
+                    setRoleNotifications([]);
+                }
+
             } catch (error) {
                 console.error("Error setting up notification listener:", error);
                 setLoading(false);
             }
         } else {
             setNotifications([]);
+            setUserNotifications([]);
+            setRoleNotifications([]);
             setLoading(false);
         }
 
         return () => {
-            if (unsubscribe) unsubscribe();
+            if (unsubscribeUser) unsubscribeUser();
+            if (unsubscribeRole) unsubscribeRole();
         };
-    }, [user]);
+    }, [user, role]);
 
     const unreadCount = notifications.filter(n => !n.read).length;
 
