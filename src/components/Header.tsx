@@ -61,11 +61,9 @@ const Header = () => {
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-6">
-
-            {/* Global Search Bar */}
-            <form onSubmit={handleSearch} className="relative w-64">
+          {/* Centered Search Bar */}
+          <div className="hidden lg:flex flex-1 max-w-sm mx-6">
+            <form onSubmit={handleSearch} className="relative w-full">
               <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="text"
@@ -75,6 +73,12 @@ const Header = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </form>
+          </div>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center gap-4">
+
+
             {navLinks.map((link) => (
               <Link
                 key={link.to}
