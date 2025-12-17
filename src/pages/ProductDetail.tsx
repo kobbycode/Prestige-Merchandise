@@ -452,28 +452,48 @@ const ProductDetail = () => {
                             </TabsContent>
                             <TabsContent value="details" className="pt-8">
                                 <Card>
-                                    <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div>
-                                            <h4 className="font-semibold mb-2">Specifications</h4>
-                                            {product.specifications ? (
-                                                <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
-                                                    {product.specifications.split('\n').filter(line => line.trim()).map((line, index) => (
-                                                        <li key={index}>{line.trim()}</li>
-                                                    ))}
-                                                </ul>
-                                            ) : (
-                                                <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
-                                                    <li>Manufacturer: Genuine OEM</li>
-                                                    <li>Condition: Brand New</li>
-                                                    <li>Warranty: 1 Year</li>
-                                                </ul>
-                                            )}
-                                        </div>
-                                        <div>
-                                            <h4 className="font-semibold mb-2">Shipping Info</h4>
-                                            <p className="text-muted-foreground">
-                                                {product.shippingInfo || "Ships within 24 hours. Nationwide delivery available via our trusted partners."}
-                                            </p>
+                                    <div className="p-6 space-y-6">
+                                        {/* Manufacturer and Condition */}
+                                        {(product.manufacturer || product.condition) && (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6 border-b">
+                                                {product.manufacturer && (
+                                                    <div>
+                                                        <h4 className="font-semibold mb-2 text-sm uppercase tracking-wide text-muted-foreground">Manufacturer</h4>
+                                                        <p className="text-lg font-medium">{product.manufacturer}</p>
+                                                    </div>
+                                                )}
+                                                {product.condition && (
+                                                    <div>
+                                                        <h4 className="font-semibold mb-2 text-sm uppercase tracking-wide text-muted-foreground">Condition</h4>
+                                                        <p className="text-lg font-medium">{product.condition}</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Specifications and Shipping */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <h4 className="font-semibold mb-2">Specifications</h4>
+                                                {product.specifications ? (
+                                                    <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                                                        {product.specifications.split('\n').filter(line => line.trim()).map((line, index) => (
+                                                            <li key={index}>{line.trim()}</li>
+                                                        ))}
+                                                    </ul>
+                                                ) : (
+                                                    <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                                                        <li>Warranty: 1 Year</li>
+                                                        <li>Genuine OEM Quality</li>
+                                                    </ul>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <h4 className="font-semibold mb-2">Shipping Info</h4>
+                                                <p className="text-muted-foreground">
+                                                    {product.shippingInfo || "Ships within 24 hours. Nationwide delivery available via our trusted partners."}
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                 </Card>
