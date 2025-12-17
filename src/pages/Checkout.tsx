@@ -253,24 +253,18 @@ const Checkout = () => {
                     }
                 }
 
-                // 3. Notify Admins
+                // 3. Notify Admins (Role-based)
                 try {
-                    const adminsQuery = query(collection(db, "admins"));
-                    const adminSnaps = await getDocs(adminsQuery);
-
-                    const notificationPromises = adminSnaps.docs.map(adminDoc =>
-                        addDoc(collection(db, "notifications"), {
-                            userId: adminDoc.id,
-                            type: "new_order",
-                            title: "New Order",
-                            message: `New order #${orderId.slice(0, 8)} from ${data.firstName} ${data.lastName}`,
-                            read: false,
-                            createdAt: serverTimestamp(),
-                            data: { orderId: orderId },
-                            link: `/admin/orders/${orderId}`
-                        })
-                    );
-                    await Promise.all(notificationPromises);
+                    await addDoc(collection(db, "notifications"), {
+                        recipientRole: "admin",
+                        type: "new_order",
+                        title: "New Order",
+                        message: `New order #${orderId.slice(0, 8)} from ${data.firstName} ${data.lastName}`,
+                        read: false,
+                        createdAt: serverTimestamp(),
+                        data: { orderId: orderId },
+                        link: `/admin/orders/${orderId}`
+                    });
                 } catch (error) {
                     console.error("Failed to notify admins:", error);
                 }

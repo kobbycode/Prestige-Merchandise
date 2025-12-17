@@ -67,24 +67,16 @@ const OrderHistory = () => {
 
             // Notify admins
             if (orderToDelete) {
-                const adminsQuery = query(collection(db, "admins"));
-                const adminSnaps = await getDocs(adminsQuery);
-                const adminNotifications = adminSnaps.docs.map(adminDoc => ({
-                    userId: adminDoc.id,
+                // Notify admins (Role-based)
+                await addDoc(collection(db, "notifications"), {
+                    recipientRole: "admin",
                     type: "info",
                     title: "Order Cancelled by User",
                     message: `Order #${orderToDelete.id.substring(0, 8).toUpperCase()} was deleted by the customer.`,
                     read: false,
                     createdAt: serverTimestamp(),
                     link: "/admin/orders"
-                }));
-
-                const batch = writeBatch(db);
-                adminNotifications.forEach(notif => {
-                    const ref = doc(collection(db, "notifications"));
-                    batch.set(ref, notif);
                 });
-                await batch.commit();
             }
 
             setOrders(prev => prev.filter(o => o.id !== deleteId));

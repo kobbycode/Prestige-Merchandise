@@ -96,25 +96,20 @@ const OrderDetail = () => {
                 }
             }
 
-            // Notify all admins with admin-oriented message
+            // Notify all admins with admin-oriented message (Role-based)
             try {
-                const adminsQuery = query(collection(db, "admins"));
-                const adminSnaps = await getDocs(adminsQuery);
                 const customerName = `${order.customerDetails.firstName} ${order.customerDetails.lastName}`;
 
-                const adminNotifications = adminSnaps.docs.map(adminDoc =>
-                    addDoc(collection(db, "notifications"), {
-                        userId: adminDoc.id,
-                        type: "order_status",
-                        title: "Order Status Updated",
-                        message: `Order #${order.id.slice(0, 8)} from ${customerName} is now ${newStatus}.`,
-                        read: false,
-                        createdAt: serverTimestamp(),
-                        data: { orderId: order.id },
-                        link: `/admin/orders/${order.id}`
-                    })
-                );
-                await Promise.all(adminNotifications);
+                await addDoc(collection(db, "notifications"), {
+                    recipientRole: "admin",
+                    type: "order_status",
+                    title: "Order Status Updated",
+                    message: `Order #${order.id.slice(0, 8)} from ${customerName} is now ${newStatus}.`,
+                    read: false,
+                    createdAt: serverTimestamp(),
+                    data: { orderId: order.id },
+                    link: `/admin/orders/${order.id}`
+                });
             } catch (error) {
                 console.error("Error creating admin notifications:", error);
             }
