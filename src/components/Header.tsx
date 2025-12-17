@@ -241,7 +241,7 @@ const Header = () => {
                   to={link.to}
                   className={`block py-2 px-3 rounded-md font-medium transition-colors ${location.pathname === link.to
                     ? "bg-primary/10 text-primary"
-                    : "text-foreground/80 hover:bg-muted hover:text-foreground"
+                    : "text-white/90 hover:bg-white/10 hover:text-white"
                     }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
@@ -256,7 +256,7 @@ const Header = () => {
               {!isAuthenticated && (
                 <Link
                   to="/login"
-                  className="block py-2 px-3 rounded-md font-medium text-foreground/80 hover:bg-muted hover:text-foreground"
+                  className="block py-2 px-3 rounded-md font-medium text-white/90 hover:bg-white/10 hover:text-white"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Login / Register
@@ -266,7 +266,7 @@ const Header = () => {
                 <>
                   <Link
                     to="/account"
-                    className="block py-2 px-3 rounded-md font-medium text-foreground/80 hover:bg-muted hover:text-foreground"
+                    className="block py-2 px-3 rounded-md font-medium text-white/90 hover:bg-white/10 hover:text-white"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     My Profile
