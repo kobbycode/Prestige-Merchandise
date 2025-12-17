@@ -12,6 +12,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import Header from "@/components/Header";
@@ -106,6 +115,9 @@ const Checkout = () => {
         form.setValue("region", addr.region);
     };
 
+    const [showAuthDialog, setShowAuthDialog] = useState(false);
+    const [pendingData, setPendingData] = useState<CheckoutValues | null>(null);
+
     const onSubmit = async (data: CheckoutValues) => {
         if (items.length === 0) {
             toast.error("Your cart is empty");
@@ -113,6 +125,17 @@ const Checkout = () => {
             return;
         }
 
+        // Check if user is logged in
+        if (!user) {
+            setPendingData(data);
+            setShowAuthDialog(true);
+            return;
+        }
+
+        await processOrder(data);
+    };
+
+    const processOrder = async (data: CheckoutValues) => {
         setIsSubmitting(true);
 
         try {
@@ -153,45 +176,11 @@ const Checkout = () => {
                 }
 
                 // 2. Reduce stock
-                for (const item of items) {
-                    const productRef = doc(db, "products", item.product.id);
-                    // We need to read again or if we read above we can use that data, but inside transaction 
-                    // reading multiple times is fine or we can optimize. simple read again is cleaner code for now.
-                    // Actually we can't reuse the doc snapshot easily for update unless we passed it.
-                    // But standard pattern is read then write.
-                    // Since we read all first to validate, we can now write all.
-                    // Note: Firestore requires all reads before any writes.
-
-                    // Optimization: We can just use increment(-quantity) without reading IF we didn't care about negative stock,
-                    // but we DO care. So the read loop above is correct.
-                    // Now we perform writes.
-
-                    // We need to calculate new stock to set it precisely? 
-                    // No, invalidation logic is handled by the transaction lock.
-                    // We can use increment, OR calculate from the read value. 
-                    // Let's re-read to be safe? No, transaction snapshot is consistent.
-                    // IMPORTANT: Firestore transactions failing if you read after write?
-                    // "All reads must happen before any writes."
-
-                    // So we must have read everything in step 1.
-                    // In step 2 we calculate new values based on what we read?
-                    // But we didn't store the snapshots. Let's modify approach to store snapshots.
-                    // Actually, simple standard way for e-commerce:
-
-                    // Re-implement loop to Read AND modify in memory, then commit? No.
-                    // Standard:
-                    // Loop items: Read stock. Check.
-                    // Loop items: Update stock.
-                    // But we can't read then write then read then write.
-                    // We must Read Item 1, Read Item 2...
-                    // Then Write Item 1, Write Item 2...
-                }
-
-                // Let's redo correctly:
+                // We need to fetch docs effectively for updates inside map
                 const productRefs = items.map(item => doc(db, "products", item.product.id));
                 const productDocs = await Promise.all(productRefs.map(ref => transaction.get(ref)));
 
-                // Check availability
+                // Check availability (double check within transaction context of bulk read)
                 productDocs.forEach((doc, index) => {
                     if (!doc.exists()) {
                         throw new Error(`Product ${items[index].product.name} not found.`);
@@ -202,6 +191,7 @@ const Checkout = () => {
                     }
                 });
 
+
                 // Deduct stock
                 items.forEach((item, index) => {
                     const newStock = productDocs[index].data().stock - item.quantity;
@@ -211,7 +201,7 @@ const Checkout = () => {
                 // Create Order
                 const newOrderRef = doc(collection(db, "orders"));
                 orderId = newOrderRef.id;
-                transaction.set(newOrderRef, { ...orderData, id: orderId }); // Ensure ID is in data if needed, or just rely on doc ID
+                transaction.set(newOrderRef, { ...orderData, id: orderId });
             });
 
 
@@ -219,21 +209,17 @@ const Checkout = () => {
 
             // 1. Send Order Confirmation Email
             if (orderId) {
-                // We used set with a generated ref, so we have the ID.
-                // orderData doesn't have the ID yet in the object passed to addDoc (which we replaced).
                 sendOrderConfirmation(
-                    { ...orderData, orderId: orderId }, // Use the actual ID
+                    { ...orderData, orderId: orderId },
                     data.email
                 ).catch(err => console.error("Failed to send confirmation email:", err));
 
                 // 2. Notify Customer (only if they're not an admin)
                 if (user?.uid) {
                     try {
-                        // Check if the user is an admin
                         const adminDocRef = doc(db, "admins", user.uid);
                         const adminDoc = await getDoc(adminDocRef);
 
-                        // Only send customer notification if user is NOT an admin
                         if (!adminDoc.exists()) {
                             await addDoc(collection(db, "notifications"), {
                                 userId: user.uid,
@@ -245,17 +231,14 @@ const Checkout = () => {
                                 data: { orderId: orderId },
                                 link: `/account/orders/${orderId}`
                             });
-                            console.log("Customer notification created successfully");
                         }
                     } catch (error) {
                         console.error("Failed to create customer notification:", error);
-                        toast.error("Order placed but notification failed");
                     }
                 }
 
                 // 3. Notify Admins
                 try {
-                    // Fetch all admins (including super_admin)
                     const adminsQuery = query(collection(db, "admins"));
                     const adminSnaps = await getDocs(adminsQuery);
 
@@ -272,24 +255,15 @@ const Checkout = () => {
                         })
                     );
                     await Promise.all(notificationPromises);
-                    console.log(`Admin notifications created for ${adminSnaps.docs.length} admins`);
                 } catch (error) {
                     console.error("Failed to notify admins:", error);
-                    toast.error("Order placed but admin notifications failed");
                 }
             }
 
 
             // 2. Check Low Stock Levels and Alert Admin
-            // We need to check the *new* stock levels.
             items.forEach(async (item) => {
                 try {
-                    // We can fetch the new stock or calculate it. 
-                    // Fetching is safer to ensure we get the committed value.
-                    // But getting it from DB is an extra read.
-                    // Let's simply call our helper which fetches and checks.
-                    // Note: This calls checkAndAlertLowStock which does a read effectively.
-                    // Depending on implementation of checkAndAlertLowStock.
                     const productRef = doc(db, "products", item.product.id);
                     const snap = await import("firebase/firestore").then(m => m.getDoc(productRef));
                     if (snap.exists()) {
@@ -310,6 +284,16 @@ const Checkout = () => {
             toast.error(error.message || "Failed to place order. Please try again.");
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    const handleAuthRedirect = () => {
+        if (pendingData) {
+            navigate("/register", {
+                state: {
+                    email: pendingData.email
+                }
+            });
         }
     };
 
@@ -582,6 +566,20 @@ const Checkout = () => {
             </main>
 
             <Footer />
+
+            <AlertDialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Account Required for Tracking</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            In order to track your order progress, kindly sign in or register an account. It only takes a moment!
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogAction onClick={handleAuthRedirect}>Ok</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 };

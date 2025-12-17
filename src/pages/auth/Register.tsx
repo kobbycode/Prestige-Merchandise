@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,30 @@ const Register = () => {
     const { signup } = useAuth();
     const navigate = useNavigate();
 
+    const location = useLocation();
+
+    // Helper function for human-readable errors
+    const getFriendlyErrorMessage = (errorCode: string, defaultMessage: string) => {
+        switch (errorCode) {
+            case 'auth/email-already-in-use':
+                return 'This email is already registered. Please sign in instead.';
+            case 'auth/invalid-email':
+                return 'Please enter a valid email address.';
+            case 'auth/operation-not-allowed':
+                return 'Account creation is currently disabled.';
+            case 'auth/weak-password':
+                return 'Password is too weak. Please use a stronger password.';
+            default:
+                return defaultMessage;
+        }
+    };
+
+    useEffect(() => {
+        if (location.state?.email) {
+            setEmail(location.state.email);
+        }
+    }, [location.state]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -35,10 +59,17 @@ const Register = () => {
 
         try {
             await signup(email, password);
-            navigate("/"); // Redirect to home on success
+            // Pass email, password and returnTo (if exists) or default instructions
+            navigate("/login", {
+                state: {
+                    email: email,
+                    password: password,
+                    message: "Registration successful! Signing you in..."
+                }
+            });
         } catch (err: any) {
             console.error("Registration error:", err);
-            setError(err.message || "Failed to create account");
+            setError(getFriendlyErrorMessage(err.code, err.message || "Failed to create account"));
         } finally {
             setLoading(false);
         }

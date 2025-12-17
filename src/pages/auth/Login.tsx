@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,40 @@ const Login = () => {
     const { login } = useAuth();
     const navigate = useNavigate();
 
+    const location = useLocation();
+
+    // Helper for friendly errors
+    const getFriendlyErrorMessage = (errorCode: string, defaultMessage: string) => {
+        switch (errorCode) {
+            case 'auth/invalid-credential':
+            case 'auth/user-not-found':
+            case 'auth/wrong-password':
+                return 'Invalid email or password. Please check your credentials.';
+            case 'auth/too-many-requests':
+                return 'Too many failed attempts. Please try again later.';
+            case 'auth/user-disabled':
+                return 'This account has been disabled.';
+            default:
+                return defaultMessage;
+        }
+    };
+
+    useEffect(() => {
+        if (location.state?.email) {
+            setEmail(location.state.email);
+        }
+        if (location.state?.password) {
+            setPassword(location.state.password);
+            // Optional: Auto-submit if coming from registration? 
+            // Ideally not, UX wise it's better they click confirm or see "Sign In" 
+            // but user request implies "so they can sign in" with details filled.
+        }
+        if (location.state?.message) {
+            // Could show a toast or message
+            // For now we just let them sign in
+        }
+    }, [location.state]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
@@ -25,10 +59,12 @@ const Login = () => {
 
         try {
             await login(email, password);
-            navigate("/"); // Redirect to home or previous page
+            // If they were redirected here from checkout (via register), they likely want to resume checkout
+            // But cart persists. So redirecting to /checkout is safe if cart not empty.
+            navigate("/checkout");
         } catch (err: any) {
             console.error("Login error:", err);
-            setError(err.message || "Failed to log in");
+            setError(getFriendlyErrorMessage(err.code, err.message || "Failed to log in"));
         } finally {
             setLoading(false);
         }
