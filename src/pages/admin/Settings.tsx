@@ -17,8 +17,8 @@ const Settings = () => {
     const [settings, setSettings] = useState<StoreSettings>({
         facebookUrl: "",
         whatsappNumber: "0247654321",
-        locations: ["Abossey Okai, Near Total Filling Station"],
-        location: "Abossey Okai, Near Total Filling Station",
+        locations: ["Abossey Okai- Former Odasani Hotel"],
+        location: "Abossey Okai- Former Odasani Hotel",
         phone: "054 123 4567",
         email: "sales@prestigemerchgh.com",
         businessHours: {

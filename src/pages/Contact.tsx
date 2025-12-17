@@ -257,18 +257,22 @@ const Contact = () => {
             <h2 className="text-3xl font-bold mb-6 text-center">Find Us on the Map</h2>
 
             {locations.length > 1 && (
-              <div className="flex justify-center gap-4 mb-6 flex-wrap">
-                {locations.map((loc, index) => (
-                  <Button
-                    key={index}
-                    variant={selectedLocation === loc ? "default" : "outline"}
-                    onClick={() => setSelectedLocation(loc)}
-                    className="min-w-[120px]"
-                  >
-                    <MapPin className="mr-2 h-4 w-4" />
-                    {loc.split(',')[0]} {/* Show first part of address as label */}
-                  </Button>
-                ))}
+              <div className="flex flex-col items-center mb-6">
+                <h3 className="text-sm font-medium text-muted-foreground mb-3 text-center uppercase tracking-wider">Select a Branch to View</h3>
+                <div className="flex justify-center gap-2 flex-wrap">
+                  {locations.map((loc, index) => (
+                    <Button
+                      key={index}
+                      variant={selectedLocation === loc ? "default" : "outline"}
+                      onClick={() => setSelectedLocation(loc)}
+                      className={`min-w-[120px] transition-all ${selectedLocation === loc ? 'ring-2 ring-primary ring-offset-2' : ''}`}
+                    >
+                      <MapPin className="mr-2 h-4 w-4" />
+                      {/* Truncate if too long, or use first part */}
+                      {loc.includes(',') ? loc.split(',')[0] : loc.substring(0, 20) + (loc.length > 20 ? '...' : '')}
+                    </Button>
+                  ))}
+                </div>
               </div>
             )}
 
@@ -288,8 +292,9 @@ const Contact = () => {
               </div>
             </Card>
             <div className="flex flex-col items-center mt-4 gap-2">
-              <p className="text-center text-muted-foreground">
-                Showing location: <span className="font-medium text-foreground">{selectedLocation}</span>
+              <p className="text-center text-muted-foreground flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-primary" />
+                <span>Selected: <span className="font-semibold text-foreground">{selectedLocation}</span></span>
               </p>
               <a
                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedLocation)}`}
