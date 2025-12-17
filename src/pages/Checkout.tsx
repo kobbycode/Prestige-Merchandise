@@ -53,7 +53,7 @@ const Checkout = () => {
     const { items, cartTotal, clearCart } = useCart();
     const { user } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [paymentMethod, setPaymentMethod] = useState<"cod" | "paystack">("cod");
+    const [paymentMethod, setPaymentMethod] = useState<"cod" | "paystack_momo" | "paystack_telecel" | "paystack_at" | "paystack_card">("cod");
 
     const form = useForm<CheckoutValues>({
         resolver: zodResolver(checkoutSchema),
@@ -144,6 +144,16 @@ const Checkout = () => {
         amount: paystackAmount, // Amount is in kobo (pesewas)
         publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || '',
         currency: 'GHS',
+        channels: paymentMethod === 'paystack_card' ? ['card'] : ['mobile_money', 'card'],
+        metadata: {
+            custom_fields: [
+                {
+                    display_name: "Mobile Number",
+                    variable_name: "mobile_number",
+                    value: form.getValues("phone")
+                }
+            ]
+        }
     };
 
     const initializePayment = usePaystackPayment(paystackConfig);
@@ -175,7 +185,7 @@ const Checkout = () => {
 
         setIsSubmitting(true);
 
-        if (paymentMethod === 'paystack') {
+        if (paymentMethod.startsWith('paystack')) {
             // Check if key is present
             if (!import.meta.env.VITE_PAYSTACK_PUBLIC_KEY) {
                 toast.error("Payment configuration missing. Please contact support.");
@@ -439,7 +449,7 @@ const Checkout = () => {
                                     <CardTitle>Payment Method</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <RadioGroup value={paymentMethod} onValueChange={(val: "cod" | "paystack") => setPaymentMethod(val)}>
+                                    <RadioGroup value={paymentMethod} onValueChange={(val: any) => setPaymentMethod(val)}>
                                         <div className="flex items-center space-x-2 border p-4 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors">
                                             <RadioGroupItem value="cod" id="cod" />
                                             <Label htmlFor="cod" className="flex-1 flex items-center cursor-pointer">
@@ -450,13 +460,47 @@ const Checkout = () => {
                                                 </div>
                                             </Label>
                                         </div>
+
                                         <div className="flex items-center space-x-2 border p-4 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors">
-                                            <RadioGroupItem value="paystack" id="paystack" />
-                                            <Label htmlFor="paystack" className="flex-1 flex items-center cursor-pointer">
+                                            <RadioGroupItem value="paystack_momo" id="paystack_momo" />
+                                            <Label htmlFor="paystack_momo" className="flex-1 flex items-center cursor-pointer">
+                                                <div className="mr-4 h-6 w-6 flex items-center justify-center font-bold text-yellow-500 border border-yellow-500 rounded-full text-[10px]">MTN</div>
+                                                <div>
+                                                    <span className="font-semibold block">MTN Mobile Money</span>
+                                                    <span className="text-secondary-foreground text-sm">Instant payment via MTN MoMo</span>
+                                                </div>
+                                            </Label>
+                                        </div>
+
+                                        <div className="flex items-center space-x-2 border p-4 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors">
+                                            <RadioGroupItem value="paystack_telecel" id="paystack_telecel" />
+                                            <Label htmlFor="paystack_telecel" className="flex-1 flex items-center cursor-pointer">
+                                                <div className="mr-4 h-6 w-6 flex items-center justify-center font-bold text-red-500 border border-red-500 rounded-full text-[10px]">T</div>
+                                                <div>
+                                                    <span className="font-semibold block">Telecel Cash</span>
+                                                    <span className="text-secondary-foreground text-sm">Instant payment via Telecel Cash</span>
+                                                </div>
+                                            </Label>
+                                        </div>
+
+                                        <div className="flex items-center space-x-2 border p-4 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors">
+                                            <RadioGroupItem value="paystack_at" id="paystack_at" />
+                                            <Label htmlFor="paystack_at" className="flex-1 flex items-center cursor-pointer">
+                                                <div className="mr-4 h-6 w-6 flex items-center justify-center font-bold text-blue-500 border border-blue-500 rounded-full text-[10px]">AT</div>
+                                                <div>
+                                                    <span className="font-semibold block">AirtelTigo Money</span>
+                                                    <span className="text-secondary-foreground text-sm">Instant payment via AT Money</span>
+                                                </div>
+                                            </Label>
+                                        </div>
+
+                                        <div className="flex items-center space-x-2 border p-4 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors">
+                                            <RadioGroupItem value="paystack_card" id="paystack_card" />
+                                            <Label htmlFor="paystack_card" className="flex-1 flex items-center cursor-pointer">
                                                 <CreditCard className="mr-4 h-6 w-6 text-primary" />
                                                 <div>
-                                                    <span className="font-semibold block">Pay Online (Mobile Money / Card)</span>
-                                                    <span className="text-secondary-foreground text-sm">MTN MomO, Telecel Cash, AirtelTigo, Visa/Mastercard</span>
+                                                    <span className="font-semibold block">Card Payment</span>
+                                                    <span className="text-secondary-foreground text-sm">Visa / Mastercard</span>
                                                 </div>
                                             </Label>
                                         </div>
@@ -519,7 +563,7 @@ const Checkout = () => {
                                                 Processing...
                                             </>
                                         ) : (
-                                            paymentMethod === 'paystack' ? `Pay ${formatPrice(cartTotal)} Now` : "Place Order"
+                                            paymentMethod.startsWith('paystack') ? `Pay ${formatPrice(cartTotal)} Now` : "Place Order"
                                         )}
                                     </Button>
                                 </CardFooter>
