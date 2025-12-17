@@ -49,6 +49,8 @@ const ProductForm = () => {
         tags: [],
         specifications: "",
         shippingInfo: "",
+        manufacturer: "",
+        condition: "",
     });
 
     useEffect(() => {
@@ -99,6 +101,8 @@ const ProductForm = () => {
                     tags: product.tags,
                     specifications: product.specifications || "",
                     shippingInfo: product.shippingInfo || "",
+                    manufacturer: product.manufacturer || "",
+                    condition: product.condition || "",
                 });
                 setImagePreviews(product.images);
             } else {
@@ -402,11 +406,44 @@ const ProductForm = () => {
                                 <CardTitle>Additional Details</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <Label htmlFor="manufacturer">Manufacturer</Label>
+                                        <Input
+                                            id="manufacturer"
+                                            placeholder="e.g., Toyota, OEM, Bosch"
+                                            value={formData.manufacturer || ""}
+                                            onChange={(e) => setFormData({ ...formData, manufacturer: e.target.value })}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <Label htmlFor="condition">Condition</Label>
+                                        <Select
+                                            value={formData.condition || ""}
+                                            onValueChange={(value) => setFormData({ ...formData, condition: value })}
+                                        >
+                                            <SelectTrigger id="condition">
+                                                <SelectValue placeholder="Select condition" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="Brand New">Brand New</SelectItem>
+                                                <SelectItem value="Used - Like New">Used - Like New</SelectItem>
+                                                <SelectItem value="Used - Good">Used - Good</SelectItem>
+                                                <SelectItem value="Used - Fair">Used - Fair</SelectItem>
+                                                <SelectItem value="Refurbished">Refurbished</SelectItem>
+                                                <SelectItem value="OEM">OEM</SelectItem>
+                                                <SelectItem value="Aftermarket">Aftermarket</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+
                                 <div>
                                     <Label htmlFor="specifications">Specifications</Label>
                                     <Textarea
                                         id="specifications"
-                                        placeholder="Enter product specifications (e.g., Manufacturer: OEM, Condition: Brand New, Warranty: 1 Year)"
+                                        placeholder="Enter product specifications (e.g., Warranty: 1 Year, Material: Steel)"
                                         value={formData.specifications || ""}
                                         onChange={(e) => setFormData({ ...formData, specifications: e.target.value })}
                                         rows={4}

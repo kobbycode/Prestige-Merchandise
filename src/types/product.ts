@@ -20,6 +20,8 @@ export interface Product {
     tags: string[];
     specifications?: string; // Additional product specifications (multiline)
     shippingInfo?: string; // Shipping/delivery information
+    manufacturer?: string; // Product manufacturer or brand
+    condition?: string; // Product condition (e.g., New, Used, Refurbished)
     createdAt: string;
     updatedAt: string;
     createdBy: string; // Admin UID
