@@ -39,6 +39,12 @@ service cloud.firestore {
         request.resource.data.diff(resource.data)
           .affectedKeys().hasOnly(['stock']) &&
         request.resource.data.stock < resource.data.stock;
+
+      // Anyone can increment view count
+      allow update: if 
+        request.resource.data.diff(resource.data)
+          .affectedKeys().hasOnly(['views']) &&
+        request.resource.data.views > resource.data.views;
     }
 
     // =========================
@@ -108,7 +114,10 @@ service cloud.firestore {
       allow create: if (request.auth != null && request.resource.data.userId == request.auth.uid) ||
                        (request.resource.data.recipientRole == 'admin');
 
-      // Allow admins to update/delete
+      // Allow users to update their own notifications (mark as read)
+      allow update: if request.auth != null && resource.data.userId == request.auth.uid;
+
+      // Allow admins to update/delete any notification
       allow update, delete: if isAdmin();
     }
 
