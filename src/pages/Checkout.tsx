@@ -464,7 +464,9 @@ const Checkout = () => {
                                         <div className="flex items-center space-x-2 border p-4 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors">
                                             <RadioGroupItem value="paystack_momo" id="paystack_momo" />
                                             <Label htmlFor="paystack_momo" className="flex-1 flex items-center cursor-pointer">
-                                                <div className="mr-4 h-6 w-6 flex items-center justify-center font-bold text-yellow-500 border border-yellow-500 rounded-full text-[10px]">MTN</div>
+                                                <div className="mr-4 h-10 w-12 flex items-center justify-center overflow-hidden rounded-md bg-white border">
+                                                    <img src="/assets/payment/mtn-momo.png" alt="MTN MoMo" className="h-full w-full object-contain" />
+                                                </div>
                                                 <div>
                                                     <span className="font-semibold block">MTN Mobile Money</span>
                                                     <span className="text-secondary-foreground text-sm">Instant payment via MTN MoMo</span>
@@ -475,7 +477,9 @@ const Checkout = () => {
                                         <div className="flex items-center space-x-2 border p-4 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors">
                                             <RadioGroupItem value="paystack_telecel" id="paystack_telecel" />
                                             <Label htmlFor="paystack_telecel" className="flex-1 flex items-center cursor-pointer">
-                                                <div className="mr-4 h-6 w-6 flex items-center justify-center font-bold text-red-500 border border-red-500 rounded-full text-[10px]">T</div>
+                                                <div className="mr-4 h-10 w-12 flex items-center justify-center overflow-hidden rounded-md bg-white border">
+                                                    <img src="/assets/payment/telecel-cash.jpg" alt="Telecel Cash" className="h-full w-full object-contain" />
+                                                </div>
                                                 <div>
                                                     <span className="font-semibold block">Telecel Cash</span>
                                                     <span className="text-secondary-foreground text-sm">Instant payment via Telecel Cash</span>
@@ -486,7 +490,9 @@ const Checkout = () => {
                                         <div className="flex items-center space-x-2 border p-4 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors">
                                             <RadioGroupItem value="paystack_at" id="paystack_at" />
                                             <Label htmlFor="paystack_at" className="flex-1 flex items-center cursor-pointer">
-                                                <div className="mr-4 h-6 w-6 flex items-center justify-center font-bold text-blue-500 border border-blue-500 rounded-full text-[10px]">AT</div>
+                                                <div className="mr-4 h-10 w-12 flex items-center justify-center overflow-hidden rounded-md bg-white border">
+                                                    <img src="/assets/payment/airteltigo-money.png" alt="AirtelTigo Money" className="h-full w-full object-contain" />
+                                                </div>
                                                 <div>
                                                     <span className="font-semibold block">AirtelTigo Money</span>
                                                     <span className="text-secondary-foreground text-sm">Instant payment via AT Money</span>
