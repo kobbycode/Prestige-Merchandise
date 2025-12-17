@@ -40,24 +40,54 @@ async function generateSitemap() {
         .where('status', '==', 'active')
         .get();
 
-    const productPages = productsSnapshot.docs.map(doc => ({
-        url: `/product/${doc.id}`,
-        priority: '0.8',
-        changefreq: 'weekly',
-        lastmod: doc.data().updatedAt?.toDate().toISOString().split('T')[0] || new Date().toISOString().split('T')[0]
-    }));
+    const productPages = productsSnapshot.docs.map(doc => {
+        const data = doc.data();
+        let lastmod = new Date().toISOString().split('T')[0];
+
+        if (data.updatedAt) {
+            // Handle Firebase Admin SDK Timestamp
+            const timestamp = data.updatedAt;
+            if (timestamp._seconds) {
+                lastmod = new Date(timestamp._seconds * 1000).toISOString().split('T')[0];
+            } else if (typeof timestamp.toDate === 'function') {
+                lastmod = timestamp.toDate().toISOString().split('T')[0];
+            }
+        }
+
+        return {
+            url: `/product/${doc.id}`,
+            priority: '0.8',
+            changefreq: 'weekly',
+            lastmod
+        };
+    });
 
     // Fetch blog posts
     const blogSnapshot = await db.collection('blog_posts')
         .where('status', '==', 'published')
         .get();
 
-    const blogPages = blogSnapshot.docs.map(doc => ({
-        url: `/blog/${doc.id}`,
-        priority: '0.6',
-        changefreq: 'monthly',
-        lastmod: doc.data().publishedAt?.toDate().toISOString().split('T')[0] || new Date().toISOString().split('T')[0]
-    }));
+    const blogPages = blogSnapshot.docs.map(doc => {
+        const data = doc.data();
+        let lastmod = new Date().toISOString().split('T')[0];
+
+        if (data.publishedAt) {
+            // Handle Firebase Admin SDK Timestamp
+            const timestamp = data.publishedAt;
+            if (timestamp._seconds) {
+                lastmod = new Date(timestamp._seconds * 1000).toISOString().split('T')[0];
+            } else if (typeof timestamp.toDate === 'function') {
+                lastmod = timestamp.toDate().toISOString().split('T')[0];
+            }
+        }
+
+        return {
+            url: `/blog/${doc.id}`,
+            priority: '0.6',
+            changefreq: 'monthly',
+            lastmod
+        };
+    });
 
     const allPages = [...staticPages, ...productPages, ...blogPages];
 
