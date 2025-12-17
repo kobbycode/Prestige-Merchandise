@@ -97,11 +97,30 @@ service cloud.firestore {
     // Notifications collection rules
     // =========================
     match /notifications/{notificationId} {
-      allow create: if true;
-      allow read, update, delete: if request.auth != null &&
-        resource.data.userId == request.auth.uid;
+      // Allow users to read their own notifications
+      allow read: if request.auth != null && (
+        resource.data.userId == request.auth.uid ||
+        (resource.data.recipientRole == 'admin' && isAdmin())
+      );
+
+      // Allow users to create notifications (e.g., for orders)
+      // Allow public to create notifications for admins (e.g., contact form)
+      allow create: if (request.auth != null && request.resource.data.userId == request.auth.uid) ||
+                       (request.resource.data.recipientRole == 'admin');
+
+      // Allow admins to update/delete
+      allow update, delete: if isAdmin();
     }
-    
+
+    // Messages (Contact Form)
+    match /messages/{messageId} {
+      // Allow anyone to create a message (public contact form)
+      allow create: if true;
+
+      // Only admins can read, update, or delete messages
+      allow read, update, delete: if isAdmin();
+    }
+
     // =========================
     // Wishlists collection rules
     // =========================

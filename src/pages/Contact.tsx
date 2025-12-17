@@ -67,6 +67,17 @@ const Contact = () => {
         createdAt: new Date().toISOString()
       });
 
+      // Send notification to admin
+      await addDoc(collection(db, "notifications"), {
+        type: "message",
+        title: "New Contact Message",
+        message: `New message from ${formData.name}`,
+        read: false,
+        createdAt: new Date().toISOString(),
+        recipientRole: "admin",
+        link: "/admin/messages"
+      });
+
       toast({
         title: "Message Sent!",
         description: "We'll get back to you as soon as possible.",
