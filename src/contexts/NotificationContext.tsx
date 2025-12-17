@@ -25,8 +25,21 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
 
     // Merge notifications whenever sources change
     useEffect(() => {
+        const getMillis = (d: any) => {
+            if (!d) return 0;
+            // Firestore Timestamp
+            if (typeof d.toMillis === 'function') return d.toMillis();
+            // JavaScript Date
+            if (d instanceof Date) return d.getTime();
+            // Firestore Timestamp-like object (e.g. from local storage or plain JSON)
+            if (typeof d.seconds === 'number') return d.seconds * 1000;
+            // String date
+            if (typeof d === 'string') return new Date(d).getTime();
+            return 0;
+        };
+
         const merged = [...userNotifications, ...roleNotifications].sort((a, b) =>
-            b.createdAt.toMillis() - a.createdAt.toMillis()
+            getMillis(b.createdAt) - getMillis(a.createdAt)
         );
         // Deduplicate by ID just in case
         const unique = Array.from(new Map(merged.map(item => [item.id, item])).values());

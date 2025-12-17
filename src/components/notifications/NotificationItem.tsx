@@ -38,7 +38,19 @@ const NotificationItem = ({ notification, onClick }: NotificationItemProps) => {
                 <p className="font-medium leading-none">{notification.title}</p>
                 <p className="text-muted-foreground text-xs line-clamp-2">{notification.message}</p>
                 <p className="text-[10px] text-muted-foreground/80">
-                    {notification.createdAt ? format(notification.createdAt.toDate(), "MMM d, h:mm a") : 'Just now'}
+                    {(() => {
+                        const date = notification.createdAt;
+                        if (!date) return 'Just now';
+                        try {
+                            if (typeof date.toDate === 'function') return format(date.toDate(), "MMM d, h:mm a");
+                            if (date instanceof Date) return format(date, "MMM d, h:mm a");
+                            if (typeof date === 'string') return format(new Date(date), "MMM d, h:mm a");
+                            if (typeof (date as any).seconds === 'number') return format(new Date((date as any).seconds * 1000), "MMM d, h:mm a");
+                            return 'Just now';
+                        } catch (e) {
+                            return 'Just now';
+                        }
+                    })()}
                 </p>
             </div>
             {!notification.read && (
