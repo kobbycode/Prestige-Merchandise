@@ -17,6 +17,7 @@ const Settings = () => {
     const [settings, setSettings] = useState<StoreSettings>({
         facebookUrl: "",
         whatsappNumber: "0247654321",
+        locations: ["Abossey Okai, Near Total Filling Station"],
         location: "Abossey Okai, Near Total Filling Station",
         phone: "054 123 4567",
         email: "sales@prestigemerchgh.com",
@@ -37,10 +38,23 @@ const Settings = () => {
 
             if (docSnap.exists()) {
                 const data = docSnap.data() as StoreSettings;
+
+                // Migration: If locations array is missing but legacy location string exists, split it
+                let locations = data.locations || [];
+                if (locations.length === 0 && data.location) {
+                    locations = data.location.split('/').map(l => l.trim()).filter(Boolean);
+                }
+
+                // Fallback default if absolutely nothing exists
+                if (locations.length === 0) {
+                    locations = ["Abossey Okai, Near Total Filling Station"];
+                }
+
                 setSettings({
                     facebookUrl: data.facebookUrl || "",
                     whatsappNumber: data.whatsappNumber || "",
-                    location: data.location || "",
+                    locations: locations,
+                    location: data.location || "", // Keep for reference
                     phone: data.phone || "",
                     email: data.email || "",
                     businessHours: {
@@ -63,8 +77,13 @@ const Settings = () => {
 
         try {
             const docRef = doc(db, "settings", "general");
+
+            // Sync legacy field for backward compatibility
+            const locationString = settings.locations?.join(' / ') || settings.location || "";
+
             await setDoc(docRef, {
                 ...settings,
+                location: locationString, // Update legacy field based on new array
                 updatedAt: new Date().toISOString()
             }, { merge: true });
 
@@ -187,17 +206,56 @@ const Settings = () => {
                             />
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="location" className="flex items-center gap-2">
+                        <div className="space-y-4">
+                            <Label className="flex items-center gap-2">
                                 <MapPin className="h-4 w-4" />
-                                Location
+                                Locations
                             </Label>
-                            <Input
-                                id="location"
-                                placeholder="Abossey Okai, Near Total Filling Station"
-                                value={settings.location}
-                                onChange={(e) => handleChange('location', e.target.value)}
-                            />
+
+                            <div className="space-y-3">
+                                {settings.locations?.map((loc, index) => (
+                                    <div key={index} className="flex gap-2">
+                                        <Input
+                                            value={loc}
+                                            onChange={(e) => {
+                                                const newLocations = [...(settings.locations || [])];
+                                                newLocations[index] = e.target.value;
+                                                setSettings(prev => ({ ...prev, locations: newLocations }));
+                                            }}
+                                            placeholder={`Location ${index + 1}`}
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => {
+                                                const newLocations = settings.locations?.filter((_, i) => i !== index);
+                                                setSettings(prev => ({ ...prev, locations: newLocations }));
+                                            }}
+                                            className="shrink-0 text-destructive hover:text-destructive/90 hover:bg-destructive/10"
+                                        >
+                                            <span className="sr-only">Delete</span>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><path d="M18 6 6 18" /><path d="m6 6 18 12" /></svg>
+                                        </Button>
+                                    </div>
+                                ))}
+
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setSettings(prev => ({
+                                        ...prev,
+                                        locations: [...(prev.locations || []), ""]
+                                    }))}
+                                    className="w-full border-dashed"
+                                >
+                                    + Add Another Location
+                                </Button>
+                                <p className="text-xs text-muted-foreground">
+                                    Add multiple store locations. Use the first one for your main branch.
+                                </p>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>

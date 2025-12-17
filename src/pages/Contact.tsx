@@ -18,14 +18,18 @@ const Contact = () => {
   const [selectedLocation, setSelectedLocation] = useState("");
 
   useEffect(() => {
-    if (settings.location) {
+    if (settings.locations && settings.locations.length > 0) {
+      setLocations(settings.locations);
+      setSelectedLocation(settings.locations[0]);
+    } else if (settings.location) {
+      // Fallback for legacy data not yet migrated or if array empty
       const locs = settings.location.split('/').map(l => l.trim()).filter(Boolean);
       setLocations(locs);
       if (locs.length > 0) {
         setSelectedLocation(locs[0]);
       }
     }
-  }, [settings.location]);
+  }, [settings.locations, settings.location]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -88,10 +92,23 @@ const Contact = () => {
                         <MapPin className="h-6 w-6 text-primary" />
                       </div>
                       <div>
-                        <h3 className="font-bold mb-1">Address</h3>
-                        <p className="text-muted-foreground whitespace-pre-line">
-                          {settings.location}
-                        </p>
+                        <h3 className="font-bold mb-1">Address{settings.locations && settings.locations.length > 1 ? 'es' : ''}</h3>
+                        {settings.locations && settings.locations.length > 0 ? (
+                          <div className="space-y-2">
+                            {settings.locations.map((loc, idx) => (
+                              <p key={idx} className="text-muted-foreground whitespace-pre-line border-l-2 border-primary/20 pl-2">
+                                {loc}
+                              </p>
+                            ))}
+                            <p className="text-muted-foreground mt-1">Accra, Ghana</p>
+                          </div>
+                        ) : (
+                          <p className="text-muted-foreground whitespace-pre-line">
+                            {settings.location}
+                            <br />
+                            Accra, Ghana
+                          </p>
+                        )}
                       </div>
                     </div>
                   </CardContent>

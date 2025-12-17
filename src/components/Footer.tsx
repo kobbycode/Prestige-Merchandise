@@ -50,7 +50,13 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-bold mb-4 text-primary-foreground">Contact Us</h3>
             <ul className="space-y-2 text-sm">
-              <li>📍 {settings.location}</li>
+              {settings.locations && settings.locations.length > 0 ? (
+                settings.locations.map((loc, idx) => (
+                  <li key={idx}>📍 {loc}</li>
+                ))
+              ) : (
+                <li>📍 {settings.location}</li>
+              )}
               <li>📞 {settings.phone}</li>
               <li>📱 WhatsApp: {settings.whatsappNumber}</li>
               <li>📧 {settings.email}</li>
