@@ -71,26 +71,19 @@ const OrderDetail = () => {
             const updatedHistory = [...(order.statusHistory || []), statusHistoryEntry];
             setOrder({ ...order, status: newStatus, statusHistory: updatedHistory });
 
-            // Create in-app notification for the customer (only if they're not an admin)
+            // Create in-app notification for the customer
             if (order.userId && order.userId !== "guest") {
                 try {
-                    // Check if the user is an admin
-                    const adminDocRef = doc(db, "admins", order.userId);
-                    const adminDoc = await getDoc(adminDocRef);
-
-                    // Only send customer notification if user is NOT an admin
-                    if (!adminDoc.exists()) {
-                        await addDoc(collection(db, "notifications"), {
-                            userId: order.userId,
-                            type: "order_status",
-                            title: "Order Status Updated",
-                            message: `Your order #${order.id.slice(0, 8)} is now ${newStatus}.`,
-                            read: false,
-                            createdAt: serverTimestamp(),
-                            data: { orderId: order.id },
-                            link: `/account/orders/${order.id}`
-                        });
-                    }
+                    await addDoc(collection(db, "notifications"), {
+                        userId: order.userId,
+                        type: "order_status",
+                        title: "Order Status Updated",
+                        message: `Your order #${order.id.slice(0, 8)} is now ${newStatus}.`,
+                        read: false,
+                        createdAt: serverTimestamp(),
+                        data: { orderId: order.id },
+                        link: `/account/orders/${order.id}`
+                    });
                 } catch (error) {
                     console.error("Error creating customer notification:", error);
                 }
