@@ -24,7 +24,7 @@ const app = initializeApp({
 const db = getFirestore(app);
 
 async function generateSitemap() {
-    const baseUrl = process.env.VITE_BASE_URL || 'https://your-vercel-url.vercel.app';
+    const baseUrl = process.env.VITE_BASE_URL || 'https://prestigemerchandise.vercel.app';
 
     const staticPages = [
         { url: '', priority: '1.0', changefreq: 'daily', lastmod: new Date().toISOString().split('T')[0] },
