@@ -453,7 +453,9 @@ const Checkout = () => {
                                         <div className="flex items-center space-x-2 border p-4 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors">
                                             <RadioGroupItem value="cod" id="cod" />
                                             <Label htmlFor="cod" className="flex-1 flex items-center cursor-pointer">
-                                                <Banknote className="mr-4 h-6 w-6 text-primary" />
+                                                <div className="mr-4 h-10 w-12 flex items-center justify-center overflow-hidden rounded-md bg-white border">
+                                                    <img src="/assets/payment/cash-on-delivery.jpg" alt="COD" className="h-full w-full object-contain" />
+                                                </div>
                                                 <div>
                                                     <span className="font-semibold block">Cash on Delivery</span>
                                                     <span className="text-secondary-foreground text-sm">Pay with cash upon delivery</span>
@@ -503,7 +505,9 @@ const Checkout = () => {
                                         <div className="flex items-center space-x-2 border p-4 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors">
                                             <RadioGroupItem value="paystack_card" id="paystack_card" />
                                             <Label htmlFor="paystack_card" className="flex-1 flex items-center cursor-pointer">
-                                                <CreditCard className="mr-4 h-6 w-6 text-primary" />
+                                                <div className="mr-4 h-10 w-12 flex items-center justify-center overflow-hidden rounded-md bg-white border">
+                                                    <img src="/assets/payment/card-payment.jpg" alt="Card Payment" className="h-full w-full object-contain" />
+                                                </div>
                                                 <div>
                                                     <span className="font-semibold block">Card Payment</span>
                                                     <span className="text-secondary-foreground text-sm">Visa / Mastercard</span>
