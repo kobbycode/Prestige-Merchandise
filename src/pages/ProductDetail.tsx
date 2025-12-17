@@ -59,10 +59,15 @@ const ProductDetail = () => {
                 // Increment view count if not already viewed in this session
                 const sessionKey = `viewed_product_${productId}`;
                 if (!sessionStorage.getItem(sessionKey)) {
-                    await updateDoc(docRef, {
-                        views: increment(1)
-                    });
-                    sessionStorage.setItem(sessionKey, 'true');
+                    try {
+                        await updateDoc(docRef, {
+                            views: increment(1)
+                        });
+                        sessionStorage.setItem(sessionKey, 'true');
+                    } catch (err) {
+                        console.error("Error incrementing view count:", err);
+                        // Silently fail if user doesn't have permission to update views
+                    }
                 }
 
             } else {
