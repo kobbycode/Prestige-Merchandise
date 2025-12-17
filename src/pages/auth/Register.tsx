@@ -9,6 +9,8 @@ import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { toast } from "sonner";
+
 
 const Register = () => {
     const [email, setEmail] = useState("");
@@ -60,10 +62,12 @@ const Register = () => {
         try {
             await signup(email, password);
             // Pass email, password and returnTo (if exists) or default instructions
+            toast.success("Registration successful!");
             navigate("/login", {
                 state: {
                     email: email,
                     password: password,
+                    checkoutData: location.state?.checkoutData, // Pass through checkout data
                     message: "Registration successful! Signing you in..."
                 }
             });

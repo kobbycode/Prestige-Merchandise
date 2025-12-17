@@ -15,6 +15,7 @@ export interface Order {
         address?: string;
         city?: string;
         region?: string;
+        notes?: string;
     };
     amount: number;
     status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';

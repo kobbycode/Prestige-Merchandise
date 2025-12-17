@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { getDoc } from "firebase/firestore";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -33,7 +33,7 @@ const checkoutSchema = z.object({
     firstName: z.string().min(2, "First name is required"),
     lastName: z.string().min(2, "Last name is required"),
     email: z.string().email("Valid email is required"),
-    phone: z.string().min(10, "Valid phone number is required"),
+    phone: z.string().regex(/^(0|\+233)[235][0-9]{8}$/, "Please enter a valid Ghanaian phone number (e.g., 0244123456)"),
     address: z.string().min(5, "Delivery address is required"),
     city: z.string().min(2, "City is required"),
     region: z.string().min(2, "Region is required"),
@@ -44,6 +44,7 @@ type CheckoutValues = z.infer<typeof checkoutSchema>;
 
 const Checkout = () => {
     const navigate = useNavigate();
+    const location = useLocation(); // Add useLocation
     const { items, cartTotal, clearCart } = useCart();
     const { user } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -69,11 +70,26 @@ const Checkout = () => {
 
     const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
 
+    // Restore form data from redirect if available
+    useEffect(() => {
+        if (location.state?.checkoutData) {
+            const data = location.state.checkoutData;
+            form.setValue("firstName", data.firstName);
+            form.setValue("lastName", data.lastName);
+            form.setValue("email", data.email);
+            form.setValue("phone", data.phone);
+            form.setValue("address", data.address);
+            form.setValue("city", data.city);
+            form.setValue("region", data.region);
+            form.setValue("notes", data.notes || "");
+        }
+    }, [location.state, form]);
+
     // Fetch user details and addresses
     useEffect(() => {
         if (user) {
-            // Pred-fill email
-            if (user.email) {
+            // Pred-fill email if not already filled by checkoutData
+            if (user.email && !form.getValues("email")) {
                 form.setValue("email", user.email);
             }
 
@@ -93,9 +109,9 @@ const Checkout = () => {
 
                     setSavedAddresses(addressList);
 
-                    // Auto-fill default address
+                    // Auto-fill default address ONLY if form is empty (don't overwrite persisted data)
                     const defaultAddr = addressList.find(a => a.isDefault);
-                    if (defaultAddr) {
+                    if (defaultAddr && !form.getValues("firstName")) {
                         fillFormWithAddress(defaultAddr);
                     }
                 } catch (error) {
@@ -291,7 +307,8 @@ const Checkout = () => {
         if (pendingData) {
             navigate("/register", {
                 state: {
-                    email: pendingData.email
+                    email: pendingData.email,
+                    checkoutData: pendingData
                 }
             });
         }
@@ -374,7 +391,7 @@ const Checkout = () => {
                                                         <FormItem>
                                                             <FormLabel>First Name</FormLabel>
                                                             <FormControl>
-                                                                <Input placeholder="John" {...field} />
+                                                                <Input placeholder="Daniel" {...field} />
                                                             </FormControl>
                                                             <FormMessage />
                                                         </FormItem>
@@ -387,7 +404,7 @@ const Checkout = () => {
                                                         <FormItem>
                                                             <FormLabel>Last Name</FormLabel>
                                                             <FormControl>
-                                                                <Input placeholder="Doe" {...field} />
+                                                                <Input placeholder="Mensah" {...field} />
                                                             </FormControl>
                                                             <FormMessage />
                                                         </FormItem>
@@ -402,7 +419,7 @@ const Checkout = () => {
                                                     <FormItem>
                                                         <FormLabel>Email</FormLabel>
                                                         <FormControl>
-                                                            <Input type="email" placeholder="john.doe@example.com" {...field} />
+                                                            <Input type="email" placeholder="daniel.mensah@example.com" {...field} />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>

@@ -285,6 +285,19 @@ const OrderDetail = () => {
                         </CardContent>
                     </Card>
 
+                    {order.customerDetails.notes && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Order Notes</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-sm italic text-muted-foreground whitespace-pre-wrap">
+                                    "{order.customerDetails.notes}"
+                                </p>
+                            </CardContent>
+                        </Card>
+                    )}
+
                     <Card>
                         <CardHeader>
                             <CardTitle>Payment Information</CardTitle>

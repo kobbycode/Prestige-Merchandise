@@ -9,6 +9,8 @@ import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { toast } from "sonner";
+
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -59,9 +61,14 @@ const Login = () => {
 
         try {
             await login(email, password);
+            toast.success("Login successful!");
             // If they were redirected here from checkout (via register), they likely want to resume checkout
             // But cart persists. So redirecting to /checkout is safe if cart not empty.
-            navigate("/checkout");
+            navigate("/checkout", {
+                state: {
+                    checkoutData: location.state?.checkoutData // Restore checkout form data
+                }
+            });
         } catch (err: any) {
             console.error("Login error:", err);
             setError(getFriendlyErrorMessage(err.code, err.message || "Failed to log in"));
