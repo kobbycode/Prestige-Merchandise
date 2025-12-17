@@ -13,6 +13,7 @@ import {
     Settings,
     Shield,
     FolderTree,
+    Mail,
     Star,
     ShoppingBag,
     User
@@ -71,6 +72,7 @@ const AdminLayout = () => {
         { icon: FileText, label: "Blog Posts", path: "/admin/blog" },
         // Only show Admins management to super_admin
         ...(role === 'super_admin' ? [{ icon: Shield, label: "Manage Admins", path: "/admin/admins" }] : []),
+        { icon: Mail, label: "Messages", path: "/admin/messages" },
         { icon: Settings, label: "Settings", path: "/admin/settings" },
         { icon: User, label: "Profile", path: "/admin/profile" },
     ];

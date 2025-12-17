@@ -11,11 +11,15 @@ import Footer from "@/components/Footer";
 import { useStoreSettings } from "@/hooks/useStoreSettings";
 import { useEffect } from "react";
 
+import { db } from "@/lib/firebase";
+import { collection, addDoc } from "firebase/firestore";
+
 const Contact = () => {
   const { toast } = useToast();
   const { settings } = useStoreSettings();
   const [locations, setLocations] = useState<string[]>([]);
   const [selectedLocation, setSelectedLocation] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (settings.locations && settings.locations.length > 0) {
@@ -38,7 +42,7 @@ const Contact = () => {
     phone: ""
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Simple validation
@@ -51,14 +55,35 @@ const Contact = () => {
       return;
     }
 
-    // In a real app, this would send to a server
-    toast({
-      title: "Message Sent!",
-      description: "We'll get back to you as soon as possible.",
-    });
+    setSubmitting(true);
 
-    // Reset form
-    setFormData({ name: "", email: "", phone: "", message: "" });
+    try {
+      await addDoc(collection(db, "messages"), {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        message: formData.message,
+        read: false,
+        createdAt: new Date().toISOString()
+      });
+
+      toast({
+        title: "Message Sent!",
+        description: "We'll get back to you as soon as possible.",
+      });
+
+      // Reset form
+      setFormData({ name: "", email: "", phone: "", message: "" });
+    } catch (error) {
+      console.error("Error sending message:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again or contact us via WhatsApp.",
+        variant: "destructive"
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -243,8 +268,8 @@ const Contact = () => {
                       />
                     </div>
 
-                    <Button type="submit" size="lg" className="w-full">
-                      Send Message
+                    <Button type="submit" size="lg" className="w-full" disabled={submitting}>
+                      {submitting ? "Sending..." : "Send Message"}
                     </Button>
                   </form>
                 </CardContent>

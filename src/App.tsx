@@ -27,6 +27,7 @@ import ProductForm from "./pages/admin/ProductForm";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminReviews from "./pages/admin/Reviews";
 import AdminSettings from "./pages/admin/Settings";
+import AdminMessages from "./pages/admin/Messages";
 import OrderDetail from "./pages/admin/OrderDetail";
 import AdminLayout from "./components/layout/AdminLayout";
 import CustomerProfile from "./pages/customer/Profile";
@@ -88,6 +89,7 @@ const App = () => (
                     <Route path="blog/new" element={<BlogPostForm />} />
                     <Route path="blog/:id/edit" element={<BlogPostForm />} />
                     <Route path="admins" element={<Admins />} />
+                    <Route path="messages" element={<AdminMessages />} />
                     <Route path="settings" element={<AdminSettings />} />
                     <Route path="profile" element={<Profile />} />
                   </Route>
