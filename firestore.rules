@@ -109,10 +109,12 @@ service cloud.firestore {
         (resource.data.recipientRole == 'admin' && isAdmin())
       );
 
-      // Allow users to create notifications (e.g., for orders)
+      // Allow users to create notifications for themselves
+      // Allow admins to create notifications for anyone
       // Allow public to create notifications for admins (e.g., contact form)
       allow create: if (request.auth != null && request.resource.data.userId == request.auth.uid) ||
-                       (request.resource.data.recipientRole == 'admin');
+                       (request.resource.data.recipientRole == 'admin') ||
+                       isAdmin();
 
       // Allow users to update their own notifications (mark as read)
       allow update: if request.auth != null && resource.data.userId == request.auth.uid;
