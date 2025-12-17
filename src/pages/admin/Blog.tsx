@@ -140,7 +140,7 @@ const Blog = () => {
                                             {post.isPublished ? "Published" : "Draft"}
                                         </div>
                                         <span className="text-xs text-muted-foreground">
-                                            {format(new Date(post.createdAt), "MMM d, yyyy")}
+                                            {format(new Date(post.createdAt), "MMM d, yyyy")} • {post.views || 0} views
                                         </span>
                                     </div>
                                 </div>
@@ -173,6 +173,7 @@ const Blog = () => {
                     <TableHeader>
                         <TableHead>Title</TableHead>
                         <TableHead>Status</TableHead>
+                        <TableHead>Views</TableHead>
                         <TableHead>Date</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                     </TableHeader>
@@ -209,6 +210,9 @@ const Blog = () => {
                                             }`}>
                                             {post.isPublished ? "Published" : "Draft"}
                                         </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        {post.views || 0}
                                     </TableCell>
                                     <TableCell>
                                         {format(new Date(post.createdAt), "MMM d, yyyy")}

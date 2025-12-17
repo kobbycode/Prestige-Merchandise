@@ -320,7 +320,7 @@ const Shop = () => {
                           </div>
                           <CardContent className="p-3 md:p-4">
                             <h3 className="font-semibold mb-1 md:mb-2 line-clamp-2 text-sm md:text-base min-h-[2.5rem] md:min-h-[3rem]">{product.name}</h3>
-                            <p className="text-xs text-muted-foreground mb-2 line-clamp-2 hidden md:block">{product.description}</p>
+                            <p className="text-sm text-muted-foreground mb-2 line-clamp-2 hidden md:block">{product.description}</p>
                             <div className="flex flex-col md:flex-row md:items-baseline gap-1 md:gap-2 mb-3 md:mb-4">
                               <p className="text-base md:text-2xl font-bold text-primary">GH₵{product.price.toFixed(2)}</p>
                               {product.compareAtPrice && (

@@ -47,6 +47,7 @@ export interface BlogPost {
     createdAt: string;
     updatedAt: string;
     tags: string[];
+    views?: number;
 }
 
 export interface Review {

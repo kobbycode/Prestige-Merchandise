@@ -430,9 +430,13 @@ const ProductDetail = () => {
                             </TabsList>
                             <TabsContent value="description" className="pt-8">
                                 <div className="prose prose-stone max-w-none dark:prose-invert">
-                                    <p className="text-lg leading-relaxed text-muted-foreground whitespace-pre-line">
-                                        {product.description}
-                                    </p>
+                                    {product.description.split('\n').map((paragraph, index) => (
+                                        paragraph.trim() && (
+                                            <p key={index} className="text-base md:text-lg leading-relaxed text-muted-foreground mb-4 last:mb-0">
+                                                {paragraph.trim()}
+                                            </p>
+                                        )
+                                    ))}
                                 </div>
                             </TabsContent>
                             <TabsContent value="details" className="pt-8">

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { doc, getDoc, collection, query, where, getDocs, limit } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, getDocs, limit, updateDoc, increment } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { BlogPost } from "@/types/product";
 import { Button } from "@/components/ui/button";
@@ -27,15 +27,35 @@ const BlogPostDetail = () => {
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
-                setPost({ id: docSnap.id, ...docSnap.data() } as BlogPost);
+                const postData = { id: docSnap.id, ...docSnap.data() } as BlogPost;
+                setPost(postData);
+
+                // Increment view count
+                const sessionKey = `viewed_post_${docSnap.id}`;
+                if (!sessionStorage.getItem(sessionKey)) {
+                    await updateDoc(docRef, {
+                        views: increment(1)
+                    });
+                    sessionStorage.setItem(sessionKey, 'true');
+                }
             } else {
                 // If not found by ID, try querying by slug field
                 const q = query(collection(db, "blog_posts"), where("slug", "==", slugId), limit(1));
                 const querySnapshot = await getDocs(q);
 
                 if (!querySnapshot.empty) {
-                    const doc = querySnapshot.docs[0];
-                    setPost({ id: doc.id, ...doc.data() } as BlogPost);
+                    const docFn = querySnapshot.docs[0];
+                    const postData = { id: docFn.id, ...docFn.data() } as BlogPost;
+                    setPost(postData);
+
+                    // Increment view count for slug match too
+                    const sessionKey = `viewed_post_${docFn.id}`;
+                    if (!sessionStorage.getItem(sessionKey)) {
+                        await updateDoc(docFn.ref, {
+                            views: increment(1)
+                        });
+                        sessionStorage.setItem(sessionKey, 'true');
+                    }
                 }
             }
         } catch (error) {
@@ -124,9 +144,13 @@ const BlogPostDetail = () => {
 
                 <article className="container mx-auto px-4 max-w-3xl">
                     <div className="prose prose-lg dark:prose-invert max-w-none">
-                        <div className="whitespace-pre-wrap leading-relaxed text-foreground/90">
-                            {post.content}
-                        </div>
+                        {post.content.split('\n').map((paragraph, index) => (
+                            paragraph.trim() && (
+                                <p key={index} className="text-lg leading-relaxed text-foreground/90 mb-6 last:mb-0">
+                                    {paragraph.trim()}
+                                </p>
+                            )
+                        ))}
                     </div>
 
 
