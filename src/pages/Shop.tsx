@@ -35,9 +35,15 @@ const Shop = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [priceRange, setPriceRange] = useState({ min: "", max: "" });
   const [sortBy, setSortBy] = useState("newest");
+  const [selectedManufacturer, setSelectedManufacturer] = useState("all");
+  const [selectedCondition, setSelectedCondition] = useState("all");
+  const [inStockOnly, setInStockOnly] = useState(false);
+  const [featuredOnly, setFeaturedOnly] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<string[]>([]);
+  const [manufacturers, setManufacturers] = useState<string[]>([]);
+  const [conditions, setConditions] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
@@ -55,7 +61,7 @@ const Shop = () => {
   // Reset pagination when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedCategory, priceRange, sortBy]);
+  }, [searchQuery, selectedCategory, priceRange, sortBy, selectedManufacturer, selectedCondition, inStockOnly, featuredOnly]);
 
   const fetchProducts = async () => {
     try {
@@ -64,6 +70,8 @@ const Shop = () => {
       const querySnapshot = await getDocs(q);
       const productsList: Product[] = [];
       const categoriesSet = new Set<string>();
+      const manufacturersSet = new Set<string>();
+      const conditionsSet = new Set<string>();
 
       querySnapshot.forEach((doc) => {
         const product = { id: doc.id, ...doc.data() } as Product;
@@ -71,10 +79,18 @@ const Shop = () => {
         if (product.category) {
           categoriesSet.add(product.category);
         }
+        if (product.manufacturer) {
+          manufacturersSet.add(product.manufacturer);
+        }
+        if (product.condition) {
+          conditionsSet.add(product.condition);
+        }
       });
 
       setProducts(productsList);
       setCategories(["All Products", ...Array.from(categoriesSet)]);
+      setManufacturers(["All", ...Array.from(manufacturersSet)]);
+      setConditions(["All", ...Array.from(conditionsSet)]);
     } catch (error) {
       console.error("Error fetching products:", error);
     } finally {
@@ -94,7 +110,19 @@ const Shop = () => {
     const maxPrice = priceRange.max ? parseFloat(priceRange.max) : Infinity;
     const matchesPrice = product.price >= minPrice && product.price <= maxPrice;
 
-    return matchesSearch && matchesCategory && matchesPrice;
+    const matchesManufacturer = selectedManufacturer === "all" ||
+      selectedManufacturer === "All" ||
+      product.manufacturer === selectedManufacturer;
+
+    const matchesCondition = selectedCondition === "all" ||
+      selectedCondition === "All" ||
+      product.condition === selectedCondition;
+
+    const matchesStock = !inStockOnly || product.stock > 0;
+
+    const matchesFeatured = !featuredOnly || product.featured;
+
+    return matchesSearch && matchesCategory && matchesPrice && matchesManufacturer && matchesCondition && matchesStock && matchesFeatured;
   }).sort((a, b) => {
     switch (sortBy) {
       case "price-asc":
@@ -113,6 +141,10 @@ const Shop = () => {
     setSearchQuery("");
     setSelectedCategory("all");
     setPriceRange({ min: "", max: "" });
+    setSelectedManufacturer("all");
+    setSelectedCondition("all");
+    setInStockOnly(false);
+    setFeaturedOnly(false);
   };
 
 
@@ -174,16 +206,83 @@ const Shop = () => {
           </div>
         </div>
 
-        {/* Clear Filters */}
-        {(searchQuery || selectedCategory !== "all" || priceRange.min || priceRange.max) && (
-          <Button
-            variant="outline"
-            className="w-full mt-6"
-            onClick={clearFilters}
-          >
-            Clear All Filters
-          </Button>
+        {/* Manufacturer Filter */}
+        {manufacturers.length > 1 && (
+          <div className="mb-6">
+            <h4 className="font-semibold mb-3 text-sm text-muted-foreground">MANUFACTURER</h4>
+            <Select value={selectedManufacturer} onValueChange={setSelectedManufacturer}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Manufacturers" />
+              </SelectTrigger>
+              <SelectContent>
+                {manufacturers.map((manufacturer, index) => (
+                  <SelectItem key={index} value={manufacturer === "All" ? "all" : manufacturer}>
+                    {manufacturer}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         )}
+
+        {/* Condition Filter */}
+        {conditions.length > 1 && (
+          <div className="mb-6">
+            <h4 className="font-semibold mb-3 text-sm text-muted-foreground">CONDITION</h4>
+            <Select value={selectedCondition} onValueChange={setSelectedCondition}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Conditions" />
+              </SelectTrigger>
+              <SelectContent>
+                {conditions.map((condition, index) => (
+                  <SelectItem key={index} value={condition === "All" ? "all" : condition}>
+                    {condition}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        {/* Stock Availability */}
+        <div className="mb-6">
+          <h4 className="font-semibold mb-3 text-sm text-muted-foreground">AVAILABILITY</h4>
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={inStockOnly}
+              onChange={(e) => setInStockOnly(e.target.checked)}
+              className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+            />
+            <span className="text-sm">In Stock Only</span>
+          </label>
+        </div>
+
+        {/* Featured Products */}
+        <div className="mb-6">
+          <h4 className="font-semibold mb-3 text-sm text-muted-foreground">SPECIAL</h4>
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={featuredOnly}
+              onChange={(e) => setFeaturedOnly(e.target.checked)}
+              className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+            />
+            <span className="text-sm">Featured Products Only</span>
+          </label>
+        </div>
+
+        {/* Clear Filters */}
+        {(searchQuery || selectedCategory !== "all" || priceRange.min || priceRange.max ||
+          selectedManufacturer !== "all" || selectedCondition !== "all" || inStockOnly || featuredOnly) && (
+            <Button
+              variant="outline"
+              className="w-full mt-6"
+              onClick={clearFilters}
+            >
+              Clear All Filters
+            </Button>
+          )}
       </div>
     </div>
   );

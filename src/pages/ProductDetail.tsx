@@ -27,6 +27,7 @@ import { Share2 } from "lucide-react";
 import { useStoreSettings } from "@/hooks/useStoreSettings";
 import SEOHead from "@/components/SEOHead";
 import { FaWhatsapp, FaLink } from "react-icons/fa";
+import { ProductDetailSkeleton } from "@/components/product/ProductDetailSkeleton";
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -141,8 +142,8 @@ const ProductDetail = () => {
         return (
             <div className="flex flex-col min-h-screen">
                 <Header />
-                <main className="flex-1 flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                <main className="flex-1">
+                    <ProductDetailSkeleton />
                 </main>
                 <Footer />
             </div>
