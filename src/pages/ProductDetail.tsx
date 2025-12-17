@@ -25,7 +25,7 @@ import { toast } from "sonner";
 import { useCart } from "@/contexts/CartContext";
 import { Share2 } from "lucide-react";
 import { useStoreSettings } from "@/hooks/useStoreSettings";
-import { Helmet } from "react-helmet-async";
+import SEOHead from "@/components/SEOHead";
 import { FaWhatsapp, FaLink } from "react-icons/fa";
 
 const ProductDetail = () => {
@@ -160,30 +160,36 @@ const ProductDetail = () => {
 
     return (
         <div className="flex flex-col min-h-screen bg-background text-foreground">
-            {product && (
-                <Helmet>
-                    <title>{product.name} | The Prestige Merchandise</title>
-                    <meta name="description" content={product.description.substring(0, 160)} />
-
-                    {/* Open Graph / Facebook */}
-                    <meta property="og:type" content="product" />
-                    <meta property="og:url" content={window.location.href} />
-                    <meta property="og:title" content={`${product.name} - GH₵${product.price.toFixed(2)}`} />
-                    <meta property="og:description" content={product.description.substring(0, 160)} />
-                    {product.images && product.images.length > 0 && (
-                        <meta property="og:image" content={product.images[0]} />
-                    )}
-
-                    {/* Twitter */}
-                    <meta name="twitter:card" content="summary_large_image" />
-                    <meta name="twitter:url" content={window.location.href} />
-                    <meta name="twitter:title" content={`${product.name} - GH₵${product.price.toFixed(2)}`} />
-                    <meta name="twitter:description" content={product.description.substring(0, 160)} />
-                    {product.images && product.images.length > 0 && (
-                        <meta name="twitter:image" content={product.images[0]} />
-                    )}
-                </Helmet>
-            )}
+            <SEOHead
+                title={`${product.name} - GH₵${product.price.toFixed(2)} | The Prestige Merchandise`}
+                description={product.description.substring(0, 160)}
+                keywords={`${product.name}, ${product.category}, auto parts Ghana, ${product.sku}`}
+                image={product.images && product.images.length > 0 ? product.images[0] : undefined}
+                url={`/product/${product.id}`}
+                type="product"
+                structuredData={{
+                    "@context": "https://schema.org",
+                    "@type": "Product",
+                    "name": product.name,
+                    "description": product.description,
+                    "image": product.images,
+                    "sku": product.sku,
+                    "category": product.category,
+                    "offers": {
+                        "@type": "Offer",
+                        "url": typeof window !== 'undefined' ? window.location.href : '',
+                        "priceCurrency": "GHS",
+                        "price": product.price,
+                        "priceValidUntil": new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+                        "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+                        "itemCondition": "https://schema.org/NewCondition"
+                    },
+                    "brand": {
+                        "@type": "Brand",
+                        "name": "The Prestige Merchandise"
+                    }
+                }}
+            />
             <Header />
 
             <main className="flex-1">

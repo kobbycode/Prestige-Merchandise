@@ -1,14 +1,14 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
+# Allow all crawlers
 User-agent: *
 Allow: /
+
+# Disallow admin and account pages from indexing
+Disallow: /admin/
+Disallow: /account/
+Disallow: /checkout
+
+# Sitemap location (update with your actual domain)
+Sitemap: https://your-vercel-url.vercel.app/sitemap.xml
+
+# Crawl delay for polite crawling
+Crawl-delay: 1

@@ -10,6 +10,7 @@ import { Wrench, Truck, DollarSign, FileText, MessageCircle, ShoppingCart, Packa
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import RecentlyViewed from "@/components/product/RecentlyViewed";
+import SEOHead from "@/components/SEOHead";
 import heroImage from "@/assets/hero-mechanic.jpg";
 
 const Index = () => {
@@ -68,6 +69,36 @@ const Index = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <SEOHead
+        url="/"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "AutoPartsStore",
+          "name": "The Prestige Merchandise",
+          "description": "Your trusted auto parts dealer in Abossey Okai. Genuine power steering pumps, steering racks, lubricants & more.",
+          "url": typeof window !== 'undefined' ? window.location.origin : '',
+          "telephone": "+233-24-765-4321",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Abossey Okai",
+            "addressLocality": "Accra",
+            "addressRegion": "Greater Accra",
+            "addressCountry": "GH"
+          },
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": "5.614818",
+            "longitude": "-0.186964"
+          },
+          "priceRange": "₵₵",
+          "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+            "opens": "08:00",
+            "closes": "18:00"
+          }
+        }}
+      />
       <Header />
 
       <main>
