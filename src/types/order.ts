@@ -20,6 +20,9 @@ export interface Order {
     amount: number;
     status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
     statusHistory?: StatusHistoryItem[];
+    trackingNumber?: string;
+    trackingCarrier?: string;
+    trackingUrl?: string;
     createdAt: any;
     items: any[];
 }

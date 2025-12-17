@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Star, User, Loader2 } from "lucide-react";
+import { Star, User, Loader2, Upload, X, Image as ImageIcon } from "lucide-react";
 import { collection, addDoc, query, where, orderBy, getDocs, Timestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { db, storage } from "@/lib/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Review } from "@/types/product";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -24,6 +25,8 @@ const Reviews = ({ productId }: ReviewsProps) => {
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState("");
     const [hoverRating, setHoverRating] = useState(0);
+    const [imageFiles, setImageFiles] = useState<File[]>([]);
+    const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
     useEffect(() => {
         fetchReviews();
@@ -52,6 +55,29 @@ const Reviews = ({ productId }: ReviewsProps) => {
         }
     };
 
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || []);
+        if (files.length + imageFiles.length > 5) {
+            toast.error("You can only upload up to 5 images");
+            return;
+        }
+
+        setImageFiles(prev => [...prev, ...files]);
+
+        files.forEach(file => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreviews(prev => [...prev, reader.result as string]);
+            };
+            reader.readAsDataURL(file);
+        });
+    };
+
+    const removeImage = (index: number) => {
+        setImagePreviews(prev => prev.filter((_, i) => i !== index));
+        setImageFiles(prev => prev.filter((_, i) => i !== index));
+    };
+
     const handleSubmitReview = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -68,25 +94,38 @@ const Reviews = ({ productId }: ReviewsProps) => {
         setSubmitLoading(true);
 
         try {
+            // Upload images first
+            const imageUrls: string[] = [];
+            if (imageFiles.length > 0) {
+                const uploadPromises = imageFiles.map(async (file) => {
+                    const storageRef = ref(storage, `reviews/${productId}/${Date.now()}_${file.name}`);
+                    await uploadBytes(storageRef, file);
+                    return getDownloadURL(storageRef);
+                });
+                const urls = await Promise.all(uploadPromises);
+                imageUrls.push(...urls);
+            }
+
             const newReview = {
                 productId,
                 userId: user?.uid || "anonymous",
                 userName: user?.displayName || user?.email?.split('@')[0] || "Customer",
                 rating,
                 comment,
+                images: imageUrls.length > 0 ? imageUrls : undefined,
                 createdAt: new Date().toISOString(),
                 isVerifiedPurchase: false,
-                status: 'pending' // Default status
+                status: 'pending'
             };
-
-            await addDoc(collection(db, "reviews"), newReview);
 
             await addDoc(collection(db, "reviews"), newReview);
 
             toast.success("Review submitted! It will appear after approval.");
             setRating(0);
             setComment("");
-            fetchReviews(); // Refresh list
+            setImageFiles([]);
+            setImagePreviews([]);
+            fetchReviews();
         } catch (error) {
             console.error("Error submitting review:", error);
             toast.error("Failed to submit review: " + (error instanceof Error ? error.message : "Unknown error"));
@@ -172,6 +211,50 @@ const Reviews = ({ productId }: ReviewsProps) => {
                                         />
                                     </div>
 
+                                    {/* Image Upload */}
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">Photos (Optional)</label>
+
+                                        {imagePreviews.length > 0 && (
+                                            <div className="grid grid-cols-5 gap-2 mb-3">
+                                                {imagePreviews.map((preview, index) => (
+                                                    <div key={index} className="relative group">
+                                                        <img
+                                                            src={preview}
+                                                            alt={`Preview ${index + 1}`}
+                                                            className="w-full aspect-square object-cover rounded-md"
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeImage(index)}
+                                                            className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                        >
+                                                            <X className="h-3 w-3" />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {imagePreviews.length < 5 && (
+                                            <label className="cursor-pointer">
+                                                <div className="border-2 border-dashed rounded-lg p-4 text-center hover:border-primary transition-colors">
+                                                    <Upload className="h-6 w-6 mx-auto mb-1 text-muted-foreground" />
+                                                    <p className="text-xs text-muted-foreground">
+                                                        Add photos ({imagePreviews.length}/5)
+                                                    </p>
+                                                </div>
+                                                <Input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    multiple
+                                                    className="hidden"
+                                                    onChange={handleImageChange}
+                                                />
+                                            </label>
+                                        )}
+                                    </div>
+
                                     <Button type="submit" disabled={submitLoading}>
                                         {submitLoading ? (
                                             <>
@@ -244,6 +327,21 @@ const Reviews = ({ productId }: ReviewsProps) => {
                                 <p className="text-foreground/90 mt-2 text-sm md:text-base">
                                     {review.comment}
                                 </p>
+
+                                {/* Review Images */}
+                                {review.images && review.images.length > 0 && (
+                                    <div className="grid grid-cols-4 gap-2 mt-3">
+                                        {review.images.map((image, idx) => (
+                                            <img
+                                                key={idx}
+                                                src={image}
+                                                alt={`Review image ${idx + 1}`}
+                                                className="w-full aspect-square object-cover rounded-md cursor-pointer hover:opacity-80 transition-opacity"
+                                                onClick={() => window.open(image, '_blank')}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     ))

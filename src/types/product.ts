@@ -59,6 +59,7 @@ export interface Review {
     userName: string;
     rating: number; // 1-5
     comment: string;
+    images?: string[]; // Array of image URLs from Firebase Storage
     createdAt: string;
     isVerifiedPurchase?: boolean;
     status?: 'pending' | 'approved' | 'rejected';
