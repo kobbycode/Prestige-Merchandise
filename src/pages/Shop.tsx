@@ -23,7 +23,7 @@ import { useCart } from "@/contexts/CartContext";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Filter as FilterIcon } from "lucide-react";
 import WishlistButton from "@/components/wishlist/WishlistButton";
-
+import { ProductGridSkeleton } from "@/components/product/ProductCardSkeleton";
 import { useStoreSettings } from "@/hooks/useStoreSettings";
 
 const Shop = () => {
@@ -192,7 +192,7 @@ const Shop = () => {
     <div className="flex flex-col min-h-screen">
       <Header />
 
-      <main className="flex-1">
+      <main className="flex-1 animate-fade-in">
         {/* Page Header */}
         <section className="bg-secondary text-secondary-foreground py-8 md:py-12">
           <div className="container mx-auto px-4">
@@ -203,8 +203,12 @@ const Shop = () => {
 
         <div className="container mx-auto px-4 py-6 md:py-8">
           {loading ? (
-            <div className="flex items-center justify-center h-[50vh]">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            <div className="space-y-8">
+              <div className="mb-6 md:mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div className="w-full max-w-xl h-14 bg-muted animate-pulse rounded-md"></div>
+                <div className="w-full md:w-auto h-10 bg-muted animate-pulse rounded-md"></div>
+              </div>
+              <ProductGridSkeleton count={12} />
             </div>
           ) : (
             <>
@@ -286,11 +290,11 @@ const Shop = () => {
                       </Button>
                     </Card>
                   ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
-                      {filteredProducts.map((product) => (
+                    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 stagger-animation">
+                      {paginatedProducts.map((product) => (
                         <Card
                           key={product.id}
-                          className="shadow-card hover:shadow-hover transition-all overflow-hidden group cursor-pointer"
+                          className="shadow-card hover:shadow-hover transition-all overflow-hidden group cursor-pointer animate-slide-up"
                           onClick={() => navigate(`/product/${product.id}`)}
                         >
                           <div className="aspect-square overflow-hidden bg-muted relative">

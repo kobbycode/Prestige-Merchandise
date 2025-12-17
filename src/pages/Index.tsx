@@ -12,6 +12,7 @@ import Footer from "@/components/Footer";
 import RecentlyViewed from "@/components/product/RecentlyViewed";
 import SEOHead from "@/components/SEOHead";
 import heroImage from "@/assets/hero-mechanic.jpg";
+import { ProductCardSkeleton } from "@/components/product/ProductCardSkeleton";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -101,7 +102,7 @@ const Index = () => {
       />
       <Header />
 
-      <main>
+      <main className="animate-fade-in">
         {/* Hero Section */}
         <section className="relative h-[450px] md:h-[600px] bg-secondary overflow-hidden">
           <div
@@ -134,12 +135,12 @@ const Index = () => {
         {/* Why Choose Us Section */}
         <section className="py-10 md:py-16 bg-muted">
           <div className="container mx-auto px-4">
-            <h2 className="text-2xl md:text-4xl font-bold text-center mb-8 md:mb-12">Why Choose Us?</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <h2 className="text-2xl md:text-4xl font-bold text-center mb-8 md:mb-12 animate-slide-up">Why Choose Us?</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 stagger-animation">
               {features.map((feature, index) => {
                 const Icon = feature.icon;
                 return (
-                  <Card key={index} className="shadow-card hover:shadow-hover transition-shadow">
+                  <Card key={index} className="shadow-card hover:shadow-hover transition-shadow animate-slide-up">
                     <CardContent className="p-6 text-center">
                       <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
                         <Icon className="h-8 w-8 text-primary" />
@@ -161,15 +162,17 @@ const Index = () => {
             <p className="text-center text-muted-foreground mb-8 md:mb-12">Browse our most popular auto parts</p>
 
             {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-8">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <ProductCardSkeleton key={index} />
+                ))}
               </div>
             ) : featuredProducts.length > 0 ? (
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-8">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-8 stagger-animation">
                 {featuredProducts.map((product) => (
                   <Card
                     key={product.id}
-                    className="shadow-card hover:shadow-hover transition-all overflow-hidden group cursor-pointer"
+                    className="shadow-card hover:shadow-hover transition-all overflow-hidden group cursor-pointer animate-slide-up"
                     onClick={() => navigate(`/product/${product.id}`)}
                   >
                     <div className="aspect-square overflow-hidden bg-muted relative">

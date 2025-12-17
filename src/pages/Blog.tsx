@@ -9,6 +9,7 @@ import { Search, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { BlogGridSkeleton } from "@/components/product/BlogCardSkeleton";
 
 const Blog = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -49,7 +50,7 @@ const Blog = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-grow container mx-auto px-4 py-8">
+      <main className="flex-grow container mx-auto px-4 py-8 animate-fade-in">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Our Blog</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -70,18 +71,16 @@ const Blog = () => {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          </div>
+          <BlogGridSkeleton count={6} />
         ) : filteredPosts.length === 0 ? (
           <div className="text-center py-20 text-muted-foreground">
             {searchQuery ? "No articles found matching your search." : "No published articles yet. Check back soon!"}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 stagger-animation">
             {filteredPosts.map((post) => (
               <Link to={`/blog/${post.slug || post.id}`} key={post.id} className="group">
-                <Card className="h-full overflow-hidden transition-all hover:shadow-lg border-muted">
+                <Card className="h-full overflow-hidden transition-all hover:shadow-lg border-muted animate-slide-up">
                   <div className="aspect-video w-full overflow-hidden bg-muted">
                     {post.coverImage ? (
                       <img
