@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Separator } from "@/components/ui/separator";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { Loader2, ArrowLeft, MapPin, Phone, Calendar, Truck } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
