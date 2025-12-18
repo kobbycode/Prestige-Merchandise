@@ -225,7 +225,7 @@ const Index = () => {
                           Add to Cart
                         </Button>
                         <a
-                          href={`https://wa.me/${settings.whatsappNumber}?text=I'm interested in ${product.name}`}
+                          href={`https://wa.me/${settings.whatsappNumber}?text=Hello, I'm interested in ${product.name} (${formatPrice(product.price)}): ${window.location.origin}/product/${product.id}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="block"

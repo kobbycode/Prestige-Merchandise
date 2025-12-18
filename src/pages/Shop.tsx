@@ -442,7 +442,7 @@ const Shop = () => {
                                 Add to Cart
                               </Button>
                               <a
-                                href={`https://wa.me/${settings.whatsappNumber}?text=I am interested in this product: ${window.location.origin}/product/${product.id}`}
+                                href={`https://wa.me/${settings.whatsappNumber}?text=Hello, I'm interested in ${product.name} (${formatPrice(product.price)}): ${window.location.origin}/product/${product.id}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="block"
