@@ -200,6 +200,17 @@ const Checkout = () => {
         }
     };
 
+    const getReadablePaymentMethod = (method: string) => {
+        switch (method) {
+            case 'cod': return 'Cash on Delivery';
+            case 'paystack_momo': return 'MTN Mobile Money';
+            case 'paystack_telecel': return 'Telecel Cash';
+            case 'paystack_at': return 'AirtelTigo Money';
+            case 'paystack_card': return 'Card Payment';
+            default: return 'Online Payment';
+        }
+    };
+
     const processOrder = async (data: CheckoutValues, paymentMethodType: "cod" | "prepaid", paymentReference?: string) => {
         try {
             const orderData = {
@@ -215,7 +226,7 @@ const Checkout = () => {
                 })),
                 amount: cartTotal,
                 status: "pending",
-                paymentMethod: paymentMethodType,
+                paymentMethod: getReadablePaymentMethod(paymentMethod),
                 paymentStatus: paymentMethodType === "prepaid" ? "paid" : "unpaid",
                 paymentReference: paymentReference || null,
                 currency,

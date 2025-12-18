@@ -335,10 +335,16 @@ const OrderDetail = () => {
                             <div className="flex items-center gap-3">
                                 <CreditCard className="h-5 w-5 text-muted-foreground" />
                                 <div>
-                                    <p className="font-medium">Cash on Delivery</p>
-                                    <p className="text-sm text-muted-foreground">
-                                        Badge: <Badge className={getStatusClassName(order.status)} variant="outline">{order.status}</Badge>
-                                    </p>
+                                    <p className="font-medium">{order.paymentMethod || "Cash on Delivery"}</p>
+                                    <div className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
+                                        Status:
+                                        <Badge
+                                            variant={order.paymentStatus === 'paid' ? 'default' : 'secondary'}
+                                            className={order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800 hover:bg-green-200 border-transparent' : 'bg-gray-100 text-gray-800 hover:bg-gray-200 border-transparent'}
+                                        >
+                                            {order.paymentStatus ? order.paymentStatus.toUpperCase() : "PENDING"}
+                                        </Badge>
+                                    </div>
                                 </div>
                             </div>
                         </CardContent>

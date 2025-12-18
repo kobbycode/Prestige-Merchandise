@@ -209,6 +209,17 @@ const OrderHistory = () => {
                                                     <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Total</p>
                                                     <p className="font-bold text-primary text-lg">{formatPrice(order.amount)}</p>
                                                 </div>
+                                                <div>
+                                                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Payment</p>
+                                                    <div className="flex items-center gap-1 mt-0.5">
+                                                        <span className={`text-sm font-bold ${order.paymentStatus === 'paid' ? 'text-green-600' : 'text-gray-500'}`}>
+                                                            {order.paymentStatus === 'paid' ? 'PAID' : 'UNPAID'}
+                                                        </span>
+                                                        <span className="text-xs text-muted-foreground">
+                                                            {order.paymentMethod === 'Cash on Delivery' ? '(COD)' : ''}
+                                                        </span>
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             <div className="flex items-center gap-3 pt-2 sm:pt-0">

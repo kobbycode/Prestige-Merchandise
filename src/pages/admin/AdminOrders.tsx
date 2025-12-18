@@ -324,6 +324,16 @@ const AdminOrders = () => {
                                             </div>
                                         </div>
 
+                                        <div className="flex justify-between items-center text-sm border-t pt-2">
+                                            <div>
+                                                <div className="text-muted-foreground">Payment</div>
+                                                <div className="text-xs font-medium">{order.paymentMethod || "N/A"}</div>
+                                            </div>
+                                            <Badge variant={order.paymentStatus === 'paid' ? 'default' : 'secondary'} className={order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                                                {order.paymentStatus ? order.paymentStatus.toUpperCase() : 'N/A'}
+                                            </Badge>
+                                        </div>
+
                                         <div className="pt-2 flex justify-end gap-2 border-t mt-2">
                                             <Link to={`/admin/orders/${order.id}`}>
                                                 <Button variant="outline" size="sm" className="h-8">
@@ -353,6 +363,7 @@ const AdminOrders = () => {
                                             <TableHead>Customer</TableHead>
                                             <TableHead>Date</TableHead>
                                             <TableHead>Total</TableHead>
+                                            <TableHead>Payment</TableHead>
                                             <TableHead>Status</TableHead>
                                             <TableHead className="text-right">Actions</TableHead>
                                         </TableRow>
@@ -375,6 +386,14 @@ const AdminOrders = () => {
                                                     {order.createdAt?.seconds ? format(new Date(order.createdAt.seconds * 1000), "PPP") : "N/A"}
                                                 </TableCell>
                                                 <TableCell>{formatPrice(order.amount)}</TableCell>
+                                                <TableCell>
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className="text-xs font-medium">{order.paymentMethod || "N/A"}</span>
+                                                        <Badge variant="outline" className={`w-fit text-[10px] px-1 py-0 ${order.paymentStatus === 'paid' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-gray-50 text-gray-600 border-gray-200'}`}>
+                                                            {order.paymentStatus?.toUpperCase() || "N/A"}
+                                                        </Badge>
+                                                    </div>
+                                                </TableCell>
                                                 <TableCell>
                                                     <Badge className={getStatusClassName(order.status)} variant="outline">
                                                         {order.status.charAt(0).toUpperCase() + order.status.slice(1)}

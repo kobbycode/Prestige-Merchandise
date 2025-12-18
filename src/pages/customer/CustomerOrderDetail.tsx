@@ -195,8 +195,28 @@ const CustomerOrderDetail = () => {
                             </Card>
                         </div>
 
-                        {/* Delivery Info */}
+                        {/* Payment & Delivery Info */}
                         <div>
+                            <Card className="mb-6">
+                                <CardHeader>
+                                    <CardTitle>Payment Details</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div>
+                                        <p className="font-medium">{order.paymentMethod || "Cash on Delivery"}</p>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <span className="text-sm text-muted-foreground">Status:</span>
+                                            <Badge
+                                                variant={order.paymentStatus === 'paid' ? 'default' : 'secondary'}
+                                                className={order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800 border-transparent' : 'bg-gray-100 text-gray-800 border-transparent'}
+                                            >
+                                                {order.paymentStatus ? order.paymentStatus.toUpperCase() : "PENDING"}
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
                             <Card>
                                 <CardHeader>
                                     <CardTitle>Delivery Details</CardTitle>

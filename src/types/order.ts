@@ -27,5 +27,8 @@ export interface Order {
     items: any[];
     currency?: string;
     exchangeRate?: number;
+    paymentMethod?: string;
+    paymentStatus?: 'paid' | 'unpaid' | 'refunded';
+    paymentReference?: string;
 }
 
