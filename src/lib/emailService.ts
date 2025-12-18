@@ -74,27 +74,16 @@ export const sendOrderStatusUpdate = async (
 ): Promise<boolean> => {
     try {
         const orderId = orderData.id;
-        const trackingInfo = orderData.trackingNumber ?
-            `\nTracking Carrier: ${orderData.trackingCarrier}\nTracking Number: ${orderData.trackingNumber}\nTrack here: ${orderData.trackingUrl || 'N/A'}` : '';
-
-        const trackingHtml = orderData.trackingNumber ? `
-            <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                <h3 style="margin-top: 0;">Tracking Information</h3>
-                <p><strong>Carrier:</strong> ${orderData.trackingCarrier}</p>
-                <p><strong>Number:</strong> ${orderData.trackingNumber}</p>
-                ${orderData.trackingUrl ? `<a href="${orderData.trackingUrl}" style="background-color: #facc15; padding: 10px 20px; text-decoration: none; color: black; border-radius: 5px; font-weight: bold; display: inline-block;">Track Shipment</a>` : ''}
-            </div>` : '';
 
         await addDoc(collection(db, "mail"), {
             to: customerEmail,
             message: {
                 subject: `Order Update - #${orderId.slice(0, 8).toUpperCase()}: ${newStatus.toUpperCase()}`,
-                text: `Hello ${formatCustomerName(orderData.customerDetails)},\n\nYour order status has been updated from ${oldStatus} to ${newStatus}.\n\nOrder ID: ${orderId}${trackingInfo}\n\nYou can track your order live here: ${window.location.origin}/track?orderId=${orderId}\n\nBest regards,\nPrestige Merchandise`,
+                text: `Hello ${formatCustomerName(orderData.customerDetails)},\n\nYour order status has been updated from ${oldStatus} to ${newStatus}.\n\nOrder ID: ${orderId}\n\nYou can track your order live here: ${window.location.origin}/track?orderId=${orderId}\n\nBest regards,\nPrestige Merchandise`,
                 html: `
                     <h2>Order Status Update</h2>
                     <p>Hello ${formatCustomerName(orderData.customerDetails)},</p>
                     <p>Your order status has been updated from <strong>${oldStatus}</strong> to <strong>${newStatus}</strong>.</p>
-                    ${trackingHtml}
                     <p>Order ID: <code>${orderId}</code></p>
                     <p><a href="${window.location.origin}/track?orderId=${orderId}" style="color: #facc15; font-weight: bold;">Track your order real-time on our website</a></p>
                     <br />

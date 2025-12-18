@@ -146,36 +146,6 @@ const TrackOrder = () => {
                                 </CardContent>
                             </Card>
 
-                            {/* Tracking Details if Shipped */}
-                            {order.trackingNumber && (
-                                <Card className="border-primary/30 shadow-lg overflow-hidden animate-fade-in-up [animation-delay:100ms]">
-                                    <div className="bg-primary px-6 py-4 font-bold flex items-center gap-2 text-primary-foreground">
-                                        <div className="p-1 bg-white/20 rounded-lg">
-                                            <Truck className="h-5 w-5" />
-                                        </div>
-                                        Shipment Details
-                                    </div>
-                                    <CardContent className="pt-6">
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                            <div>
-                                                <p className="text-sm text-muted-foreground mb-1 uppercase tracking-tight font-semibold">Logistics Carrier</p>
-                                                <p className="text-lg font-bold">{order.trackingCarrier}</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-sm text-muted-foreground mb-1 uppercase tracking-tight font-semibold">Tracking Number</p>
-                                                <p className="text-lg font-mono font-bold text-primary">{order.trackingNumber}</p>
-                                            </div>
-                                        </div>
-                                        {order.trackingUrl && (
-                                            <Button className="w-full mt-6 h-12 text-lg font-bold" asChild>
-                                                <a href={order.trackingUrl} target="_blank" rel="noopener noreferrer">
-                                                    Open Carrier Website <ArrowRight className="ml-2 h-5 w-5" />
-                                                </a>
-                                            </Button>
-                                        )}
-                                    </CardContent>
-                                </Card>
-                            )}
 
                             {/* Order Timeline */}
                             <Card className="animate-fade-in-up [animation-delay:200ms]">

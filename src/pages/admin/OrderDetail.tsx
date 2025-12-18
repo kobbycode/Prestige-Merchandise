@@ -23,9 +23,6 @@ const OrderDetail = () => {
     const [order, setOrder] = useState<Order | null>(null);
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
-    const [trackingNumber, setTrackingNumber] = useState("");
-    const [trackingCarrier, setTrackingCarrier] = useState("");
-    const [trackingUrl, setTrackingUrl] = useState("");
 
     useEffect(() => {
         if (id) {
@@ -36,17 +33,8 @@ const OrderDetail = () => {
     }, [id]);
 
     useEffect(() => {
-        if (order) {
-            setTrackingNumber(order.trackingNumber || "");
-            setTrackingCarrier(order.trackingCarrier || "");
-            setTrackingUrl(order.trackingUrl || "");
-        }
+        // No-op
     }, [order]);
-
-    const ensureAbsoluteUrl = (url: string) => {
-        if (!url || url.startsWith('http://') || url.startsWith('https://')) return url;
-        return `https://${url}`;
-    };
 
     const fetchOrder = async (orderId: string) => {
         try {
@@ -67,35 +55,6 @@ const OrderDetail = () => {
         }
     };
 
-    const handleTrackingUpdate = async () => {
-        if (!order) return;
-        setUpdating(true);
-        try {
-            const docRef = doc(db, "orders", order.id);
-            const absoluteUrl = ensureAbsoluteUrl(trackingUrl);
-
-            await updateDoc(docRef, {
-                trackingNumber,
-                trackingCarrier,
-                trackingUrl: absoluteUrl
-            });
-
-            setOrder({
-                ...order,
-                trackingNumber,
-                trackingCarrier,
-                trackingUrl: absoluteUrl
-            });
-            setTrackingUrl(absoluteUrl);
-
-            toast.success("Tracking information saved");
-        } catch (error) {
-            console.error("Error updating tracking:", error);
-            toast.error("Failed to save tracking information");
-        } finally {
-            setUpdating(false);
-        }
-    };
 
     const handleStatusUpdate = async (newStatus: Order['status']) => {
         if (!order) return;
@@ -103,11 +62,6 @@ const OrderDetail = () => {
         setUpdating(true);
         try {
             const docRef = doc(db, "orders", order.id);
-
-            // If switching to shipped and tracking is missing, warn admin
-            if (newStatus === 'shipped' && (!trackingNumber || !trackingCarrier)) {
-                toast.warning("Please remember to fill in tracking information for this shipment.");
-            }
 
             // Create status history entry
             const statusHistoryEntry = {
@@ -121,12 +75,6 @@ const OrderDetail = () => {
                 statusHistory: arrayUnion(statusHistoryEntry)
             };
 
-            // If we have tracking info that wasn't saved yet, include it in this update too
-            const absoluteTrackUrl = ensureAbsoluteUrl(trackingUrl);
-            if (trackingNumber) updateData.trackingNumber = trackingNumber;
-            if (trackingCarrier) updateData.trackingCarrier = trackingCarrier;
-            if (trackingUrl) updateData.trackingUrl = absoluteTrackUrl;
-
             // Update Firestore
             await updateDoc(docRef, updateData);
 
@@ -136,9 +84,6 @@ const OrderDetail = () => {
                 ...order,
                 status: newStatus,
                 statusHistory: updatedHistory,
-                trackingNumber: updateData.trackingNumber || order.trackingNumber,
-                trackingCarrier: updateData.trackingCarrier || order.trackingCarrier,
-                trackingUrl: updateData.trackingUrl || order.trackingUrl
             };
             setOrder(updatedOrder);
 
@@ -381,46 +326,6 @@ const OrderDetail = () => {
                         </CardContent>
                     </Card>
 
-                    {/* Shipping & Tracking */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Shipment Tracking</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Carrier</label>
-                                <Input
-                                    placeholder="DHL, FedEx, Ghana Post..."
-                                    value={trackingCarrier}
-                                    onChange={(e) => setTrackingCarrier(e.target.value)}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Tracking Number</label>
-                                <Input
-                                    placeholder="Enter tracking number"
-                                    value={trackingNumber}
-                                    onChange={(e) => setTrackingNumber(e.target.value)}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Tracking URL</label>
-                                <Input
-                                    placeholder="https://..."
-                                    value={trackingUrl}
-                                    onChange={(e) => setTrackingUrl(e.target.value)}
-                                />
-                            </div>
-                            <Button
-                                className="w-full"
-                                onClick={handleTrackingUpdate}
-                                disabled={updating}
-                            >
-                                {updating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Save Tracking Info
-                            </Button>
-                        </CardContent>
-                    </Card>
                 </div>
             </div>
         </div >

@@ -125,51 +125,6 @@ const CustomerOrderDetail = () => {
                         </div>
                     </div>
 
-                    {/* Tracking Information */}
-                    {order.trackingNumber && (
-                        <Card className="mb-6 bg-primary/5 border-primary/20">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-lg flex items-center gap-2">
-                                    <Truck className="h-5 w-5 text-primary" />
-                                    Shipment Tracking
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Carrier</p>
-                                        <p className="font-medium">{order.trackingCarrier || "Unknown Carrier"}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Tracking Number</p>
-                                        <p className="font-medium font-mono">{order.trackingNumber}</p>
-                                    </div>
-                                </div>
-                                {order.trackingUrl && (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
-                                        <Button className="w-full gap-2" asChild>
-                                            <a
-                                                href={order.trackingUrl.startsWith('http') ? order.trackingUrl : `https://${order.trackingUrl}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                            >
-                                                <Truck className="h-4 w-4" />
-                                                Track Shipment
-                                            </a>
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            className="w-full gap-2 border-primary/30 text-primary hover:bg-primary/5"
-                                            onClick={() => navigate(`/track?orderId=${order.id}`)}
-                                        >
-                                            <Package className="h-4 w-4" />
-                                            Track on our Website
-                                        </Button>
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
-                    )}
 
                     {/* Order Timeline */}
                     <Card className="mb-6">
