@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useCurrency } from "@/contexts/CurrencyContext";
-import { collection, query, orderBy, limit, getDocs, where } from "firebase/firestore";
+import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Product, Category } from "@/types/product";
 import { Order } from "@/types/order";
@@ -62,6 +62,8 @@ const Dashboard = () => {
     const [topSellingProducts, setTopSellingProducts] = useState<{ name: string, sales: number, revenue: number }[]>([]);
     const [loading, setLoading] = useState(true);
 
+    const [error, setError] = useState<string | null>(null);
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -76,14 +78,17 @@ const Dashboard = () => {
                 const catCounts: Record<string, number> = {};
 
                 productsSnap.forEach(doc => {
-                    const p = { id: doc.id, ...doc.data() } as Product;
+                    const data = doc.data();
+                    const p = { id: doc.id, ...data } as Product;
                     products.push(p);
                     if (p.status === 'active') activeCount++;
                     if (p.stock <= 10) {
                         lowStockCount++;
                         lowStockList.push(p);
                     }
-                    value += p.price * p.stock;
+                    if (p.price && p.stock) {
+                        value += p.price * p.stock;
+                    }
                     totalViews += (p.views || 0);
 
                     // Category counts
@@ -116,31 +121,34 @@ const Dashboard = () => {
                 ordersSnap.forEach(doc => {
                     const o = { id: doc.id, ...doc.data() } as Order;
                     orders.push(o);
-                    revenue += o.amount;
+                    revenue += (o.amount || 0);
                     if (o.status === 'pending') pendingCount++;
-                    statusCounts[o.status] = (statusCounts[o.status] || 0) + 1;
+                    const status = o.status || 'unknown';
+                    statusCounts[status] = (statusCounts[status] || 0) + 1;
 
                     // Track product sales and category revenue
-                    o.items.forEach(item => {
-                        const productId = item.id; // Or item.product.id
-                        if (!productSales[productId]) {
-                            productSales[productId] = { count: 0, revenue: 0, name: item.product.name };
-                        }
-                        productSales[productId].count += item.quantity;
-                        productSales[productId].revenue += item.product.price * item.quantity;
+                    if (Array.isArray(o.items)) {
+                        o.items.forEach(item => {
+                            if (item.product) {
+                                const productId = item.id || item.product.id;
+                                if (!productSales[productId]) {
+                                    productSales[productId] = { count: 0, revenue: 0, name: item.product.name || 'Unknown Product' };
+                                }
+                                const qty = item.quantity || 0;
+                                const price = item.product.price || 0;
+                                productSales[productId].count += qty;
+                                productSales[productId].revenue += price * qty;
 
-                        const cat = item.product.category;
-                        if (cat) {
-                            categoryRevenue[cat] = (categoryRevenue[cat] || 0) + item.product.price * item.quantity;
-                        }
-                    });
+                                const cat = item.product.category;
+                                if (cat) {
+                                    categoryRevenue[cat] = (categoryRevenue[cat] || 0) + price * qty;
+                                }
+                            }
+                        });
+                    }
                 });
 
-                // Fetch Recent Orders (Fetch more to get meaningful data for charts, e.g. last 20 or 50)
-                // Actually, for the chart we might want ALL orders or just slice from the main orders array
-                // But the 'recentOrders' view is limited to 5.
-                // Let's repurpose 'recentOrders' state for the list, and use 'orders' for the chart.
-
+                // Fetch Recent Orders
                 const recentOrdersQuery = query(collection(db, "orders"), orderBy("createdAt", "desc"), limit(5));
                 const recentOrdersSnap = await getDocs(recentOrdersQuery);
                 const recentOrdersList: Order[] = [];
@@ -167,10 +175,6 @@ const Dashboard = () => {
                     .slice(0, 5);
                 setMostViewedProducts(mostViewed);
 
-                setRecentOrders(recentOrdersList); // Keep list as 5
-
-                // Format category chart data
-
                 // Format order status chart data
                 const statusChartData = Object.entries(statusCounts)
                     .map(([name, value]) => ({
@@ -182,18 +186,22 @@ const Dashboard = () => {
                 // PROCESS REVENUE DATA FOR STATE
                 const revData = orders
                     .filter(o => o.createdAt?.seconds)
-                    .sort((a, b) => (a.createdAt!.seconds - b.createdAt!.seconds)) // Oldest first
+                    .sort((a, b) => (a.createdAt.seconds - b.createdAt.seconds)) // Oldest first
                     .reduce((acc: any[], order) => {
-                        const date = format(new Date(order.createdAt.seconds * 1000), "MMM dd");
-                        const existing = acc.find(item => item.date === date);
-                        if (existing) {
-                            existing.revenue += order.amount;
-                        } else {
-                            acc.push({ date, revenue: order.amount });
+                        try {
+                            const date = format(new Date(order.createdAt.seconds * 1000), "MMM dd");
+                            const existing = acc.find(item => item.date === date);
+                            if (existing) {
+                                existing.revenue += order.amount;
+                            } else {
+                                acc.push({ date, revenue: order.amount });
+                            }
+                        } catch (e) {
+                            // Ignore invalid dates
                         }
                         return acc;
                     }, [])
-                    .slice(-14); // Last 14 days with activity for better trend line
+                    .slice(-14);
 
                 setRevenueChartData(revData);
 
@@ -213,10 +221,11 @@ const Dashboard = () => {
                     .map(([name, value]) => ({ name, value }))
                     .sort((a, b) => b.value - a.value)
                     .slice(0, 5);
-                setCategoryData(catRevenueData); // Overwriting the product count with revenue for better analysis
+                setCategoryData(catRevenueData);
 
-            } catch (error) {
+            } catch (error: any) {
                 console.error("Error fetching dashboard data:", error);
+                setError(error.message || "Failed to load dashboard data");
             } finally {
                 setLoading(false);
             }
@@ -229,6 +238,18 @@ const Dashboard = () => {
         return (
             <div className="flex items-center justify-center h-[50vh]">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="p-6 bg-red-50 border border-red-200 rounded-lg text-red-800">
+                <h3 className="font-bold mb-2">Error Loading Dashboard</h3>
+                <p>{error}</p>
+                <Button variant="outline" className="mt-4 border-red-300 text-red-800 hover:bg-red-100" onClick={() => window.location.reload()}>
+                    Retry
+                </Button>
             </div>
         );
     }
