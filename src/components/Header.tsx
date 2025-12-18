@@ -51,8 +51,12 @@ const Header = () => {
       <div className="container mx-auto px-4 py-2 md:py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 md:gap-3 hover:opacity-90 transition-opacity">
-            <img src={logo} alt="Prestige Merchandise" className="h-[150px] w-auto md:h-[180px] transition-all" />
+          <Link to="/" className="relative flex items-center h-12 md:h-16 w-32 md:w-48 z-50">
+            <img
+              src={logo}
+              alt="Prestige Merchandise"
+              className="absolute left-0 top-1/2 -translate-y-1/2 h-[120px] md:h-[160px] w-auto max-w-none transition-all hover:scale-105"
+            />
           </Link>
 
           {/* Centered Search Bar */}

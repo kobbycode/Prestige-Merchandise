@@ -138,19 +138,47 @@ const Checkout = () => {
     const totalInGhs = currency === 'GHS' ? cartTotal : cartTotal * exchangeRate;
     const paystackAmount = Math.round(totalInGhs * 100);
 
+    const getPaystackProvider = (method: string) => {
+        switch (method) {
+            case 'paystack_momo': return 'mtn';
+            case 'paystack_telecel': return 'vod'; // Vodafone is now Telecel in Ghana
+            case 'paystack_at': return 'atl'; // AirtelTigo is now AT
+            default: return null;
+        }
+    };
+
+    const getReadablePaymentMethod = (method: string) => {
+        switch (method) {
+            case 'cod': return 'Cash on Delivery';
+            case 'paystack_momo': return 'MTN Mobile Money';
+            case 'paystack_telecel': return 'Telecel Cash';
+            case 'paystack_at': return 'AirtelTigo Money';
+            case 'paystack_card': return 'Card Payment';
+            default: return 'Online Payment';
+        }
+    };
+
     const paystackConfig = {
         reference: (new Date()).getTime().toString(),
         email: form.getValues("email"),
         amount: paystackAmount, // Amount is in kobo (pesewas)
         publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || '',
         currency: 'GHS',
-        channels: paymentMethod === 'paystack_card' ? ['card'] : ['mobile_money', 'card'],
+        channels: paymentMethod === 'paystack_card' ? ['card'] : ['mobile_money'],
         metadata: {
+            custom_filters: {
+                supported_mobile_money_providers: getPaystackProvider(paymentMethod) ? [getPaystackProvider(paymentMethod)] : ['mtn', 'vod', 'atl']
+            },
             custom_fields: [
                 {
                     display_name: "Mobile Number",
                     variable_name: "mobile_number",
-                    value: form.getValues("phone")
+                    value: form.getValues("phone").replace(/^\+233/, '0')
+                },
+                {
+                    display_name: "Payment Method",
+                    variable_name: "payment_method",
+                    value: getReadablePaymentMethod(paymentMethod)
                 }
             ]
         }
@@ -192,6 +220,14 @@ const Checkout = () => {
                 setIsSubmitting(false);
                 return;
             }
+
+            // Hint for MoMo users
+            if (paymentMethod !== 'paystack_card') {
+                toast.info("Please wait for the Paystack window and then check your phone for the payment prompt.", {
+                    duration: 8000
+                });
+            }
+
             // Trigger Paystack Popup
             initializePayment({ onSuccess, onClose });
         } else {
@@ -200,16 +236,7 @@ const Checkout = () => {
         }
     };
 
-    const getReadablePaymentMethod = (method: string) => {
-        switch (method) {
-            case 'cod': return 'Cash on Delivery';
-            case 'paystack_momo': return 'MTN Mobile Money';
-            case 'paystack_telecel': return 'Telecel Cash';
-            case 'paystack_at': return 'AirtelTigo Money';
-            case 'paystack_card': return 'Card Payment';
-            default: return 'Online Payment';
-        }
-    };
+
 
     const processOrder = async (data: CheckoutValues, paymentMethodType: "cod" | "prepaid", paymentReference?: string) => {
         try {
