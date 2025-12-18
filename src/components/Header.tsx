@@ -3,6 +3,11 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, Phone, MessageCircle, User, LogOut, ShoppingBag, Search, Heart } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { collection, query, where, limit, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { Product } from "@/types/product";
+import { useCurrency } from "@/contexts/CurrencyContext";
+import { Loader2 } from "lucide-react";
 
 import logo from "@/assets/logo.png";
 import { useAuth } from "@/contexts/AuthContext";
@@ -26,6 +31,10 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isCartBouncing, setIsCartBouncing] = useState(false);
+  const [suggestions, setSuggestions] = useState<Product[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const { formatPrice } = useCurrency();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -37,6 +46,63 @@ const Header = () => {
       return () => clearTimeout(timer);
     }
   }, [cartCount]);
+
+  // Live search suggestions effect
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      const trimmedQuery = searchQuery.trim();
+      if (trimmedQuery.length < 2) {
+        setSuggestions([]);
+        return;
+      }
+
+      setIsSearching(true);
+      try {
+        const productsRef = collection(db, "products");
+        // Simple search logic: filter by status active and match name starting with query
+        // Note: Firestore doesn't support full-text search natively without third-party tools,
+        // so we'll use a prefix match (query + \uf8ff)
+        const q = query(
+          productsRef,
+          where("status", "==", "active"),
+          where("name", ">=", trimmedQuery),
+          where("name", "<=", trimmedQuery + "\uf8ff"),
+          limit(5)
+        );
+
+        const querySnapshot = await getDocs(q);
+        const results: Product[] = [];
+        querySnapshot.forEach((doc) => {
+          results.push({ id: doc.id, ...doc.data() } as Product);
+        });
+
+        setSuggestions(results);
+        setShowSuggestions(results.length > 0);
+      } catch (error) {
+        console.error("Error fetching suggestions:", error);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(() => {
+      fetchSuggestions();
+    }, 300);
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery]);
+
+  // Close suggestions when location changes
+  useEffect(() => {
+    setShowSuggestions(false);
+    setSearchQuery("");
+  }, [location.pathname]);
+
+  const handleSuggestionClick = (productId: string) => {
+    navigate(`/product/${productId}`);
+    setShowSuggestions(false);
+    setSearchQuery("");
+  };
 
 
   const handleSearch = (e: React.FormEvent) => {
@@ -70,18 +136,62 @@ const Header = () => {
             />
           </Link>
 
-          {/* Centered Search Bar */}
-          <div className="hidden lg:flex flex-1 max-w-sm mx-6">
+          <div className="hidden lg:flex flex-1 max-w-sm mx-6 relative">
             <form onSubmit={handleSearch} className="relative w-full">
-              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search parts..."
-                className="pl-8 h-9 bg-background/90 border-transparent focus:border-primary placeholder:text-muted-foreground text-foreground"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+              <div className="relative">
+                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search parts..."
+                  className="pl-8 h-9 bg-background/90 border-transparent focus:border-primary placeholder:text-muted-foreground text-foreground"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => searchQuery.trim().length >= 2 && setShowSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                />
+                {isSearching && (
+                  <Loader2 className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+                )}
+              </div>
             </form>
+
+            {/* Desktop Suggestions Dropdown */}
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-background border border-border rounded-md shadow-lg overflow-hidden z-50">
+                <div className="py-2">
+                  <p className="px-4 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    Quick Suggestions
+                  </p>
+                  {suggestions.map((product) => (
+                    <button
+                      key={product.id}
+                      className="w-full flex items-center gap-3 px-4 py-2 hover:bg-muted transition-colors text-left"
+                      onClick={() => handleSuggestionClick(product.id)}
+                    >
+                      <div className="h-10 w-10 shrink-0 bg-muted rounded overflow-hidden">
+                        {product.images?.[0] ? (
+                          <img src={product.images[0]} alt={product.name} className="h-full w-full object-contain" />
+                        ) : (
+                          <div className="h-full w-full flex items-center justify-center">
+                            <Search className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{product.name}</p>
+                        <p className="text-xs text-primary font-bold">{formatPrice(product.price)}</p>
+                      </div>
+                    </button>
+                  ))}
+                  <button
+                    onClick={handleSearch}
+                    className="w-full px-4 py-2 text-xs text-center text-primary hover:bg-primary/5 font-medium border-t mt-1"
+                  >
+                    View all results for "{searchQuery}"
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Desktop Navigation */}
@@ -232,16 +342,52 @@ const Header = () => {
         {isMenuOpen && (
           <nav className="lg:hidden mt-4 pb-4 border-t pt-4 space-y-4">
             {/* Mobile Search */}
-            <form onSubmit={handleSearch} className="relative">
-              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search parts..."
-                className="pl-8 h-10 w-full bg-background/90 text-foreground"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </form>
+            <div className="relative">
+              <form onSubmit={handleSearch} className="relative">
+                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search parts..."
+                  className="pl-8 h-10 w-full bg-background/90 text-foreground"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => searchQuery.trim().length >= 2 && setShowSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                />
+                {isSearching && (
+                  <Loader2 className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+                )}
+              </form>
+
+              {/* Mobile Suggestions Dropdown */}
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-background border border-border rounded-md shadow-lg overflow-hidden z-50">
+                  <div className="py-2 max-h-[300px] overflow-y-auto">
+                    {suggestions.map((product) => (
+                      <button
+                        key={product.id}
+                        className="w-full flex items-center gap-3 px-4 py-2 hover:bg-muted transition-colors text-left"
+                        onClick={() => handleSuggestionClick(product.id)}
+                      >
+                        <div className="h-10 w-10 shrink-0 bg-muted rounded overflow-hidden">
+                          {product.images?.[0] ? (
+                            <img src={product.images[0]} alt={product.name} className="h-full w-full object-contain" />
+                          ) : (
+                            <div className="h-full w-full flex items-center justify-center">
+                              <Search className="h-4 w-4 text-muted-foreground" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate">{product.name}</p>
+                          <p className="text-xs text-primary font-bold">{formatPrice(product.price)}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
 
             <div className="space-y-2">
               {navLinks.map((link) => (

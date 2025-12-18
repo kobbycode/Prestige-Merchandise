@@ -42,6 +42,7 @@ const ProductDetail = () => {
     const [loading, setLoading] = useState(true);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
+    const [showStickyCTA, setShowStickyCTA] = useState(false);
 
     useEffect(() => {
         if (id) {
@@ -85,6 +86,20 @@ const ProductDetail = () => {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        const handleScroll = () => {
+            // Show sticky bar after scrolling past 600px
+            if (window.scrollY > 600) {
+                setShowStickyCTA(true);
+            } else {
+                setShowStickyCTA(false);
+            }
+        };
+
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
 
     const nextImage = () => {
         if (product && product.images.length > 0) {
@@ -257,7 +272,7 @@ const ProductDetail = () => {
                                                 </>
                                             )}
                                             {product.stock <= 5 && product.stock > 0 && (
-                                                <Badge variant="destructive" className="absolute top-4 left-4 text-xs font-bold uppercase tracking-wide">
+                                                <Badge variant="destructive" className="absolute top-4 left-4 text-xs font-bold uppercase tracking-wide animate-pulse-subtle shadow-lg">
                                                     Low Stock: {product.stock} left
                                                 </Badge>
                                             )}
@@ -511,6 +526,35 @@ const ProductDetail = () => {
             </main >
 
             <Footer />
+
+            {/* Sticky Mobile CTA */}
+            {product && product.stock > 0 && (
+                <div className={`fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-background border-t shadow-[0_-4px_10px_rgba(0,0,0,0.1)] p-3 transition-transform duration-300 ${showStickyCTA ? 'translate-y-0' : 'translate-y-full'}`}>
+                    <div className="flex items-center gap-3">
+                        <div className="h-12 w-12 bg-muted rounded shrink-0 overflow-hidden">
+                            {product.images?.[0] ? (
+                                <img src={product.images[0]} alt={product.name} className="h-full w-full object-contain" />
+                            ) : (
+                                <div className="h-full w-full flex items-center justify-center">
+                                    <Package className="h-6 w-6 text-muted-foreground" />
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold truncate leading-tight">{product.name}</p>
+                            <p className="text-primary font-bold text-sm">{formatPrice(product.price)}</p>
+                        </div>
+                        <Button
+                            size="sm"
+                            className="h-10 px-4 font-bold shrink-0"
+                            onClick={handleAddToCart}
+                        >
+                            <ShoppingCart className="h-4 w-4 mr-2" />
+                            Add
+                        </Button>
+                    </div>
+                </div>
+            )}
         </div >
     );
 };

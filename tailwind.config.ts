@@ -90,6 +90,10 @@ export default {
         float: {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-10px)" },
+        },
+        "pulse-subtle": {
+          "0%, 100%": { opacity: "1", transform: "scale(1)" },
+          "50%": { opacity: "0.8", transform: "scale(1.05)" },
         }
       },
       animation: {
@@ -98,6 +102,7 @@ export default {
         "fade-in-up": "fade-in-up 0.6s ease-out forwards",
         "bounce-slow": "bounce-slow 3s infinite",
         float: "float 6s ease-in-out infinite",
+        "pulse-subtle": "pulse-subtle 2s ease-in-out infinite",
       },
     },
   },
