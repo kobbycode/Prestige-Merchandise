@@ -130,7 +130,7 @@ const Index = () => {
                   </Button>
                 </Link>
                 <Link to="/contact">
-                  <Button size="lg" variant="outline" className="gap-2 w-full sm:w-auto text-base rounded-full px-8 border-white/20 text-white hover:bg-white/10">
+                  <Button size="lg" variant="outline" className="gap-2 w-full sm:w-auto text-base rounded-full px-8 border-white/60 text-white hover:bg-white hover:text-secondary bg-transparent transition-all">
                     Contact Us
                   </Button>
                 </Link>
