@@ -189,12 +189,12 @@ const Products = () => {
                                                 <div className="font-semibold">
                                                     {formatPrice(product.price)}
                                                 </div>
-                                                {product.stock < 10 && (
+                                                {product.stock <= 10 && (
                                                     <div className="text-xs text-destructive font-medium">
                                                         Low Stock: {product.stock}
                                                     </div>
                                                 )}
-                                                {product.stock >= 10 && (
+                                                {product.stock > 10 && (
                                                     <div className="text-xs text-muted-foreground">
                                                         Stock: {product.stock}
                                                     </div>
@@ -280,7 +280,7 @@ const Products = () => {
                                                 <TableCell className="font-mono text-sm">{product.sku}</TableCell>
                                                 <TableCell>{product.category}</TableCell>
                                                 <TableCell>
-                                                    <span className={product.stock < 10 ? 'text-destructive font-medium' : ''}>
+                                                    <span className={product.stock <= 10 ? 'text-destructive font-medium' : ''}>
                                                         {product.stock}
                                                     </span>
                                                 </TableCell>

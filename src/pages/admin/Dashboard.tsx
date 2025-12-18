@@ -78,7 +78,7 @@ const Dashboard = () => {
                     const p = { id: doc.id, ...doc.data() } as Product;
                     products.push(p);
                     if (p.status === 'active') activeCount++;
-                    if (p.stock <= 5) {
+                    if (p.stock <= 10) {
                         lowStockCount++;
                         lowStockList.push(p);
                     }
@@ -308,7 +308,7 @@ const Dashboard = () => {
                         title="Low Stock Alerts"
                         value={stats.lowStockProducts}
                         icon={AlertTriangle}
-                        description="Products with stock ≤ 5"
+                        description="Products with stock ≤ 10"
                         alert={stats.lowStockProducts > 0}
                     />
                 </div>
@@ -393,7 +393,7 @@ const Dashboard = () => {
                                                     <div className="font-bold text-sm">
                                                         {formatPrice(product.price)}
                                                     </div>
-                                                    {product.stock <= 5 && (
+                                                    {product.stock <= 10 && (
                                                         <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full">Low Stock</span>
                                                     )}
                                                 </div>
@@ -417,7 +417,7 @@ const Dashboard = () => {
                                                 <p className="text-sm font-medium leading-none line-clamp-1">{product.name}</p>
                                                 <div className="flex items-center gap-2">
                                                     <p className="text-xs text-muted-foreground">{product.category || "Uncategorized"}</p>
-                                                    {product.stock <= 5 && (
+                                                    {product.stock <= 10 && (
                                                         <span className="text-[10px] bg-red-100 text-red-600 px-1 rounded">Low Stock</span>
                                                     )}
                                                 </div>
