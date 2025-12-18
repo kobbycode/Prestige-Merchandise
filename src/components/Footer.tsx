@@ -11,7 +11,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-bold mb-4 text-primary-foreground">Quick Links</h3>
+            <h3 className="text-lg font-bold mb-4 text-yellow-400">Quick Links</h3>
             <ul className="space-y-2">
               <li>
                 <Link to="/" className="hover:text-primary transition-colors">
@@ -48,7 +48,7 @@ const Footer = () => {
 
           {/* Contact Info */}
           <div>
-            <h3 className="text-lg font-bold mb-4 text-primary-foreground">Contact Us</h3>
+            <h3 className="text-lg font-bold mb-4 text-yellow-400">Contact Us</h3>
             <ul className="space-y-2 text-sm">
               {settings.locations && settings.locations.length > 0 ? (
                 settings.locations.map((loc, idx) => (
