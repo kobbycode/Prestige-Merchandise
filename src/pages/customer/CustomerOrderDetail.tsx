@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useCurrency } from "@/contexts/CurrencyContext";
-import { Loader2, ArrowLeft, MapPin, Phone, Calendar, Truck } from "lucide-react";
+import { Loader2, ArrowLeft, MapPin, Phone, Calendar, Truck, Package, Printer } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { Order } from "@/types/order";
@@ -16,7 +16,6 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import OrderTimeline from "@/components/order/OrderTimeline";
 import { generateInvoice } from "@/lib/invoiceGenerator";
-import { Printer } from "lucide-react";
 
 const CustomerOrderDetail = () => {
     const { id } = useParams();
@@ -96,23 +95,32 @@ const CustomerOrderDetail = () => {
                         <ArrowLeft className="mr-2 h-4 w-4" /> Back to Orders
                     </Button>
 
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
                         <div>
-                            <h1 className="text-2xl font-bold">Order Details</h1>
-                            <p className="text-muted-foreground flex items-center gap-2 text-sm mt-1">
-                                ID: <span className="font-mono">{order.id}</span>
-                                <span className="text-gray-300">|</span>
-                                <Calendar className="h-3 w-3" />
-                                {order.createdAt?.seconds ? format(new Date(order.createdAt.seconds * 1000), "PPP") : "N/A"}
-                            </p>
+                            <h1 className="text-2xl md:text-3xl font-bold">Order Details</h1>
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm mt-2">
+                                <span className="text-muted-foreground flex items-center gap-1 font-medium italic">
+                                    ID: <span className="font-mono text-foreground font-bold not-italic">{order.id}</span>
+                                </span>
+                                <span className="text-gray-300 hidden sm:inline">|</span>
+                                <div className="flex items-center gap-1.5 text-muted-foreground">
+                                    <Calendar className="h-4 w-4 text-primary" />
+                                    <span>{order.createdAt?.seconds ? format(new Date(order.createdAt.seconds * 1000), "PPP") : "N/A"}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex gap-2">
-                            <Button variant="outline" size="sm" onClick={() => generateInvoice(order)}>
-                                <Printer className="mr-2 h-4 w-4" />
+                        <div className="flex flex-wrap items-center gap-3">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => generateInvoice(order)}
+                                className="h-10 px-4 rounded-xl border-primary/20 hover:bg-primary/5 shadow-sm"
+                            >
+                                <Printer className="mr-2 h-4 w-4 text-primary" />
                                 Download Invoice
                             </Button>
-                            <Badge className={getStatusClassName(order.status)} variant="outline">
-                                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                            <Badge className={`${getStatusClassName(order.status)} px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider`} variant="outline">
+                                {order.status}
                             </Badge>
                         </div>
                     </div>
@@ -165,23 +173,36 @@ const CustomerOrderDetail = () => {
                                 <CardContent>
                                     <div className="divide-y">
                                         {order.items.map((item, index) => (
-                                            <div key={index} className="py-4 flex gap-4">
-                                                <div className="h-16 w-16 bg-muted rounded overflow-hidden flex-shrink-0">
+                                            <div key={index} className="py-4 flex items-start gap-4">
+                                                <div className="h-20 w-20 bg-muted rounded-xl overflow-hidden flex-shrink-0 border border-border/50">
                                                     {item.image ? (
-                                                        <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
+                                                        <img src={item.image} alt={item.name} className="h-full w-full object-cover transition-transform hover:scale-110" />
                                                     ) : (
-                                                        <div className="h-full w-full flex items-center justify-center bg-gray-100 text-gray-400">?</div>
+                                                        <div className="h-full w-full flex items-center justify-center bg-gray-100 text-gray-400">
+                                                            <Package className="h-8 w-8 opacity-20" />
+                                                        </div>
                                                     )}
                                                 </div>
-                                                <div className="flex-1">
-                                                    <h4 className="font-semibold">{item.name}</h4>
-                                                    <p className="text-sm text-muted-foreground">
-                                                        {item.variant && <span className="mr-2 border px-1 rounded text-xs">{item.variant}</span>}
-                                                        Qty: {item.quantity}
-                                                    </p>
+                                                <div className="flex-1 min-w-0">
+                                                    <h4 className="font-bold text-sm md:text-base line-clamp-2">{item.name}</h4>
+                                                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                                                        {item.variant && (
+                                                            <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 uppercase font-bold">
+                                                                {item.variant}
+                                                            </Badge>
+                                                        )}
+                                                        <p className="text-xs text-muted-foreground font-medium">
+                                                            Qty: <span className="text-foreground">{item.quantity}</span>
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                                <div className="text-right font-medium">
-                                                    {formatPrice(item.price * item.quantity)}
+                                                <div className="text-right">
+                                                    <p className="font-bold text-primary text-sm md:text-base whitespace-nowrap">
+                                                        {formatPrice(item.price * item.quantity)}
+                                                    </p>
+                                                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                                                        {formatPrice(item.price)} each
+                                                    </p>
                                                 </div>
                                             </div>
                                         ))}

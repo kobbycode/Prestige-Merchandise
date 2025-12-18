@@ -197,25 +197,25 @@ const OrderHistory = () => {
                                         <div className="border-t border-border/50 my-1" />
 
                                         {/* Order Details: Items, Price, Actions */}
-                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                            <div className="flex items-center justify-between sm:justify-start gap-6">
-                                                <div>
-                                                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Items</p>
-                                                    <p className="font-medium text-foreground">{order.items.length}</p>
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                                            <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
+                                                <div className="min-w-[60px]">
+                                                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-0.5">Items</p>
+                                                    <p className="font-bold text-foreground text-sm">{order.items.length}</p>
                                                 </div>
-                                                <div>
-                                                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Total</p>
-                                                    <p className="font-bold text-primary text-lg">{formatPrice(order.amount)}</p>
+                                                <div className="min-w-[80px]">
+                                                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-0.5">Total</p>
+                                                    <p className="font-black text-primary text-base">{formatPrice(order.amount)}</p>
                                                 </div>
-                                                <div>
-                                                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Payment</p>
-                                                    <div className="flex items-center gap-1 mt-0.5">
-                                                        <span className={`text-sm font-bold ${order.paymentStatus === 'paid' ? 'text-green-600' : 'text-gray-500'}`}>
+                                                <div className="min-w-[100px]">
+                                                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-0.5">Payment</p>
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className={`text-[10px] font-black px-1.5 py-0.5 rounded border ${order.paymentStatus === 'paid' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-gray-50 text-gray-500 border-gray-200'}`}>
                                                             {order.paymentStatus === 'paid' ? 'PAID' : 'UNPAID'}
                                                         </span>
-                                                        <span className="text-xs text-muted-foreground">
-                                                            {order.paymentMethod === 'Cash on Delivery' ? '(COD)' : ''}
-                                                        </span>
+                                                        {order.paymentMethod === 'Cash on Delivery' && (
+                                                            <span className="text-[10px] text-muted-foreground font-medium">(COD)</span>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>
