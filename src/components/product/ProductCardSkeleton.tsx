@@ -3,30 +3,28 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export const ProductCardSkeleton = () => {
     return (
-        <Card className="overflow-hidden">
+        <Card className="overflow-hidden border-none shadow-sm bg-card/50">
             <CardContent className="p-0">
-                {/* Image skeleton */}
-                <Skeleton className="w-full h-64" />
+                {/* Image skeleton with a subtle background */}
+                <div className="bg-muted aspect-[4/5] relative overflow-hidden">
+                    <Skeleton className="absolute inset-0 h-full w-full rounded-none" />
+                </div>
 
                 {/* Content skeleton */}
-                <div className="p-4 space-y-3">
+                <div className="p-5 space-y-4">
                     {/* Category badge */}
-                    <Skeleton className="h-5 w-20 rounded-full" />
+                    <Skeleton className="h-5 w-24 rounded-full bg-primary/10" />
 
                     {/* Title */}
-                    <Skeleton className="h-6 w-full" />
-                    <Skeleton className="h-6 w-3/4" />
-
-                    {/* Price and discount */}
-                    <div className="flex items-center gap-2">
-                        <Skeleton className="h-7 w-24" />
-                        <Skeleton className="h-5 w-16" />
+                    <div className="space-y-2">
+                        <Skeleton className="h-6 w-full" />
+                        <Skeleton className="h-6 w-2/3" />
                     </div>
 
-                    {/* Buttons */}
-                    <div className="flex gap-2 pt-2">
-                        <Skeleton className="h-10 flex-1" />
-                        <Skeleton className="h-10 w-10" />
+                    {/* Price and discount */}
+                    <div className="flex items-center justify-between pt-2">
+                        <Skeleton className="h-8 w-28" />
+                        <Skeleton className="h-10 w-10 rounded-full" />
                     </div>
                 </div>
             </CardContent>

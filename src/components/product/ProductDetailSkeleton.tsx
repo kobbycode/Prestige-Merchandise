@@ -64,16 +64,18 @@ export const ProductDetailSkeleton = () => {
             </div>
 
             {/* Tabs Skeleton */}
-            <div className="mt-16">
-                <div className="flex gap-6 border-b mb-8">
+            <div className="mt-16 border-t pt-10">
+                <div className="flex gap-8 border-b mb-8 overflow-x-auto pb-1 scrollbar-hide">
                     {[1, 2, 3].map((i) => (
-                        <Skeleton key={i} className="h-10 w-32" />
+                        <Skeleton key={i} className="h-10 w-32 shrink-0 rounded-none border-b-2 border-transparent" />
                     ))}
                 </div>
-                <div className="space-y-3">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-3/4" />
+                <div className="max-w-3xl space-y-4">
+                    <Skeleton className="h-5 w-full" />
+                    <Skeleton className="h-5 w-full" />
+                    <Skeleton className="h-5 w-full" />
+                    <Skeleton className="h-5 w-4/5" />
+                    <Skeleton className="h-5 w-3/4" />
                 </div>
             </div>
         </div>
