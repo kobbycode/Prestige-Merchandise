@@ -12,6 +12,7 @@ import { Order } from "@/types/order";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { toast } from "sonner";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import {
     AlertDialog,
@@ -154,24 +155,21 @@ const OrderHistory = () => {
                             <Loader2 className="h-8 w-8 animate-spin text-primary" />
                         </div>
                     ) : orders.length === 0 ? (
-                        <Card className="border-dashed">
-                            <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                                <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center mb-4">
-                                    <Package className="h-8 w-8 text-muted-foreground" />
-                                </div>
-                                <h3 className="text-lg font-semibold mb-2">No orders yet</h3>
-                                <p className="text-muted-foreground mb-6 max-w-sm">
-                                    You haven't placed any orders yet. Start shopping to find great parts for your vehicle.
-                                </p>
-                                <Link to="/shop">
-                                    <Button size="lg" className="min-w-[150px]">Browse Shop</Button>
-                                </Link>
-                            </CardContent>
-                        </Card>
+                        <EmptyState
+                            icon={Package}
+                            title="No orders yet"
+                            description="You haven't placed any orders yet. Start shopping to find great parts for your vehicle."
+                            actionLabel="Browse Shop"
+                            actionLink="/shop"
+                        />
                     ) : (
-                        <div className="grid gap-4">
-                            {orders.map((order) => (
-                                <Card key={order.id} className="overflow-hidden bg-card transition-all hover:shadow-md">
+                        <div className="grid gap-4 stagger-animation">
+                            {orders.map((order, index) => (
+                                <Card
+                                    key={order.id}
+                                    className="overflow-hidden bg-card transition-all hover:shadow-md animate-fade-in-up"
+                                    style={{ animationDelay: `${index * 50}ms` }}
+                                >
                                     <div className="p-4 md:p-6 flex flex-col gap-4">
                                         {/* Order Header: ID, Date, Status */}
                                         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">

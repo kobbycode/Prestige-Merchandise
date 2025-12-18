@@ -94,15 +94,18 @@ const OrderTimeline = ({ order }: OrderTimelineProps) => {
                             <div key={status} className="flex items-start gap-4 relative">
                                 {/* Icon Circle */}
                                 <div
-                                    className={`relative z-10 flex items-center justify-center w-9 h-9 rounded-full border-2 ${isCompleted
-                                            ? `${config.bgColor} border-transparent`
-                                            : "bg-background border-muted-foreground/30"
-                                        }`}
+                                    className={`relative z-10 flex items-center justify-center w-10 h-10 rounded-2xl border-2 transition-all duration-500 ${isCompleted
+                                        ? `${config.bgColor} border-transparent`
+                                        : "bg-background border-muted-foreground/30"
+                                        } ${isCurrent ? "ring-4 ring-primary/20 scale-110 shadow-lg" : ""}`}
                                 >
+                                    {isCurrent && (
+                                        <span className="absolute inset-0 rounded-2xl bg-primary/20 animate-ping -z-10" />
+                                    )}
                                     {isCompleted ? (
-                                        <Icon className={`h-5 w-5 ${config.color}`} />
+                                        <Icon className={`h-5 w-5 ${config.color} ${isCurrent ? "animate-pulse" : ""}`} />
                                     ) : (
-                                        <div className="h-2 w-2 rounded-full bg-muted-foreground/30" />
+                                        <div className="h-2.5 w-2.5 rounded-full bg-muted-foreground/30" />
                                     )}
                                 </div>
 

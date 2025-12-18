@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, Phone, MessageCircle, User, LogOut, ShoppingBag, Search, Heart } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -25,8 +25,19 @@ const Header = () => {
   const { wishlistCount } = useWishlist();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isCartBouncing, setIsCartBouncing] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Trigger bounce animation when cart count changes
+  useEffect(() => {
+    if (cartCount > 0) {
+      setIsCartBouncing(true);
+      const timer = setTimeout(() => setIsCartBouncing(false), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [cartCount]);
+
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,10 +107,10 @@ const Header = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="relative text-secondary-foreground hover:text-white hover:bg-white/10"
+              className={`relative text-secondary-foreground hover:text-white hover:bg-white/10 ${isCartBouncing ? "animate-bounce-slow" : ""}`}
               onClick={() => setIsCartOpen(true)}
             >
-              <ShoppingBag className="h-5 w-5" />
+              <ShoppingBag className={`h-5 w-5 ${isCartBouncing ? "text-primary" : ""}`} />
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] font-bold text-primary-foreground flex items-center justify-center">
                   {cartCount}

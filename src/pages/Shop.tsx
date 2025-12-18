@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MessageCircle, Search, ShoppingCart, Package } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { EmptyState } from "@/components/ui/EmptyState";
 import {
   Pagination,
   PaginationContent,
@@ -381,24 +382,23 @@ const Shop = () => {
                   </div>
 
                   {filteredProducts.length === 0 ? (
-                    <Card className="p-8 md:p-12 text-center">
-                      <p className="text-muted-foreground text-lg">No products found matching your criteria.</p>
-                      <Button
-                        onClick={clearFilters}
-                        className="mt-4"
-                      >
-                        Clear Filters
-                      </Button>
-                    </Card>
+                    <EmptyState
+                      icon={Package}
+                      title="No parts found"
+                      description="We couldn't find any products matching your current filters. Try adjusting your search or clearing filters."
+                      actionLabel="Clear All Filters"
+                      onAction={clearFilters}
+                    />
                   ) : (
                     <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 stagger-animation">
-                      {paginatedProducts.map((product) => (
+                      {paginatedProducts.map((product, index) => (
                         <Card
                           key={product.id}
-                          className="shadow-card hover:shadow-hover transition-all overflow-hidden group cursor-pointer animate-slide-up"
+                          className="shadow-card hover:shadow-hover transition-all overflow-hidden group cursor-pointer animate-fade-in-up border-none"
+                          style={{ animationDelay: `${index * 50}ms` }}
                           onClick={() => navigate(`/product/${product.id}`)}
                         >
-                          <div className="aspect-square overflow-hidden bg-muted relative">
+                          <div className="aspect-square overflow-hidden bg-[#F8F9FA] relative">
                             {product.images && product.images[0] ? (
                               <img
                                 src={product.images[0]}

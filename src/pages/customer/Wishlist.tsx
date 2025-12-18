@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Heart, ShoppingCart, Trash2 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 const Wishlist = () => {
     const { user, isAuthenticated } = useAuth();
@@ -109,24 +110,21 @@ const Wishlist = () => {
                             <Loader2 className="h-8 w-8 animate-spin text-primary" />
                         </div>
                     ) : products.length === 0 ? (
-                        <Card className="border-dashed">
-                            <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                                <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center mb-4">
-                                    <Heart className="h-8 w-8 text-muted-foreground" />
-                                </div>
-                                <h3 className="text-lg font-semibold mb-2">Your wishlist is empty</h3>
-                                <p className="text-muted-foreground mb-6 max-w-sm">
-                                    Save items you love by clicking the heart icon on products.
-                                </p>
-                                <Link to="/shop">
-                                    <Button size="lg" className="min-w-[150px]">Browse Shop</Button>
-                                </Link>
-                            </CardContent>
-                        </Card>
+                        <EmptyState
+                            icon={Heart}
+                            title="Your wishlist is empty"
+                            description="Save items you love by clicking the heart icon on products. Your liked items will appear here."
+                            actionLabel="Browse Shop"
+                            actionLink="/shop"
+                        />
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-                            {products.map((product) => (
-                                <Card key={product.id} className="overflow-hidden group hover:shadow-lg transition-shadow">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 stagger-animation">
+                            {products.map((product, index) => (
+                                <Card
+                                    key={product.id}
+                                    className="overflow-hidden group hover:shadow-lg transition-all animate-fade-in-up"
+                                    style={{ animationDelay: `${index * 50}ms` }}
+                                >
                                     <Link to={`/product/${product.id}`}>
                                         <div className="relative aspect-square overflow-hidden bg-muted">
                                             <img

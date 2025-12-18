@@ -127,12 +127,12 @@ const TrackOrder = () => {
                     </Card>
 
                     {order ? (
-                        <div className="space-y-6">
+                        <div className="space-y-6 stagger-animation overflow-hidden">
                             {/* Short Status Banner */}
-                            <Card className="bg-primary/5 border-primary/20">
+                            <Card className="bg-primary/5 border-primary/20 animate-fade-in-up">
                                 <CardContent className="py-6 flex flex-col md:flex-row items-center justify-between gap-4">
                                     <div className="flex items-center gap-4">
-                                        <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                        <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary animate-float">
                                             <Truck className="h-6 w-6" />
                                         </div>
                                         <div>
@@ -140,7 +140,7 @@ const TrackOrder = () => {
                                             <h3 className="text-2xl font-bold capitalize">{order.status}</h3>
                                         </div>
                                     </div>
-                                    <Badge className={`${getStatusClassName(order.status)} px-4 py-1.5 text-sm`} variant="outline">
+                                    <Badge className={`${getStatusClassName(order.status)} px-4 py-1.5 text-sm rounded-full`} variant="outline">
                                         Estimated Delivery: {order.status === 'delivered' ? 'Delivered' : 'Within 2-5 Business Days'}
                                     </Badge>
                                 </CardContent>
@@ -148,9 +148,12 @@ const TrackOrder = () => {
 
                             {/* Tracking Details if Shipped */}
                             {order.trackingNumber && (
-                                <Card className="border-primary/30 shadow-sm overflow-hidden">
-                                    <div className="bg-primary/90 text-primary-foreground px-6 py-3 font-semibold flex items-center gap-2">
-                                        <Truck className="h-5 w-5" /> Shipment Details
+                                <Card className="border-primary/30 shadow-lg overflow-hidden animate-fade-in-up [animation-delay:100ms]">
+                                    <div className="bg-primary px-6 py-4 font-bold flex items-center gap-2 text-primary-foreground">
+                                        <div className="p-1 bg-white/20 rounded-lg">
+                                            <Truck className="h-5 w-5" />
+                                        </div>
+                                        Shipment Details
                                     </div>
                                     <CardContent className="pt-6">
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -175,7 +178,7 @@ const TrackOrder = () => {
                             )}
 
                             {/* Order Timeline */}
-                            <Card>
+                            <Card className="animate-fade-in-up [animation-delay:200ms]">
                                 <CardHeader>
                                     <CardTitle>Order Progress</CardTitle>
                                 </CardHeader>
@@ -185,8 +188,8 @@ const TrackOrder = () => {
                             </Card>
 
                             {/* Order Summary Basics */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <Card>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 stagger-animation overflow-hidden">
+                                <Card className="animate-fade-in-up [animation-delay:300ms]">
                                     <CardHeader className="pb-2"><CardTitle className="text-base">Delivery To</CardTitle></CardHeader>
                                     <CardContent className="space-y-2">
                                         <div className="flex items-start gap-2 text-sm">
@@ -199,7 +202,7 @@ const TrackOrder = () => {
                                         </div>
                                     </CardContent>
                                 </Card>
-                                <Card>
+                                <Card className="animate-fade-in-up [animation-delay:400ms]">
                                     <CardHeader className="pb-2"><CardTitle className="text-base">Order Info</CardTitle></CardHeader>
                                     <CardContent className="space-y-2">
                                         <div className="flex items-center gap-2 text-sm font-medium">

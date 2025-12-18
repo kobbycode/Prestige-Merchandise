@@ -115,18 +115,23 @@ const Index = () => {
           </div>
 
           <div className="relative container mx-auto px-4 h-full flex items-center">
-            <div className="max-w-2xl text-secondary-foreground pt-8 md:pt-0">
-              <h1 className="text-3xl md:text-6xl font-bold mb-4 leading-tight">
+            <div className="max-w-2xl text-secondary-foreground pt-8 md:pt-0 stagger-animation">
+              <h1 className="text-3xl md:text-6xl font-bold mb-4 leading-tight animate-fade-in-up">
                 Your Trusted Auto Parts Dealer at <span className="text-primary">Abossey Okai</span>
               </h1>
-              <p className="text-lg md:text-2xl mb-6 md:mb-8 text-secondary-foreground/90">
+              <p className="text-lg md:text-2xl mb-6 md:mb-8 text-secondary-foreground/90 animate-fade-in-up [animation-delay:150ms]">
                 Genuine Power Steering Pumps, Racks & Lubricants — Delivered Nationwide!
               </p>
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-4 animate-fade-in-up [animation-delay:300ms]">
                 <Link to="/shop">
-                  <Button size="lg" className="gap-2 w-full sm:w-auto text-base">
+                  <Button size="lg" className="gap-2 w-full sm:w-auto text-base rounded-full px-8 shadow-lg shadow-primary/20">
                     <ShoppingCart className="h-5 w-5" />
                     Shop Now
+                  </Button>
+                </Link>
+                <Link to="/contact">
+                  <Button size="lg" variant="outline" className="gap-2 w-full sm:w-auto text-base rounded-full px-8 border-white/20 text-white hover:bg-white/10">
+                    Contact Us
                   </Button>
                 </Link>
               </div>
@@ -142,10 +147,14 @@ const Index = () => {
               {features.map((feature, index) => {
                 const Icon = feature.icon;
                 return (
-                  <Card key={index} className="shadow-card hover:shadow-hover transition-shadow animate-slide-up">
+                  <Card
+                    key={index}
+                    className="shadow-card hover:shadow-hover transition-all animate-fade-in-up border-none bg-background/50 backdrop-blur-sm"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
                     <CardContent className="p-6 text-center">
-                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-                        <Icon className="h-8 w-8 text-primary" />
+                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4 group-hover:scale-110 transition-transform">
+                        <Icon className="h-8 w-8 text-primary" strokeWidth={1.5} />
                       </div>
                       <h3 className="font-bold text-lg mb-2">{feature.title}</h3>
                       <p className="text-muted-foreground text-sm">{feature.description}</p>
@@ -171,13 +180,14 @@ const Index = () => {
               </div>
             ) : featuredProducts.length > 0 ? (
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-8 stagger-animation">
-                {featuredProducts.map((product) => (
+                {featuredProducts.map((product, index) => (
                   <Card
                     key={product.id}
-                    className="shadow-card hover:shadow-hover transition-all overflow-hidden group cursor-pointer animate-slide-up"
+                    className="shadow-card hover:shadow-hover transition-all overflow-hidden group cursor-pointer animate-fade-in-up border-none"
+                    style={{ animationDelay: `${index * 100}ms` }}
                     onClick={() => navigate(`/product/${product.id}`)}
                   >
-                    <div className="aspect-square overflow-hidden bg-muted relative">
+                    <div className="aspect-square overflow-hidden bg-[#F8F9FA] relative">
                       {product.images && product.images[0] ? (
                         <img
                           src={product.images[0]}
