@@ -25,6 +25,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Filter as FilterIcon } from "lucide-react";
 import WishlistButton from "@/components/wishlist/WishlistButton";
 import { ProductGridSkeleton } from "@/components/product/ProductCardSkeleton";
+import ProductCard from "@/components/product/ProductCard";
 import { useStoreSettings } from "@/hooks/useStoreSettings";
 import { useCurrency } from "@/contexts/CurrencyContext";
 
@@ -392,69 +393,7 @@ const Shop = () => {
                   ) : (
                     <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 stagger-animation">
                       {paginatedProducts.map((product, index) => (
-                        <Card
-                          key={product.id}
-                          className="shadow-card hover:shadow-hover transition-all overflow-hidden group cursor-pointer animate-fade-in-up border-none"
-                          style={{ animationDelay: `${index * 50}ms` }}
-                          onClick={() => navigate(`/product/${product.id}`)}
-                        >
-                          <div className="aspect-square overflow-hidden bg-[#F8F9FA] relative">
-                            {product.images && product.images[0] ? (
-                              <img
-                                src={product.images[0]}
-                                alt={product.name}
-                                className="w-full h-full object-contain p-2 md:p-4 group-hover:scale-110 transition-transform duration-300"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <Package className="h-10 w-10 md:h-16 md:w-16 text-muted-foreground" />
-                              </div>
-                            )}
-                            {product.stock <= 5 && (
-                              <span className="absolute top-2 right-2 bg-red-500 text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded-full">
-                                Low Stock
-                              </span>
-                            )}
-                            {/* Wishlist Button */}
-                            <div className="absolute top-2 left-2" onClick={(e) => e.stopPropagation()}>
-                              <WishlistButton
-                                productId={product.id}
-                                className="bg-white/80 hover:bg-white shadow-sm"
-                              />
-                            </div>
-                          </div>
-                          <CardContent className="p-3 md:p-4">
-                            <h3 className="font-semibold mb-1 md:mb-2 line-clamp-2 text-sm md:text-base min-h-[2.5rem] md:min-h-[3rem]">{product.name}</h3>
-                            <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{product.description}</p>
-                            <div className="flex flex-col md:flex-row md:items-baseline gap-1 md:gap-2 mb-3 md:mb-4">
-                              <p className="text-base md:text-2xl font-bold text-primary">{formatPrice(product.price)}</p>
-                              {product.compareAtPrice && (
-                                <p className="text-xs md:text-sm text-muted-foreground line-through">{formatPrice(product.compareAtPrice)}</p>
-                              )}
-                            </div>
-                            <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
-                              <Button
-                                className="w-full gap-2 text-xs md:text-sm h-8 md:h-10"
-                                size="sm"
-                                onClick={() => addToCart(product, 1)}
-                              >
-                                <ShoppingCart className="h-3 w-3 md:h-4 md:w-4" />
-                                Add to Cart
-                              </Button>
-                              <a
-                                href={`https://wa.me/${settings.whatsappNumber}?text=Hello, I'm interested in ${product.name} (${formatPrice(product.price)}): ${window.location.origin}/product/${product.id}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="block"
-                              >
-                                <Button variant="outline" className="w-full gap-2 text-xs md:text-sm h-8 md:h-10" size="sm">
-                                  <MessageCircle className="h-3 w-3 md:h-4 md:w-4" />
-                                  Order on WhatsApp
-                                </Button>
-                              </a>
-                            </div>
-                          </CardContent>
-                        </Card>
+                        <ProductCard key={product.id} product={product} index={index} showDescription={true} />
                       ))}
                     </div>
                   )}
