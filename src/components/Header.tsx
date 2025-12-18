@@ -52,7 +52,7 @@ const Header = () => {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 md:gap-3 hover:opacity-90 transition-opacity">
-            <img src={logo} alt="Prestige Merchandise" className="h-[120px] w-auto md:h-28 transition-all" />
+            <img src={logo} alt="Prestige Merchandise" className="h-[150px] w-auto md:h-[180px] transition-all" />
           </Link>
 
           {/* Centered Search Bar */}
