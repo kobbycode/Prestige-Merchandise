@@ -35,8 +35,8 @@ const Login = () => {
         <div className="min-h-screen flex items-center justify-center bg-gray-50/50">
             <Card className="w-full max-w-md mx-4 shadow-xl border-t-4 border-t-primary">
                 <CardHeader className="text-center space-y-4">
-                    <div className="mx-auto bg-white p-2 rounded-full w-fit shadow-sm">
-                        <img src={logo} alt="Logo" className="h-20 w-auto" />
+                    <div className="mx-auto w-fit">
+                        <img src={logo} alt="Logo" className="h-24 w-auto" />
                     </div>
                     <CardTitle className="text-2xl font-bold">Admin Portal</CardTitle>
                     <CardDescription>Secure login for enterprise management</CardDescription>

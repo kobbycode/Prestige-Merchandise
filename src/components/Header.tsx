@@ -47,18 +47,12 @@ const Header = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-secondary text-secondary-foreground shadow-sm">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-secondary text-secondary-foreground shadow-sm">
       <div className="container mx-auto px-4 py-2 md:py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 md:gap-3 hover:opacity-90 transition-opacity">
-            <div className="bg-white p-1 rounded-md">
-              <img src={logo} alt="Prestige Merchandise" className="h-16 w-auto md:h-20 transition-all" />
-            </div>
-            <div className="hidden sm:block">
-              <h1 className="text-lg md:text-xl font-bold text-secondary-foreground">The Prestige Merchandise</h1>
-              <p className="text-left text-[10px] md:text-xs text-secondary-foreground/80">Genuine Auto Parts</p>
-            </div>
+            <img src={logo} alt="Prestige Merchandise" className="h-20 w-auto md:h-24 transition-all" />
           </Link>
 
           {/* Centered Search Bar */}
@@ -241,7 +235,7 @@ const Header = () => {
                   to={link.to}
                   className={`block py-2 px-3 rounded-md font-medium transition-colors ${location.pathname === link.to
                     ? "bg-primary/10 text-primary"
-                    : "text-white/90 hover:bg-white/10 hover:text-white"
+                    : "text-white hover:bg-white/10 hover:text-white"
                     }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
@@ -256,7 +250,7 @@ const Header = () => {
               {!isAuthenticated && (
                 <Link
                   to="/login"
-                  className="block py-2 px-3 rounded-md font-medium text-white/90 hover:bg-white/10 hover:text-white"
+                  className="block py-2 px-3 rounded-md font-medium text-white hover:bg-white/10 hover:text-white"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Login / Register
@@ -266,7 +260,7 @@ const Header = () => {
                 <>
                   <Link
                     to="/account"
-                    className="block py-2 px-3 rounded-md font-medium text-white/90 hover:bg-white/10 hover:text-white"
+                    className="block py-2 px-3 rounded-md font-medium text-white hover:bg-white/10 hover:text-white"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     My Profile

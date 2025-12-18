@@ -98,7 +98,7 @@ const AdminLayout = () => {
             >
                 <div className="h-full flex flex-col">
                     <div className="p-6 border-b border-white/10 flex items-center gap-3">
-                        <img src={logo} alt="Logo" className="h-10 w-auto bg-white rounded-full p-1" />
+                        <img src={logo} alt="Logo" className="h-12 w-auto" />
                         <span className="font-bold text-lg text-primary">Admin Panel</span>
                         <button
                             className="ml-auto lg:hidden hover:text-primary"
