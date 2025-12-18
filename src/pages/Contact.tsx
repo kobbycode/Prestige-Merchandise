@@ -207,7 +207,7 @@ const Contact = () => {
 
               {/* Quick WhatsApp Button */}
               <a
-                href="https://wa.me/233247654321?text=Hello, I'd like to inquire about your auto parts"
+                href={`https://wa.me/${settings.whatsappNumber}?text=Hello, I'd like to inquire about your auto parts`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block mt-6"

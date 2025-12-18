@@ -3,8 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Building2, Target, Award, Users, MessageCircle, Phone } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { useStoreSettings } from "@/hooks/useStoreSettings";
 
 const About = () => {
+  const { settings } = useStoreSettings();
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
@@ -125,13 +128,13 @@ const About = () => {
             <h2 className="text-3xl font-bold mb-4">Ready to Experience Quality Service?</h2>
             <p className="text-xl mb-8 opacity-90">Visit our shop in Abossey Okai or contact us today</p>
             <div className="flex flex-wrap gap-4 justify-center">
-              <a href="https://wa.me/233247654321" target="_blank" rel="noopener noreferrer">
+              <a href={`https://wa.me/${settings.whatsappNumber}`} target="_blank" rel="noopener noreferrer">
                 <Button variant="secondary" size="lg" className="gap-2 min-w-[150px]">
                   <MessageCircle className="h-5 w-5" />
                   Contact on WhatsApp
                 </Button>
               </a>
-              <a href="tel:0541234567">
+              <a href={`tel:${settings.phone?.replace(/\s/g, '')}`}>
                 <Button variant="secondary" size="lg" className="gap-2 min-w-[150px]">
                   <Phone className="h-5 w-5" />
                   Call Us Now

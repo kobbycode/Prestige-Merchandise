@@ -14,11 +14,13 @@ import RecentlyViewed from "@/components/product/RecentlyViewed";
 import SEOHead from "@/components/SEOHead";
 import heroImage from "@/assets/hero-mechanic.jpg";
 import { ProductCardSkeleton } from "@/components/product/ProductCardSkeleton";
+import { useStoreSettings } from "@/hooks/useStoreSettings";
 
 const Index = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { formatPrice } = useCurrency();
+  const { settings } = useStoreSettings();
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -80,7 +82,7 @@ const Index = () => {
           "name": "The Prestige Merchandise",
           "description": "Your trusted auto parts dealer in Abossey Okai. Genuine power steering pumps, steering racks, lubricants & more.",
           "url": typeof window !== 'undefined' ? window.location.origin : '',
-          "telephone": "+233-24-765-4321",
+          "telephone": settings.phone || "+233-24-765-4321",
           "address": {
             "@type": "PostalAddress",
             "streetAddress": "Abossey Okai",
@@ -223,7 +225,7 @@ const Index = () => {
                           Add to Cart
                         </Button>
                         <a
-                          href={`https://wa.me/233247654321?text=I'm interested in ${product.name}`}
+                          href={`https://wa.me/${settings.whatsappNumber}?text=I'm interested in ${product.name}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="block"

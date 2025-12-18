@@ -3,8 +3,10 @@ import { Button } from "@/components/ui/button";
 import { MessageSquare, Truck, Package, Wrench, MessageCircle, Phone } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { useStoreSettings } from "@/hooks/useStoreSettings";
 
 const Services = () => {
+  const { settings } = useStoreSettings();
   const services = [
     {
       icon: MessageSquare,
@@ -161,13 +163,13 @@ const Services = () => {
             <h2 className="text-3xl font-bold mb-4">Need Our Services?</h2>
             <p className="text-xl mb-8 opacity-90">Contact us today to learn more about how we can help</p>
             <div className="flex flex-wrap gap-4 justify-center">
-              <a href="https://wa.me/233247654321" target="_blank" rel="noopener noreferrer">
+              <a href={`https://wa.me/${settings.whatsappNumber}`} target="_blank" rel="noopener noreferrer">
                 <Button variant="outline" size="lg" className="gap-2">
                   <MessageCircle className="h-5 w-5" />
                   WhatsApp Us
                 </Button>
               </a>
-              <a href="tel:0541234567">
+              <a href={`tel:${settings.phone?.replace(/\s/g, '')}`}>
                 <Button variant="outline" size="lg" className="gap-2">
                   <Phone className="h-5 w-5" />
                   Call Now
