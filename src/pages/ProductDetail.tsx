@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { doc, getDoc, updateDoc, increment } from "firebase/firestore";
+import { doc, getDoc, updateDoc, increment, collection, query, where, limit, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Product } from "@/types/product";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, MessageCircle, Package, ChevronLeft, ChevronRight, Home, Heart } from "lucide-react";
+import { ShoppingCart, MessageCircle, Package, ChevronLeft, ChevronRight, Home, Heart, ArrowRight } from "lucide-react";
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -27,8 +27,8 @@ import { Share2 } from "lucide-react";
 import { useStoreSettings } from "@/hooks/useStoreSettings";
 import SEOHead from "@/components/SEOHead";
 import { FaWhatsapp, FaLink } from "react-icons/fa";
+import ProductCard from "@/components/product/ProductCard";
 import { ProductDetailSkeleton } from "@/components/product/ProductDetailSkeleton";
-
 import { useCurrency } from "@/contexts/CurrencyContext";
 
 const ProductDetail = () => {
@@ -39,6 +39,7 @@ const ProductDetail = () => {
     const { settings } = useStoreSettings();
     const { formatPrice } = useCurrency();
     const [product, setProduct] = useState<Product | null>(null);
+    const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
@@ -58,6 +59,8 @@ const ProductDetail = () => {
             if (docSnap.exists()) {
                 const productData = { id: docSnap.id, ...docSnap.data() } as Product;
                 setProduct(productData);
+                // Fetch related products
+                fetchRelatedProducts(productData.category, productData.id);
                 // Track this product as recently viewed
                 addToRecentlyViewed(productData.id);
 
@@ -84,6 +87,25 @@ const ProductDetail = () => {
             toast.error("Failed to load product");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchRelatedProducts = async (category: string, currentProductId: string) => {
+        try {
+            const q = query(
+                collection(db, "products"),
+                where("category", "==", category),
+                where("status", "==", "active"),
+                limit(10) // Fetch a few more to filter out current
+            );
+            const querySnapshot = await getDocs(q);
+            const related = querySnapshot.docs
+                .map(doc => ({ id: doc.id, ...doc.data() } as Product))
+                .filter(p => p.id !== currentProductId)
+                .slice(0, 4);
+            setRelatedProducts(related);
+        } catch (error) {
+            console.error("Error fetching related products:", error);
         }
     };
 
@@ -522,6 +544,28 @@ const ProductDetail = () => {
                             </TabsContent>
                         </Tabs>
                     </div>
+
+                    {/* Related Products Section */}
+                    {relatedProducts.length > 0 && (
+                        <div className="mt-20">
+                            <div className="flex items-center justify-between mb-8">
+                                <div>
+                                    <h2 className="text-2xl md:text-3xl font-bold tracking-tight">You May Also Like</h2>
+                                    <p className="text-muted-foreground mt-1">Similar products you might be interested in</p>
+                                </div>
+                                <Link to={`/shop?category=${product.category}`}>
+                                    <Button variant="ghost" className="hidden md:flex group">
+                                        View Category <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                    </Button>
+                                </Link>
+                            </div>
+                            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                                {relatedProducts.map((p, idx) => (
+                                    <ProductCard key={p.id} product={p} index={idx} />
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </main >
 

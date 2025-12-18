@@ -28,6 +28,8 @@ import { ProductGridSkeleton } from "@/components/product/ProductCardSkeleton";
 import ProductCard from "@/components/product/ProductCard";
 import { useStoreSettings } from "@/hooks/useStoreSettings";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { Slider } from "@/components/ui/slider";
+import { Badge } from "@/components/ui/badge";
 
 const Shop = () => {
   const navigate = useNavigate();
@@ -37,12 +39,14 @@ const Shop = () => {
   const { settings } = useStoreSettings();
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [priceRange, setPriceRange] = useState({ min: "", max: "" });
+
   const [sortBy, setSortBy] = useState("newest");
   const [selectedManufacturer, setSelectedManufacturer] = useState("all");
   const [selectedCondition, setSelectedCondition] = useState("all");
   const [inStockOnly, setInStockOnly] = useState(false);
   const [featuredOnly, setFeaturedOnly] = useState(false);
+  const [priceSliderValue, setPriceSliderValue] = useState<number[]>([0, 10000]);
+  const [maxProductPrice, setMaxProductPrice] = useState(10000);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<string[]>([]);
@@ -65,7 +69,7 @@ const Shop = () => {
   // Reset pagination when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedCategory, priceRange, sortBy, selectedManufacturer, selectedCondition, inStockOnly, featuredOnly]);
+  }, [searchQuery, selectedCategory, sortBy, selectedManufacturer, selectedCondition, inStockOnly, featuredOnly]);
 
   const fetchProducts = async () => {
     try {
@@ -95,6 +99,13 @@ const Shop = () => {
       setCategories(["All Products", ...Array.from(categoriesSet)]);
       setManufacturers(["All", ...Array.from(manufacturersSet)]);
       setConditions(["All", ...Array.from(conditionsSet)]);
+
+      // Set max price for slider
+      if (productsList.length > 0) {
+        const max = Math.max(...productsList.map(p => p.price));
+        setMaxProductPrice(Math.ceil(max / 100) * 100);
+        setPriceSliderValue([0, Math.ceil(max / 100) * 100]);
+      }
     } catch (error) {
       console.error("Error fetching products:", error);
     } finally {
@@ -110,9 +121,7 @@ const Shop = () => {
       selectedCategory === "All Products" ||
       product.category === selectedCategory;
 
-    const minPrice = priceRange.min ? parseFloat(priceRange.min) : 0;
-    const maxPrice = priceRange.max ? parseFloat(priceRange.max) : Infinity;
-    const matchesPrice = product.price >= minPrice && product.price <= maxPrice;
+    const matchesPrice = product.price >= priceSliderValue[0] && product.price <= priceSliderValue[1];
 
     const matchesManufacturer = selectedManufacturer === "all" ||
       selectedManufacturer === "All" ||
@@ -133,6 +142,10 @@ const Shop = () => {
         return a.price - b.price;
       case "price-desc":
         return b.price - a.price;
+      case "discount":
+        const discountA = a.compareAtPrice ? ((a.compareAtPrice - a.price) / a.compareAtPrice) : 0;
+        const discountB = b.compareAtPrice ? ((b.compareAtPrice - b.price) / b.compareAtPrice) : 0;
+        return discountB - discountA;
       case "newest":
       default:
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -144,11 +157,12 @@ const Shop = () => {
   const clearFilters = () => {
     setSearchQuery("");
     setSelectedCategory("all");
-    setPriceRange({ min: "", max: "" });
+
     setSelectedManufacturer("all");
     setSelectedCondition("all");
     setInStockOnly(false);
     setFeaturedOnly(false);
+    setPriceSliderValue([0, maxProductPrice]);
   };
 
 
@@ -182,30 +196,45 @@ const Shop = () => {
         </div>
 
         {/* Price Range Filter */}
-        <div>
-          <h4 className="font-semibold mb-3 text-sm text-muted-foreground">PRICE RANGE</h4>
-          <div className="space-y-3">
-            <div>
-              <label className="text-xs text-muted-foreground mb-1 block">Min Price (GH₵)</label>
-              <Input
-                type="number"
-                placeholder="0"
-                value={priceRange.min}
-                onChange={(e) => setPriceRange({ ...priceRange, min: e.target.value })}
-                min="0"
-                step="10"
-              />
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Price Range</h4>
+            <Badge variant="secondary" className="font-mono text-[10px]">
+              {formatPrice(priceSliderValue[0])} - {formatPrice(priceSliderValue[1])}
+            </Badge>
+          </div>
+          <Slider
+            defaultValue={[0, maxProductPrice]}
+            max={maxProductPrice}
+            step={10}
+            value={priceSliderValue}
+            onValueChange={setPriceSliderValue}
+            className="mb-6"
+          />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Min</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">GH₵</span>
+                <Input
+                  type="number"
+                  value={priceSliderValue[0]}
+                  onChange={(e) => setPriceSliderValue([parseInt(e.target.value) || 0, priceSliderValue[1]])}
+                  className="pl-9 h-9 text-xs"
+                />
+              </div>
             </div>
-            <div>
-              <label className="text-xs text-muted-foreground mb-1 block">Max Price (GH₵)</label>
-              <Input
-                type="number"
-                placeholder="Any"
-                value={priceRange.max}
-                onChange={(e) => setPriceRange({ ...priceRange, max: e.target.value })}
-                min="0"
-                step="10"
-              />
+            <div className="space-y-1.5">
+              <label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Max</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">GH₵</span>
+                <Input
+                  type="number"
+                  value={priceSliderValue[1]}
+                  onChange={(e) => setPriceSliderValue([priceSliderValue[0], parseInt(e.target.value) || maxProductPrice])}
+                  className="pl-9 h-9 text-xs"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -277,7 +306,7 @@ const Shop = () => {
         </div>
 
         {/* Clear Filters */}
-        {(searchQuery || selectedCategory !== "all" || priceRange.min || priceRange.max ||
+        {(searchQuery || selectedCategory !== "all" ||
           selectedManufacturer !== "all" || selectedCondition !== "all" || inStockOnly || featuredOnly) && (
             <Button
               variant="outline"
@@ -357,6 +386,7 @@ const Shop = () => {
                         <SelectItem value="newest">Newest</SelectItem>
                         <SelectItem value="price-asc">Price: Low to High</SelectItem>
                         <SelectItem value="price-desc">Price: High to Low</SelectItem>
+                        <SelectItem value="discount">Biggest Discount</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

@@ -54,11 +54,12 @@ const Dashboard = () => {
     });
     const [recentProducts, setRecentProducts] = useState<Product[]>([]);
     const [recentOrders, setRecentOrders] = useState<Order[]>([]);
-    const [categoryData, setCategoryData] = useState<{ name: string, count: number }[]>([]);
+    const [categoryData, setCategoryData] = useState<{ name: string, value: number }[]>([]);
     const [orderStatusData, setOrderStatusData] = useState<{ name: string, value: number }[]>([]);
     const [revenueChartData, setRevenueChartData] = useState<{ date: string, revenue: number }[]>([]);
     const [lowStockItems, setLowStockItems] = useState<Product[]>([]);
     const [mostViewedProducts, setMostViewedProducts] = useState<Product[]>([]);
+    const [topSellingProducts, setTopSellingProducts] = useState<{ name: string, sales: number, revenue: number }[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -109,6 +110,8 @@ const Dashboard = () => {
                 let pendingCount = 0;
                 let revenue = 0;
                 const statusCounts: Record<string, number> = {};
+                const productSales: Record<string, { count: number, revenue: number, name: string }> = {};
+                const categoryRevenue: Record<string, number> = {};
 
                 ordersSnap.forEach(doc => {
                     const o = { id: doc.id, ...doc.data() } as Order;
@@ -116,6 +119,21 @@ const Dashboard = () => {
                     revenue += o.amount;
                     if (o.status === 'pending') pendingCount++;
                     statusCounts[o.status] = (statusCounts[o.status] || 0) + 1;
+
+                    // Track product sales and category revenue
+                    o.items.forEach(item => {
+                        const productId = item.id; // Or item.product.id
+                        if (!productSales[productId]) {
+                            productSales[productId] = { count: 0, revenue: 0, name: item.product.name };
+                        }
+                        productSales[productId].count += item.quantity;
+                        productSales[productId].revenue += item.product.price * item.quantity;
+
+                        const cat = item.product.category;
+                        if (cat) {
+                            categoryRevenue[cat] = (categoryRevenue[cat] || 0) + item.product.price * item.quantity;
+                        }
+                    });
                 });
 
                 // Fetch Recent Orders (Fetch more to get meaningful data for charts, e.g. last 20 or 50)
@@ -149,62 +167,9 @@ const Dashboard = () => {
                     .slice(0, 5);
                 setMostViewedProducts(mostViewed);
 
-                // For chart: Use all orders, sort by date
-                setRecentOrders(orders.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)).slice(0, 7)); // Just showing last 7 for chart? 
-                // Wait, if I overwrite recentOrders with 7 items, the list only shows 7. 
-                // But the chart needs potentially more data or same data. 
-                // Let's keep recentOrders for the list (5 items) and create a separate state for chart if needed?
-                // OR just use the 'orders' array we already fetched which has EVERYTHING.
-                // The previous code block for the chart used 'recentOrders'.
-                // Let's update the chart logic to use 'allOrders' (which I need to save to state) OR just process 'orders' here and save processed data.
-
-                // Let's create `revenueChartData` state.
-                const processedRevenueData = orders.reduce((acc: any[], order) => {
-                    if (!order.createdAt?.seconds) return acc;
-                    const date = format(new Date(order.createdAt.seconds * 1000), "MMM dd");
-                    const existing = acc.find(item => item.date === date);
-                    if (existing) {
-                        existing.revenue += order.amount;
-                    } else {
-                        acc.push({ date, revenue: order.amount });
-                    }
-                    return acc;
-                }, [])
-                    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()) // sort by date roughly? "MMM dd" isn't year-safe but okay for recent.
-                // Actually safer to sort by raw timestamp then format.
-                // Re-doing chart data logic:
-
-                // Group by date string (unique key)
-                const revenueMap = new Map<string, number>();
-                orders.forEach(o => {
-                    if (o.createdAt?.seconds) {
-                        const d = new Date(o.createdAt.seconds * 1000);
-                        const key = format(d, "MMM dd");
-                        revenueMap.set(key, (revenueMap.get(key) || 0) + o.amount);
-                    }
-                });
-                // Convert to array and taking last 7 days? Or just all available days?
-                // Let's take last 7 entries for cleanliness.
-                const chartDataRaw = Array.from(revenueMap.entries()).map(([date, revenue]) => ({ date, revenue }));
-                // We need them sorted chronologically. This map order isn't guaranteed.
-                // Since we want simple "Trends", let's just reverse the recent logic or robustly sort.
-                // Robust:
-                // ... ignoring subtle sort issues for now, the original list was unordered.
-                // Let's use the 'orders' array which is effectively random unless sorted.
-                // 'orders' array isn't sorted in the fetch above (no orderBy).
-                // Let's just rely on the fact that for a small shop, sorting by string 'MMM dd' might fail across years but works for now.
-                // Better: Use `recentOrders` (which was 5 items) from before? No that's too small.
-                // Let's save `orders` to a state `allOrders` or just `recentOrders`? 
-                // I will save `recentOrders` as the short list (5) and add `revenueData` state.
-
                 setRecentOrders(recentOrdersList); // Keep list as 5
 
                 // Format category chart data
-                const chartData = Object.entries(catCounts)
-                    .map(([name, count]) => ({ name, count }))
-                    .sort((a, b) => b.count - a.count)
-                    .slice(0, 7);
-                setCategoryData(chartData);
 
                 // Format order status chart data
                 const statusChartData = Object.entries(statusCounts)
@@ -228,9 +193,27 @@ const Dashboard = () => {
                         }
                         return acc;
                     }, [])
-                    .slice(-7); // Last 7 days with activity
+                    .slice(-14); // Last 14 days with activity for better trend line
 
                 setRevenueChartData(revData);
+
+                // Top Selling Products
+                const topSelling = Object.values(productSales)
+                    .sort((a, b) => b.count - a.count)
+                    .slice(0, 5)
+                    .map(p => ({
+                        name: p.name,
+                        sales: p.count,
+                        revenue: p.revenue
+                    }));
+                setTopSellingProducts(topSelling);
+
+                // Sales by Category (Revenue based)
+                const catRevenueData = Object.entries(categoryRevenue)
+                    .map(([name, value]) => ({ name, value }))
+                    .sort((a, b) => b.value - a.value)
+                    .slice(0, 5);
+                setCategoryData(catRevenueData); // Overwriting the product count with revenue for better analysis
 
             } catch (error) {
                 console.error("Error fetching dashboard data:", error);
@@ -563,6 +546,85 @@ const Dashboard = () => {
                 </Card>
 
             </div >
+
+            {/* Top Selling & Category Sales */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+                <Card className="col-span-4">
+                    <CardHeader>
+                        <CardTitle>Top Selling Products</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pl-2">
+                        <ResponsiveContainer width="100%" height={350}>
+                            <BarChart data={topSellingProducts}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                <XAxis
+                                    dataKey="name"
+                                    stroke="#888888"
+                                    fontSize={12}
+                                    tickLine={false}
+                                    axisLine={false}
+                                    tickFormatter={(value) => value.length > 10 ? `${value.substring(0, 10)}...` : value}
+                                />
+                                <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
+                                <Tooltip
+                                    cursor={{ fill: 'transparent' }}
+                                    content={({ active, payload, label }) => {
+                                        if (active && payload && payload.length) {
+                                            return (
+                                                <div className="rounded-lg border bg-background p-2 shadow-sm">
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[0.70rem] uppercase text-muted-foreground">Product</span>
+                                                            <span className="font-bold text-muted-foreground">{label}</span>
+                                                        </div>
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[0.70rem] uppercase text-muted-foreground">Sales</span>
+                                                            <span className="font-bold">{payload[0].value}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )
+                                        }
+                                        return null;
+                                    }}
+                                />
+                                <Bar dataKey="sales" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
+
+                <Card className="col-span-3">
+                    <CardHeader>
+                        <CardTitle>Revenue by Category</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        {categoryData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height={350}>
+                                <PieChart>
+                                    <Pie
+                                        data={categoryData}
+                                        cx="50%"
+                                        cy="50%"
+                                        labelLine={false}
+                                        outerRadius={80}
+                                        fill="#8884d8"
+                                        dataKey="value"
+                                    >
+                                        {categoryData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip formatter={(value) => formatPrice(value as number)} />
+                                    <Legend />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <p className="text-sm text-muted-foreground text-center py-12">No sales data yet</p>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
 
             {/* Most Viewed Products */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
