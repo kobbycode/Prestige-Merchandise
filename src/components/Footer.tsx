@@ -43,6 +43,11 @@ const Footer = () => {
                   Contact
                 </Link>
               </li>
+              <li>
+                <Link to="/track" className="hover:text-primary transition-colors font-semibold text-yellow-400">
+                  Track Order
+                </Link>
+              </li>
             </ul>
           </div>
 

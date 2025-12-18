@@ -34,6 +34,7 @@ import CustomerProfile from "./pages/customer/Profile";
 import OrderHistory from "./pages/customer/OrderHistory";
 import CustomerOrderDetail from "./pages/customer/CustomerOrderDetail";
 import Wishlist from "./pages/customer/Wishlist";
+import TrackOrder from "./pages/customer/TrackOrder";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CartProvider } from "./contexts/CartContext";
 import { WishlistProvider } from "./contexts/WishlistContext";
@@ -65,6 +66,7 @@ const App = () => (
                     <Route path="/blog/:slug" element={<BlogPostDetail />} />
                     <Route path="/contact" element={<Contact />} />
                     <Route path="/checkout" element={<Checkout />} />
+                    <Route path="/track" element={<TrackOrder />} />
 
                     {/* Customer Auth */}
                     <Route path="/login" element={<CustomerLogin />} />

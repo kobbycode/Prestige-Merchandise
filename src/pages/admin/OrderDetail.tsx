@@ -96,21 +96,42 @@ const OrderDetail = () => {
         try {
             const docRef = doc(db, "orders", order.id);
 
+            // If switching to shipped and tracking is missing, warn admin
+            if (newStatus === 'shipped' && (!trackingNumber || !trackingCarrier)) {
+                toast.warning("Please remember to fill in tracking information for this shipment.");
+            }
+
             // Create status history entry
             const statusHistoryEntry = {
                 status: newStatus,
                 timestamp: Timestamp.now(),
             };
 
-            // Update both status and statusHistory
-            await updateDoc(docRef, {
+            // Prepare update data
+            const updateData: any = {
                 status: newStatus,
                 statusHistory: arrayUnion(statusHistoryEntry)
-            });
+            };
 
-            // Update local state with new statusHistory
+            // If we have tracking info that wasn't saved yet, include it in this update too
+            if (trackingNumber) updateData.trackingNumber = trackingNumber;
+            if (trackingCarrier) updateData.trackingCarrier = trackingCarrier;
+            if (trackingUrl) updateData.trackingUrl = trackingUrl;
+
+            // Update Firestore
+            await updateDoc(docRef, updateData);
+
+            // Update local state
             const updatedHistory = [...(order.statusHistory || []), statusHistoryEntry];
-            setOrder({ ...order, status: newStatus, statusHistory: updatedHistory });
+            const updatedOrder = {
+                ...order,
+                status: newStatus,
+                statusHistory: updatedHistory,
+                trackingNumber: updateData.trackingNumber || order.trackingNumber,
+                trackingCarrier: updateData.trackingCarrier || order.trackingCarrier,
+                trackingUrl: updateData.trackingUrl || order.trackingUrl
+            };
+            setOrder(updatedOrder);
 
             // Create in-app notification for the customer
             if (order.userId && order.userId !== "guest") {
@@ -130,7 +151,7 @@ const OrderDetail = () => {
                 }
             }
 
-            // Notify all admins with admin-oriented message (Role-based)
+            // Notify all admins
             try {
                 const customerName = `${order.customerDetails.firstName} ${order.customerDetails.lastName}`;
 
@@ -151,8 +172,9 @@ const OrderDetail = () => {
             // Send status update email (non-blocking)
             const customerEmail = order.customerDetails.email;
             if (customerEmail) {
+                // IMPORTANT: Pass updatedOrder so tracking info is included
                 sendOrderStatusUpdate(
-                    order,
+                    updatedOrder,
                     customerEmail,
                     oldStatus,
                     newStatus
