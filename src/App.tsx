@@ -41,6 +41,7 @@ import { WishlistProvider } from "./contexts/WishlistContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import { CurrencyProvider } from "./contexts/CurrencyContext";
 import ScrollToTop from "./components/ScrollToTop";
+import InstallPrompt from "./components/InstallPrompt";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,7 @@ const App = () => (
               <TooltipProvider>
                 <Toaster />
                 <Sonner />
+                <InstallPrompt />
                 <BrowserRouter>
                   <ScrollToTop />
                   <Routes>
