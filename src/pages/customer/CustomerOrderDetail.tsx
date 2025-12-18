@@ -146,11 +146,26 @@ const CustomerOrderDetail = () => {
                                     </div>
                                 </div>
                                 {order.trackingUrl && (
-                                    <Button className="w-full mt-4" asChild>
-                                        <a href={order.trackingUrl} target="_blank" rel="noopener noreferrer">
-                                            Track Shipment
-                                        </a>
-                                    </Button>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                                        <Button className="w-full gap-2" asChild>
+                                            <a
+                                                href={order.trackingUrl.startsWith('http') ? order.trackingUrl : `https://${order.trackingUrl}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                            >
+                                                <Truck className="h-4 w-4" />
+                                                Track Shipment
+                                            </a>
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            className="w-full gap-2 border-primary/30 text-primary hover:bg-primary/5"
+                                            onClick={() => navigate(`/track?orderId=${order.id}`)}
+                                        >
+                                            <Package className="h-4 w-4" />
+                                            Track on our Website
+                                        </Button>
+                                    </div>
                                 )}
                             </CardContent>
                         </Card>

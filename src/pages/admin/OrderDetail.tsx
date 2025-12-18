@@ -43,6 +43,11 @@ const OrderDetail = () => {
         }
     }, [order]);
 
+    const ensureAbsoluteUrl = (url: string) => {
+        if (!url || url.startsWith('http://') || url.startsWith('https://')) return url;
+        return `https://${url}`;
+    };
+
     const fetchOrder = async (orderId: string) => {
         try {
             const docRef = doc(db, "orders", orderId);
@@ -67,18 +72,21 @@ const OrderDetail = () => {
         setUpdating(true);
         try {
             const docRef = doc(db, "orders", order.id);
+            const absoluteUrl = ensureAbsoluteUrl(trackingUrl);
+
             await updateDoc(docRef, {
                 trackingNumber,
                 trackingCarrier,
-                trackingUrl
+                trackingUrl: absoluteUrl
             });
 
             setOrder({
                 ...order,
                 trackingNumber,
                 trackingCarrier,
-                trackingUrl
+                trackingUrl: absoluteUrl
             });
+            setTrackingUrl(absoluteUrl);
 
             toast.success("Tracking information saved");
         } catch (error) {
@@ -114,9 +122,10 @@ const OrderDetail = () => {
             };
 
             // If we have tracking info that wasn't saved yet, include it in this update too
+            const absoluteTrackUrl = ensureAbsoluteUrl(trackingUrl);
             if (trackingNumber) updateData.trackingNumber = trackingNumber;
             if (trackingCarrier) updateData.trackingCarrier = trackingCarrier;
-            if (trackingUrl) updateData.trackingUrl = trackingUrl;
+            if (trackingUrl) updateData.trackingUrl = absoluteTrackUrl;
 
             // Update Firestore
             await updateDoc(docRef, updateData);

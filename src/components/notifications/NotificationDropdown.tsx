@@ -27,13 +27,9 @@ export function NotificationDropdown({ className }: { className?: string }) {
 
         // Handle navigation based on notification type/data
         if (notification.type === 'order_status' && notification.data?.orderId) {
-            // If user is admin, go to admin order detail? Or customer order detail? 
-            // We need to know context. Assuming customer for status updates mostly, but admin also.
-            // Best to just link to generic order page if unsure, or specific route.
-            // For now, let's assume it's for the recipient. 
-            // If it involves admin side, we might need logic.
-            // But customer side: /account/orders
-            // Admin side: /admin/orders/...
+            navigate(`/account/orders/${notification.data.orderId}`);
+        } else if (notification.link) {
+            navigate(notification.link);
         }
     };
 
