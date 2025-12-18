@@ -215,8 +215,10 @@ const Checkout = () => {
 
         if (paymentMethod.startsWith('paystack')) {
             // Check if key is present
-            if (!import.meta.env.VITE_PAYSTACK_PUBLIC_KEY) {
-                toast.error("Payment configuration missing. Please contact support.");
+            const paystackKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
+            if (!paystackKey || paystackKey === 'your_paystack_public_key' || paystackKey === '') {
+                console.error("Paystack Public Key is missing or invalid in environment variables.");
+                toast.error("Payment configuration error: VITE_PAYSTACK_PUBLIC_KEY is not set correctly in your .env file.");
                 setIsSubmitting(false);
                 return;
             }
