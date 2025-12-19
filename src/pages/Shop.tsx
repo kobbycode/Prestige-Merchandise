@@ -177,8 +177,8 @@ const Shop = () => {
         {/* Page Header */}
         <section className="bg-secondary text-secondary-foreground py-8 md:py-12">
           <div className="container mx-auto px-4">
-            <h1 className="text-3xl md:text-5xl font-bold mb-2 md:mb-4">Shop Auto Parts</h1>
-            <p className="text-lg md:text-xl opacity-90">Browse our complete catalog of genuine spare parts</p>
+            <h1 className="text-3xl md:text-5xl font-bold mb-2 md:mb-4">Steering Parts & Components</h1>
+            <p className="text-lg md:text-xl opacity-90">Browse our extensive selection of genuine steering parts, racks, pumps, and accessories</p>
           </div>
         </section>
 
