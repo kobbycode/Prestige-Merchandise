@@ -282,7 +282,7 @@ const Header = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="text-white hover:bg-white/10"
+              className="relative text-white hover:bg-white/10"
               onClick={() => setIsCartOpen(true)}
             >
               <ShoppingBag className="h-5 w-5" />
