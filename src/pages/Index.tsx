@@ -95,7 +95,7 @@ const Index = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-secondary/95 via-secondary/80 to-secondary/40"></div>
           </div>
 
-          <div className="container relative z-10 mx-auto px-4 pt-4">
+          <div className="container relative z-10 mx-auto px-4 pt-0 -mt-8">
             <div className="max-w-3xl text-white space-y-6 animate-in slide-in-from-left duration-700">
               <span className="inline-block py-1 px-3 rounded-none bg-primary/20 border border-primary text-primary font-bold text-sm uppercase tracking-wider backdrop-blur-sm">
                 The Steering Authority
