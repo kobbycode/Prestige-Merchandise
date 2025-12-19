@@ -136,18 +136,18 @@ const FleetSolutions = () => {
                         </p>
 
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                            <a href="tel:+233203663708">
-                                <Button size="lg" variant="secondary" className="w-full sm:w-auto h-14 px-8 text-lg font-bold gap-2">
+                            <a href={`tel:${settings.phone?.replace(/\s/g, '')}`}>
+                                <Button size="lg" variant="secondary" className="w-full sm:w-auto h-14 px-8 text-lg font-bold gap-2 rounded-none">
                                     <Phone className="h-5 w-5" /> Call Now
                                 </Button>
                             </a>
-                            <a href="https://wa.me/233203663708?text=Hi, I'm interested in fleet solutions" target="_blank" rel="noopener noreferrer">
-                                <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-lg font-bold bg-[#25D366] hover:bg-[#128C7E] text-white border-none gap-2">
+                            <a href={`https://wa.me/${settings.whatsappNumber}?text=Hi, I'm interested in fleet solutions`} target="_blank" rel="noopener noreferrer">
+                                <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-lg font-bold bg-[#25D366] hover:bg-[#128C7E] text-white border-none gap-2 rounded-none">
                                     <MessageCircle className="h-5 w-5" /> WhatsApp Us
                                 </Button>
                             </a>
                             <Link to="/contact">
-                                <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 px-8 text-lg font-bold border-white/40 bg-transparent text-white hover:bg-white hover:text-secondary gap-2">
+                                <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 px-8 text-lg font-bold border-white/40 bg-transparent text-white hover:bg-white hover:text-secondary gap-2 rounded-none">
                                     Request Quote
                                 </Button>
                             </Link>
