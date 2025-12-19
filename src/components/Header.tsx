@@ -128,10 +128,10 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-sidebar-border bg-sidebar text-sidebar-foreground shadow-lg">
-      <div className="container mx-auto px-4 py-2">
+      <div className="container mx-auto px-4 py-1">
         <div className="flex items-center justify-between gap-4">
           {/* Logo */}
-          <Link to="/" className="relative flex items-center h-24 md:h-28 shrink-0 z-50">
+          <Link to="/" className="relative flex items-center h-28 md:h-32 shrink-0 z-50">
             <img
               src={logo}
               alt="Prestige Merchandise"
