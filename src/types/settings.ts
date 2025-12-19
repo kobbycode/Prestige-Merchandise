@@ -9,5 +9,10 @@ export interface StoreSettings {
         monSat?: string;
         sunday?: string;
     };
+    menuItems?: {
+        label: string;
+        path: string;
+        active: boolean;
+    }[];
     updatedAt?: string;
 }

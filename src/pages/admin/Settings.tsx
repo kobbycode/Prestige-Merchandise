@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2, Save, Facebook, Phone, MapPin, Mail, Clock } from "lucide-react";
+import { Loader2, Save, Facebook, Phone, MapPin, Mail, Clock, Trash2, Plus, Link as LinkIcon } from "lucide-react";
 import { StoreSettings } from "@/types/settings";
 
 const Settings = () => {
@@ -129,6 +129,98 @@ const Settings = () => {
             </div>
 
             <form onSubmit={handleSave} className="space-y-6">
+                {/* Navigation Menu */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <LinkIcon className="h-5 w-5" />
+                            Navigation Menu
+                        </CardTitle>
+                        <CardDescription>
+                            Customize the main navigation links displayed in the header.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-4">
+                            {(settings.menuItems || []).map((item, index) => (
+                                <div key={index} className="flex gap-2 items-start p-3 bg-muted/20 rounded-md border text-sm">
+                                    <div className="grid gap-2 flex-1 sm:grid-cols-3">
+                                        <div className="space-y-1">
+                                            <Label className="text-xs text-muted-foreground">Label</Label>
+                                            <Input
+                                                value={item.label}
+                                                onChange={(e) => {
+                                                    const newItems = [...(settings.menuItems || [])];
+                                                    newItems[index] = { ...item, label: e.target.value };
+                                                    setSettings(prev => ({ ...prev, menuItems: newItems }));
+                                                }}
+                                                placeholder="Link Name"
+                                                className="h-8"
+                                            />
+                                        </div>
+                                        <div className="space-y-1 sm:col-span-2">
+                                            <Label className="text-xs text-muted-foreground">URL Path</Label>
+                                            <div className="flex gap-2">
+                                                <Input
+                                                    value={item.path}
+                                                    onChange={(e) => {
+                                                        const newItems = [...(settings.menuItems || [])];
+                                                        newItems[index] = { ...item, path: e.target.value };
+                                                        setSettings(prev => ({ ...prev, menuItems: newItems }));
+                                                    }}
+                                                    placeholder="/path"
+                                                    className="h-8"
+                                                />
+                                                <div className="flex bg-background border rounded-md h-8 items-center px-2 space-x-2 shrink-0">
+                                                    <Label htmlFor={`active-${index}`} className="text-xs cursor-pointer select-none">Show</Label>
+                                                    <input
+                                                        type="checkbox"
+                                                        id={`active-${index}`}
+                                                        checked={item.active}
+                                                        onChange={(e) => {
+                                                            const newItems = [...(settings.menuItems || [])];
+                                                            newItems[index] = { ...item, active: e.target.checked };
+                                                            setSettings(prev => ({ ...prev, menuItems: newItems }));
+                                                        }}
+                                                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => {
+                                            const newItems = settings.menuItems?.filter((_, i) => i !== index);
+                                            setSettings(prev => ({ ...prev, menuItems: newItems }));
+                                        }}
+                                        className="h-8 w-8 text-destructive hover:text-destructive/90 hover:bg-destructive/10 mt-6"
+                                    >
+                                        <span className="sr-only">Delete</span>
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            ))}
+
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setSettings(prev => ({
+                                    ...prev,
+                                    menuItems: [...(prev.menuItems || []), { label: "New Link", path: "/", active: true }]
+                                }))}
+                                className="w-full border-dashed"
+                            >
+                                <Plus className="mr-2 h-3 w-3" />
+                                Add Menu Item
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+
                 {/* Social Media */}
                 <Card>
                     <CardHeader>

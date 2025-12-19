@@ -1,89 +1,75 @@
-import { useState, useEffect } from "react";
-import { useCart } from "@/contexts/CartContext";
-import { useCurrency } from "@/contexts/CurrencyContext";
-import { Link, useNavigate } from "react-router-dom";
-import { collection, query, where, limit, getDocs } from "firebase/firestore";
-import { db } from "@/lib/firebase";
-import { Product } from "@/types/product";
+import { useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Wrench, Truck, DollarSign, FileText, MessageCircle, ShoppingCart, Package } from "lucide-react";
+import {
+  Wrench,
+  ShieldCheck,
+  Truck,
+  Activity,
+  Settings,
+  Phone,
+  MessageCircle,
+  Calendar,
+  CheckCircle2,
+  ArrowRight
+} from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import RecentlyViewed from "@/components/product/RecentlyViewed";
 import SEOHead from "@/components/SEOHead";
 import heroImage from "@/assets/hero-mechanic.jpg";
-import { ProductCardSkeleton } from "@/components/product/ProductCardSkeleton";
-import ProductCard from "@/components/product/ProductCard";
 import { useStoreSettings } from "@/hooks/useStoreSettings";
 
 const Index = () => {
-  const navigate = useNavigate();
-  const { addToCart } = useCart();
-  const { formatPrice } = useCurrency();
   const { settings } = useStoreSettings();
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
 
+  // Scroll to top on mount
   useEffect(() => {
-    const fetchFeaturedProducts = async () => {
-      try {
-        const q = query(
-          collection(db, "products"),
-          where("featured", "==", true),
-          where("status", "==", "active"),
-          limit(4)
-        );
-        const querySnapshot = await getDocs(q);
-        const products: Product[] = [];
-        querySnapshot.forEach((doc) => {
-          products.push({ id: doc.id, ...doc.data() } as Product);
-        });
-        setFeaturedProducts(products);
-      } catch (error) {
-        console.error("Error fetching featured products:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchFeaturedProducts();
+    window.scrollTo(0, 0);
   }, []);
 
-  const features = [
+  const coreServices = [
     {
+      title: "Power Steering Systems",
+      description: "Complete repair and replacement of power steering pumps, reservoirs, and hoses.",
+      icon: Activity,
+      link: "/services"
+    },
+    {
+      title: "Steering Racks",
+      description: "Expert servicing for hydraulic and electric steering racks to restore precision control.",
+      icon: Settings,
+      link: "/services"
+    },
+    {
+      title: "Advanced Diagnosis",
+      description: "Pinpoint accuracy for hard steering, noise, leaks, and vibration issues.",
       icon: Wrench,
-      title: "Genuine Spare Parts",
-      description: "100% authentic parts from trusted manufacturers"
-    },
-    {
-      icon: Truck,
-      title: "Fast Delivery Nationwide",
-      description: "Quick delivery across Ghana via trusted couriers"
-    },
-    {
-      icon: DollarSign,
-      title: "Affordable Prices",
-      description: "Competitive pricing without compromising quality"
-    },
-    {
-      icon: FileText,
-      title: "Invoice & Warranty Guaranteed",
-      description: "Full documentation and warranty on all purchases"
+      link: "/contact"
     }
   ];
 
+  const partCategories = [
+    { name: "Steering Racks", link: "/shop?category=steering_racks" },
+    { name: "Power Steering Pumps", link: "/shop?category=power_steering_pumps" },
+    { name: "Steering Columns", link: "/shop?category=steering_columns" },
+    { name: "EPS Systems", link: "/shop?category=eps_systems" },
+    { name: "Ball Joints", link: "/shop?category=suspension" },
+    { name: "Control Arms", link: "/shop?category=suspension" },
+    { name: "Power Steering Fluids", link: "/shop?category=fluids" },
+    { name: "Belts & Hoses", link: "/shop?category=belts" },
+  ];
+
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen font-sans">
       <SEOHead
         url="/"
         structuredData={{
           "@context": "https://schema.org",
-          "@type": "AutoPartsStore",
-          "name": "The Prestige Merchandise",
-          "description": "Your trusted auto parts dealer in Abossey Okai. Genuine power steering pumps, steering racks, lubricants & more.",
-          "url": typeof window !== 'undefined' ? window.location.origin : '',
-          "telephone": settings.phone || "+233-24-765-4321",
+          "@type": "AutoRepair",
+          "name": "Prestige Steering Specialists",
+          "description": "The trusted specialists for power steering repairs, rack replacement, and genuine steering parts in Accra.",
+          "telephone": settings.phone || "+233-20-366-3708",
           "address": {
             "@type": "PostalAddress",
             "streetAddress": "Abossey Okai",
@@ -91,149 +77,221 @@ const Index = () => {
             "addressRegion": "Greater Accra",
             "addressCountry": "GH"
           },
-          "geo": {
-            "@type": "GeoCoordinates",
-            "latitude": "5.614818",
-            "longitude": "-0.186964"
-          },
-          "priceRange": "₵₵",
-          "openingHoursSpecification": {
-            "@type": "OpeningHoursSpecification",
-            "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-            "opens": "08:00",
-            "closes": "18:00"
-          }
+          "priceRange": "₵₵"
         }}
       />
       <Header />
 
-      <main className="animate-fade-in">
-        {/* Hero Section */}
-        <section className="relative h-[450px] md:h-[600px] bg-secondary overflow-hidden">
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${heroImage})` }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-secondary/95 via-secondary/70 to-transparent"></div>
+      <main className="flex-1">
+        {/* HERO SECTION */}
+        <section className="relative h-[550px] md:h-[650px] overflow-hidden flex items-center">
+          {/* Background Image with Overlay */}
+          <div className="absolute inset-0 z-0">
+            <img
+              src={heroImage}
+              alt="Mechanic working on steering"
+              className="w-full h-full object-cover object-center"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-secondary/95 via-secondary/80 to-secondary/40"></div>
           </div>
 
-          <div className="relative container mx-auto px-4 h-full flex items-center">
-            <div className="max-w-2xl text-secondary-foreground pt-8 md:pt-0 stagger-animation">
-              <h1 className="text-3xl md:text-6xl font-bold mb-4 leading-tight animate-fade-in-up">
-                Your Trusted Auto Parts Dealer at <span className="text-primary">Abossey Okai</span>
+          <div className="container relative z-10 mx-auto px-4 pt-10">
+            <div className="max-w-3xl text-white space-y-6 animate-in slide-in-from-left duration-700">
+              <span className="inline-block py-1 px-3 rounded-full bg-primary/20 border border-primary text-primary font-bold text-sm uppercase tracking-wider backdrop-blur-sm">
+                The Steering Authority
+              </span>
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tight">
+                Steering Problems? <br className="hidden md:block" />
+                <span className="text-primary">We Are The Specialists.</span>
               </h1>
-              <p className="text-lg md:text-2xl mb-6 md:mb-8 text-secondary-foreground/90 animate-fade-in-up [animation-delay:150ms]">
-                Genuine Power Steering Pumps, Racks & Lubricants — Delivered Nationwide!
+              <p className="text-lg md:text-2xl text-gray-200 max-w-2xl leading-relaxed">
+                Don't gamble with your safety. We provide expert diagnosis, repair, and genuine parts for all steering systems.
               </p>
-              <div className="flex flex-wrap gap-4 animate-fade-in-up [animation-delay:300ms]">
-                <Link to="/shop">
-                  <Button size="lg" className="gap-2 w-full sm:w-auto text-base rounded-full px-8 shadow-lg shadow-primary/20">
-                    <ShoppingCart className="h-5 w-5" />
-                    Shop Now
-                  </Button>
-                </Link>
+
+              <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Link to="/contact">
-                  <Button size="lg" variant="outline" className="gap-2 w-full sm:w-auto text-base rounded-full px-8 border-white/60 text-white hover:bg-white hover:text-secondary bg-transparent transition-all">
-                    Contact Us
+                  <Button size="lg" className="w-full sm:w-auto h-12 text-base px-8 rounded-full shadow-lg shadow-primary/25 hover:scale-105 transition-transform">
+                    <Calendar className="mr-2 h-5 w-5" />
+                    Book Diagnosis
                   </Button>
                 </Link>
+                <a href="https://wa.me/233203663708" target="_blank" rel="noopener noreferrer">
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto h-12 text-base px-8 rounded-full border-white/30 text-white hover:bg-white hover:text-secondary backdrop-blur-sm hover:scale-105 transition-transform">
+                    <MessageCircle className="mr-2 h-5 w-5" />
+                    Talk to an Expert
+                  </Button>
+                </a>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Why Choose Us Section */}
-        <section className="py-10 md:py-16 bg-muted">
+        {/* TRUST SIGNALS STRIP */}
+        <section className="bg-white py-8 border-b">
           <div className="container mx-auto px-4">
-            <h2 className="text-2xl md:text-4xl font-bold text-center mb-8 md:mb-12 animate-slide-up">Why Choose Us?</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 stagger-animation">
-              {features.map((feature, index) => {
-                const Icon = feature.icon;
-                return (
-                  <Card
-                    key={index}
-                    className="shadow-card hover:shadow-hover transition-all animate-fade-in-up border-none bg-background/50 backdrop-blur-sm"
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    <CardContent className="p-6 text-center">
-                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4 group-hover:scale-110 transition-transform">
-                        <Icon className="h-8 w-8 text-primary" strokeWidth={1.5} />
-                      </div>
-                      <h3 className="font-bold text-lg mb-2">{feature.title}</h3>
-                      <p className="text-muted-foreground text-sm">{feature.description}</p>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {[
+                { icon: Wrench, title: "Steering Specialists", sub: "Core Focus" },
+                { icon: Activity, title: "Sales & Repair", sub: "One-Stop Shop" },
+                { icon: Truck, title: "Fleets & Private", sub: "All Vehicles" },
+                { icon: ShieldCheck, title: "Trusted Source", sub: "Genuine Parts" },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-4 justify-center md:justify-start">
+                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-primary">
+                    <item.icon className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-secondary text-sm md:text-base">{item.title}</h3>
+                    <p className="text-muted-foreground text-xs md:text-sm">{item.sub}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* Featured Products */}
-        <section className="py-10 md:py-16">
+        {/* CORE SERVICES */}
+        <section className="py-16 md:py-24 bg-muted/30">
           <div className="container mx-auto px-4">
-            <h2 className="text-2xl md:text-4xl font-bold text-center mb-3 animate-slide-up">Featured Products</h2>
-            <p className="text-center text-muted-foreground mb-8 md:mb-12 animate-slide-up [animation-delay:100ms]">Browse our most popular auto parts</p>
-
-            {loading ? (
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-8">
-                {Array.from({ length: 4 }).map((_, index) => (
-                  <ProductCardSkeleton key={index} />
-                ))}
-              </div>
-            ) : featuredProducts.length > 0 ? (
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-8 stagger-animation">
-                {featuredProducts.map((product, index) => (
-                  <ProductCard key={product.id} product={product} index={index} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12 bg-muted rounded-lg">
-                <p className="text-muted-foreground">No featured products available at the moment.</p>
-              </div>
-            )}
-
-            <div className="text-center">
-              <Link to="/shop">
-                <Button size="lg" className="w-full sm:w-auto">View All Products</Button>
-              </Link>
+            <div className="text-center max-w-2xl mx-auto mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">Our Core Services</h2>
+              <p className="text-muted-foreground">
+                We don't just sell parts; we understand how they work. Get expert solutions for your vehicle.
+              </p>
             </div>
-          </div>
-        </section>
 
-        {/* Recently Viewed Products */}
-        <RecentlyViewed />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {coreServices.map((service, index) => (
+                <Card key={index} className="border-none shadow-card hover:shadow-hover transition-all duration-300 group overflow-hidden">
+                  <CardContent className="p-8">
+                    <div className="h-14 w-14 bg-blue-50 rounded-2xl flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform duration-300">
+                      <service.icon className="h-7 w-7" />
+                    </div>
+                    <h3 className="text-xl font-bold text-secondary mb-3">{service.title}</h3>
+                    <p className="text-muted-foreground mb-6 leading-relaxed">
+                      {service.description}
+                    </p>
+                    <Link to={service.link} className="inline-flex items-center text-primary font-semibold hover:gap-2 transition-all">
+                      Learn More <ArrowRight className="ml-1 h-4 w-4" />
+                    </Link>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
 
-        {/* Testimonial Section */}
-        <section className="py-10 md:py-16 bg-secondary text-secondary-foreground">
-          <div className="container mx-auto px-4">
-            <h2 className="text-2xl md:text-4xl font-bold text-center mb-8 md:mb-12">What Our Customers Say</h2>
-            <Card className="max-w-3xl mx-auto shadow-card">
-              <CardContent className="p-6 md:p-8 text-center">
-                <div className="text-4xl md:text-5xl text-primary mb-2 md:mb-4">"</div>
-                <p className="text-lg md:text-xl mb-4 md:mb-6 italic">
-                  I've been buying from Prestige for years. Always genuine and fast delivery!
-                </p>
-                <p className="font-semibold">— Yaw, Kumasi</p>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="py-10 md:py-16 bg-hero-gradient text-primary-foreground">
-          <div className="container mx-auto px-4 text-center">
-            <h2 className="text-2xl md:text-4xl font-bold mb-3 md:mb-4">Ready to Get Started?</h2>
-            <p className="text-lg md:text-xl mb-6 md:mb-8 opacity-90">Contact us today for the best auto parts deals in Ghana</p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/shop">
-                <Button size="lg" variant="secondary" className="w-full sm:w-[150px]">
-                  Browse Shop
+            <div className="text-center mt-12">
+              <Link to="/services">
+                <Button variant="outline" size="lg" className="rounded-full px-8">
+                  View All Services
                 </Button>
               </Link>
-              <Link to="/contact">
-                <Button size="lg" variant="secondary" className="w-full sm:w-[150px]">
-                  Get in Touch
+            </div>
+          </div>
+        </section>
+
+        {/* AUTHORITY / WHY US SECTION */}
+        <section className="py-16 md:py-24 bg-secondary text-white overflow-hidden">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+              <div className="w-full lg:w-1/2 relative">
+                {/* Decorative Elements */}
+                <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl"></div>
+                <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl"></div>
+
+                <div className="relative rounded-2xl overflow-hidden border-4 border-white/10 shadow-2xl">
+                  {/* Placeholder for workshop image if heroImage is reused or another one exists */}
+                  <img src={heroImage} alt="Workshop Interior" className="w-full h-auto grayscale hover:grayscale-0 transition-all duration-700" />
+                </div>
+              </div>
+
+              <div className="w-full lg:w-1/2 space-y-8">
+                <div>
+                  <h2 className="text-3xl md:text-5xl font-bold mb-6">Why Drivers Trust Us</h2>
+                  <p className="text-gray-300 text-lg leading-relaxed">
+                    Your safety on the road depends on your steering. We bring specialized expertise that general mechanics simply can't match.
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  {[
+                    "Steering is our core specialty, not a sideline.",
+                    "Accurate diagnosis using advanced tools, not guesswork.",
+                    "We stock high-quality genuine parts.",
+                    "Suitable for private cars, commercial fleets, and trucks."
+                  ].map((point, i) => (
+                    <div key={i} className="flex items-start gap-4">
+                      <CheckCircle2 className="h-6 w-6 text-primary shrink-0 mt-0.5" />
+                      <span className="text-gray-200 text-lg">{point}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* PARTS CATEGORIES SECTION */}
+        <section className="py-16 md:py-24 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+              <div className="max-w-2xl">
+                <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">Quality Steering & Related Parts</h2>
+                <p className="text-muted-foreground">
+                  Find the exact part you need from our extensive inventory of genuine components.
+                </p>
+              </div>
+              <Link to="/shop">
+                <Button className="hidden md:flex">Browse All Parts</Button>
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {partCategories.map((cat, index) => (
+                <Link key={index} to={cat.link} className="group">
+                  <div className="bg-muted hover:bg-primary/5 border border-transparent hover:border-primary/20 rounded-xl p-6 text-center transition-all duration-300 h-full flex flex-col items-center justify-center gap-4">
+                    <div className="h-12 w-12 rounded-full bg-white shadow-sm flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+                      <Settings className="h-6 w-6 text-secondary group-hover:text-white transition-colors" />
+                    </div>
+                    <span className="font-semibold text-secondary group-hover:text-primary transition-colors">{cat.name}</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            <div className="mt-8 text-center md:hidden">
+              <Link to="/shop">
+                <Button className="w-full">Browse All Parts</Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* FINAL CTA SECTION */}
+        <section className="py-20 bg-hero-gradient text-white text-center">
+          <div className="container mx-auto px-4 max-w-4xl">
+            <h2 className="text-3xl md:text-5xl font-bold mb-6">
+              Your Steering Controls Your Safety.
+              <br />
+              <span className="text-white/80">Don't Ignore The Signs.</span>
+            </h2>
+            <p className="text-xl text-blue-50 mb-10 max-w-2xl mx-auto">
+              If you hear noise, feel stiff steering, or see leaks, it's time to see the specialists.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <a href="tel:+233203663708" className="w-full sm:w-auto">
+                <Button size="lg" variant="secondary" className="w-full h-14 px-8 text-lg font-bold gap-2">
+                  <Phone className="h-5 w-5" /> Call Now
+                </Button>
+              </a>
+              <a href="https://wa.me/233203663708" target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full h-14 px-8 text-lg font-bold bg-[#25D366] hover:bg-[#128C7E] text-white border-none gap-2">
+                  <MessageCircle className="h-5 w-5" /> WhatsApp Us
+                </Button>
+              </a>
+              <Link to="/contact" className="w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="w-full h-14 px-8 text-lg font-bold border-white/40 text-white hover:bg-white hover:text-secondary gap-2">
+                  <Calendar className="h-5 w-5" /> Book Diagnosis
                 </Button>
               </Link>
             </div>

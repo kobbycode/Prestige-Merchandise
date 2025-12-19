@@ -10,6 +10,7 @@ import { useCurrency } from "@/contexts/CurrencyContext";
 import { Loader2 } from "lucide-react";
 
 import logo from "@/assets/logo.png";
+import { useStoreSettings } from "@/hooks/useStoreSettings";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import { useWishlist } from "@/contexts/WishlistContext";
@@ -28,6 +29,7 @@ const Header = () => {
   const { isAuthenticated, logout } = useAuth();
   const { cartCount, setIsCartOpen } = useCart();
   const { wishlistCount } = useWishlist();
+  const { settings } = useStoreSettings();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isCartBouncing, setIsCartBouncing] = useState(false);
@@ -59,9 +61,6 @@ const Header = () => {
       setIsSearching(true);
       try {
         const productsRef = collection(db, "products");
-        // Simple search logic: filter by status active and match name starting with query
-        // Note: Firestore doesn't support full-text search natively without third-party tools,
-        // so we'll use a prefix match (query + \uf8ff)
         const q = query(
           productsRef,
           where("status", "==", "active"),
@@ -114,66 +113,71 @@ const Header = () => {
     }
   };
 
-  const navLinks = [
-    { to: "/", label: "Home" },
-    { to: "/shop", label: "Shop" },
-    { to: "/about", label: "About" },
-    { to: "/services", label: "Services" },
-    { to: "/blog", label: "Blog" },
-    { to: "/contact", label: "Contact" },
-  ];
+  const navLinks = settings.menuItems?.filter(item => item.active).map(item => ({
+    to: item.path,
+    label: item.label
+  })) || [
+      { to: "/", label: "Home" },
+      { to: "/shop?category=steering", label: "Steering Systems" },
+      { to: "/services", label: "Services" },
+      { to: "/shop", label: "Auto Parts" },
+      { to: "/contact?subject=fleet", label: "Fleet Solutions" },
+      { to: "/about", label: "About" },
+      { to: "/contact", label: "Book Diagnosis" },
+    ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-secondary text-secondary-foreground shadow-sm">
-      <div className="container mx-auto px-4 py-2 md:py-4">
-        <div className="flex items-center justify-between">
+    <header className="sticky top-0 z-50 w-full border-b border-sidebar-border bg-sidebar text-sidebar-foreground shadow-lg">
+      <div className="container mx-auto px-4 py-3">
+        <div className="flex items-center justify-between gap-4">
           {/* Logo */}
-          <Link to="/" className="relative flex items-center h-12 md:h-16 w-32 md:w-48 z-50">
+          <Link to="/" className="relative flex items-center h-12 md:h-14 shrink-0 z-50">
             <img
               src={logo}
               alt="Prestige Merchandise"
-              className="absolute left-0 top-1/2 -translate-y-1/2 h-[120px] md:h-[160px] w-auto max-w-none transition-all hover:scale-105"
+              className="h-full w-auto object-contain transition-all hover:scale-105"
             />
           </Link>
 
-          <div className="hidden lg:flex flex-1 max-w-sm mx-6 relative">
+          {/* Desktop Search Center */}
+          <div className="hidden lg:flex flex-1 max-w-md mx-auto relative px-4">
             <form onSubmit={handleSearch} className="relative w-full">
               <div className="relative">
-                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="text"
-                  placeholder="Search parts..."
-                  className="pl-8 h-9 bg-background/90 border-transparent focus:border-primary placeholder:text-muted-foreground text-foreground"
+                  placeholder="Search steering pumps, racks, parts..."
+                  className="pl-9 h-10 w-full bg-white/10 border-transparent focus:border-primary text-white placeholder:text-gray-400 rounded-full transition-all focus:bg-white/20"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => searchQuery.trim().length >= 2 && setShowSuggestions(true)}
                   onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                 />
                 {isSearching && (
-                  <Loader2 className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+                  <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
                 )}
               </div>
             </form>
 
             {/* Desktop Suggestions Dropdown */}
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-background border border-border rounded-md shadow-lg overflow-hidden z-50">
+              <div className="absolute top-full left-4 right-4 mt-2 bg-popover border border-border rounded-lg shadow-xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2">
                 <div className="py-2">
-                  <p className="px-4 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Quick Suggestions
+                  <p className="px-4 py-2 text-xs font-bold text-muted-foreground uppercase tracking-wider bg-muted/50">
+                    Quick Matches
                   </p>
                   {suggestions.map((product) => (
                     <button
                       key={product.id}
-                      className="w-full flex items-center gap-3 px-4 py-2 hover:bg-muted transition-colors text-left"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-muted/50 transition-colors text-left border-b border-border/50 last:border-0"
                       onClick={() => handleSuggestionClick(product.id)}
                     >
-                      <div className="h-10 w-10 shrink-0 bg-muted rounded overflow-hidden">
+                      <div className="h-10 w-10 shrink-0 bg-muted rounded-md overflow-hidden border border-border">
                         {product.images?.[0] ? (
-                          <img src={product.images[0]} alt={product.name} className="h-full w-full object-contain" />
+                          <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover" />
                         ) : (
-                          <div className="h-full w-full flex items-center justify-center">
-                            <Search className="h-4 w-4 text-muted-foreground" />
+                          <div className="h-full w-full flex items-center justify-center bg-gray-100">
+                            <Search className="h-4 w-4 text-gray-400" />
                           </div>
                         )}
                       </div>
@@ -183,153 +187,109 @@ const Header = () => {
                       </div>
                     </button>
                   ))}
-                  <button
-                    onClick={handleSearch}
-                    className="w-full px-4 py-2 text-xs text-center text-primary hover:bg-primary/5 font-medium border-t mt-1"
-                  >
-                    View all results for "{searchQuery}"
-                  </button>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-4">
-
-
-            {navLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className={`font-medium transition-colors ${location.pathname === link.to
-                  ? "text-yellow-400 font-bold"
-                  : "text-secondary-foreground/80 hover:text-white"
-                  }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-
-            <CurrencySelector />
-
-            {/* Cart Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className={`relative text-secondary-foreground hover:text-white hover:bg-white/10 ${isCartBouncing ? "animate-bounce-slow" : ""}`}
-              onClick={() => setIsCartOpen(true)}
+          {/* Desktop Actions */}
+          <div className="hidden lg:flex items-center gap-2">
+            {/* Sticky Call/Help Buttons */}
+            <a href="tel:+233203663708" className="hidden xl:flex items-center gap-2 px-3 py-2 text-sm font-medium text-white hover:bg-white/10 rounded-md transition-colors">
+              <Phone className="h-4 w-4 text-primary" />
+              <span>Call Now</span>
+            </a>
+            <a
+              href="https://wa.me/233203663708"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden xl:flex items-center gap-2 px-3 py-2 text-sm font-medium text-white hover:bg-white/10 rounded-md transition-colors mr-2"
             >
-              <ShoppingBag className={`h-5 w-5 ${isCartBouncing ? "text-primary" : ""}`} />
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] font-bold text-primary-foreground flex items-center justify-center">
-                  {cartCount}
-                </span>
+              <MessageCircle className="h-4 w-4 text-green-500" />
+              <span>WhatsApp</span>
+            </a>
+
+            <nav className="flex items-center gap-1 mr-4">
+              {isAuthenticated ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="text-sidebar-foreground hover:bg-white/10 gap-2">
+                      <User className="h-4 w-4" />
+                      <span className="hidden xl:inline">Account</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuItem asChild>
+                      <Link to="/account" className="cursor-pointer">Profile</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/account/orders" className="cursor-pointer">Orders</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/account/wishlist" className="cursor-pointer">Wishlist</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={logout} className="text-red-500 cursor-pointer">
+                      <LogOut className="mr-2 h-4 w-4" /> Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Link to="/login">
+                  <Button variant="ghost" size="sm" className="text-sidebar-foreground hover:bg-white/10">Login</Button>
+                </Link>
               )}
-            </Button>
+            </nav>
 
-            {/* Wishlist Button */}
-            <Link to="/account/wishlist">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="relative text-secondary-foreground hover:text-white hover:bg-white/10"
-              >
-                <Heart className="h-5 w-5" />
-                {wishlistCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
-                    {wishlistCount}
-                  </span>
-                )}
-              </Button>
-            </Link>
-
-            {/* Notification Dropdown */}
-            {isAuthenticated && <NotificationDropdown />}
-
-            {/* Auth Button / Dropdown */}
-            {isAuthenticated ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="text-secondary-foreground hover:text-white hover:bg-white/10">
-                    <User className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem asChild>
-                    <Link to="/account" className="cursor-pointer">
-                      <User className="mr-2 h-4 w-4" />
-                      My Profile
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/account/orders" className="cursor-pointer">
-                      <ShoppingBag className="mr-2 h-4 w-4" />
-                      My Orders
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/account/wishlist" className="cursor-pointer">
-                      <Heart className="mr-2 h-4 w-4" />
-                      My Wishlist
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={logout} className="text-red-600 cursor-pointer">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Link to="/login">
-                <Button variant="ghost" size="icon" title="Login" className="text-secondary-foreground hover:text-white hover:bg-white/10">
-                  <User className="h-5 w-5" />
+            <div className="flex items-center gap-1 border-l border-white/10 pl-4">
+              <Link to="/account/wishlist">
+                <Button variant="ghost" size="icon" className="relative hover:bg-white/10">
+                  <Heart className="h-5 w-5" />
+                  {wishlistCount > 0 && (
+                    <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center animate-in zoom-in">
+                      {wishlistCount}
+                    </span>
+                  )}
                 </Button>
               </Link>
-            )}
-          </nav>
 
-          <div className="flex items-center gap-2 lg:hidden">
-            {/* Mobile Notification */}
-            {isAuthenticated && <NotificationDropdown className="text-secondary-foreground hover:text-white hover:bg-white/10" />}
-
-            {/* Mobile Wishlist Button */}
-            <Link to="/account/wishlist">
               <Button
                 variant="ghost"
                 size="icon"
-                className="relative text-secondary-foreground hover:text-white"
+                className={`relative hover:bg-white/10 ${isCartBouncing ? "animate-bounce" : ""}`}
+                onClick={() => setIsCartOpen(true)}
               >
-                <Heart className="h-5 w-5" />
-                {wishlistCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
-                    {wishlistCount}
+                <ShoppingBag className={`h-5 w-5 ${isCartBouncing ? "text-primary" : ""}`} />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] font-bold text-white flex items-center justify-center animate-in zoom-in">
+                    {cartCount}
                   </span>
                 )}
               </Button>
-            </Link>
+              <CurrencySelector />
+            </div>
+          </div>
 
-            {/* Mobile Cart Button */}
+          {/* Mobile Actions */}
+          <div className="flex items-center gap-1 lg:hidden">
+            <a href="tel:+233203663708" className="p-2 text-white hover:bg-white/10 rounded-full">
+              <Phone className="h-5 w-5 text-primary" />
+            </a>
+
             <Button
               variant="ghost"
               size="icon"
-              className="relative text-secondary-foreground hover:text-white"
+              className="text-white hover:bg-white/10"
               onClick={() => setIsCartOpen(true)}
             >
               <ShoppingBag className="h-5 w-5" />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] font-bold text-primary-foreground flex items-center justify-center">
-                  {cartCount}
-                </span>
+                <span className="absolute top-0 right-0 h-3 w-3 rounded-full bg-primary border-2 border-sidebar-background"></span>
               )}
             </Button>
 
-
-
-            {/* Mobile Menu Button */}
             <button
-              className="p-2 text-secondary-foreground hover:text-white transition-colors"
+              className="p-2 text-white hover:bg-white/10 rounded-md transition-colors"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label="Toggle menu"
             >
@@ -338,99 +298,70 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Desktop Lower Nav (Categories) */}
+        <div className="hidden lg:flex items-center justify-center py-2 mt-2 gap-8 text-sm border-t border-white/10">
+          {navLinks.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className={`font-medium transition-colors hover:text-primary ${location.pathname === link.to.split('?')[0] ? "text-primary" : "text-gray-300"
+                }`}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
+
+        {/* Mobile Navigation Menu */}
         {isMenuOpen && (
-          <nav className="lg:hidden mt-4 pb-4 border-t pt-4 space-y-4">
-            {/* Mobile Search */}
-            <div className="relative">
-              <form onSubmit={handleSearch} className="relative">
-                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search parts..."
-                  className="pl-8 h-10 w-full bg-background/90 text-foreground"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => searchQuery.trim().length >= 2 && setShowSuggestions(true)}
-                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                />
-                {isSearching && (
-                  <Loader2 className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
-                )}
-              </form>
+          <nav className="lg:hidden mt-4 pb-4 border-t border-white/10 pt-4 space-y-4 animate-in slide-in-from-top-5">
+            <form onSubmit={handleSearch} className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search parts..."
+                className="pl-9 h-10 w-full bg-white/10 border-transparent text-white placeholder:text-gray-400 focus:bg-white/20"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </form>
 
-              {/* Mobile Suggestions Dropdown */}
-              {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-background border border-border rounded-md shadow-lg overflow-hidden z-50">
-                  <div className="py-2 max-h-[300px] overflow-y-auto">
-                    {suggestions.map((product) => (
-                      <button
-                        key={product.id}
-                        className="w-full flex items-center gap-3 px-4 py-2 hover:bg-muted transition-colors text-left"
-                        onClick={() => handleSuggestionClick(product.id)}
-                      >
-                        <div className="h-10 w-10 shrink-0 bg-muted rounded overflow-hidden">
-                          {product.images?.[0] ? (
-                            <img src={product.images[0]} alt={product.name} className="h-full w-full object-contain" />
-                          ) : (
-                            <div className="h-full w-full flex items-center justify-center">
-                              <Search className="h-4 w-4 text-muted-foreground" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-foreground truncate">{product.name}</p>
-                          <p className="text-xs text-primary font-bold">{formatPrice(product.price)}</p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-2">
+            <div className="grid grid-cols-1 gap-1">
               {navLinks.map((link) => (
                 <Link
                   key={link.to}
                   to={link.to}
-                  className={`block py-2 px-3 rounded-md font-medium transition-colors ${location.pathname === link.to
-                    ? "bg-primary/10 text-primary"
-                    : "text-white hover:bg-white/10 hover:text-white"
-                    }`}
+                  className="flex items-center justify-between py-3 px-3 rounded-lg text-gray-200 hover:bg-white/10 hover:text-white transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  {link.label}
+                  <span className="font-medium">{link.label}</span>
+                  {/* ChevronRight className="h-4 w-4 opacity-50" / */}
                 </Link>
               ))}
+            </div>
 
-              <div className="pt-2">
-                <CurrencySelector />
-              </div>
+            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/10">
+              <a
+                href="https://wa.me/233203663708"
+                className="flex items-center justify-center gap-2 p-3 rounded-lg bg-green-600/20 text-green-400 font-medium hover:bg-green-600/30 transition-colors"
+              >
+                <MessageCircle className="h-4 w-4" /> WhatsApp
+              </a>
+              <Link
+                to="/account"
+                className="flex items-center justify-center gap-2 p-3 rounded-lg bg-white/10 text-white font-medium hover:bg-white/20 transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <User className="h-4 w-4" /> Account
+              </Link>
+            </div>
 
-              {!isAuthenticated && (
-                <Link
-                  to="/login"
-                  className="block py-2 px-3 rounded-md font-medium text-white hover:bg-white/10 hover:text-white"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Login / Register
-                </Link>
-              )}
+            <div className="flex justify-between items-center px-2 pt-2">
+              <CurrencySelector />
               {isAuthenticated && (
-                <>
-                  <Link
-                    to="/account"
-                    className="block py-2 px-3 rounded-md font-medium text-white hover:bg-white/10 hover:text-white"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    My Profile
-                  </Link>
-                  <Button variant="ghost" className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50 px-3" onClick={() => { logout(); setIsMenuOpen(false); }}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Logout
-                  </Button>
-                </>
+                <button onClick={() => { logout(); setIsMenuOpen(false); }} className="text-red-400 text-sm font-medium flex items-center gap-1">
+                  <LogOut className="h-3 w-3" /> Sign Out
+                </button>
               )}
             </div>
           </nav>
