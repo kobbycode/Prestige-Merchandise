@@ -279,18 +279,18 @@ const Index = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <a href="tel:+233203663708" className="w-full sm:w-auto">
-                <Button size="lg" variant="secondary" className="w-full h-14 px-8 text-lg font-bold gap-2">
+              <a href={`tel:${settings.phone?.replace(/\s/g, '')}`} className="w-full sm:w-auto">
+                <Button size="lg" variant="secondary" className="w-full h-14 px-8 text-lg font-bold gap-2 rounded-none">
                   <Phone className="h-5 w-5" /> Call Now
                 </Button>
               </a>
-              <a href="https://wa.me/233203663708" target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
-                <Button size="lg" className="w-full h-14 px-8 text-lg font-bold bg-[#25D366] hover:bg-[#128C7E] text-white border-none gap-2">
+              <a href={`https://wa.me/${settings.whatsappNumber}`} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full h-14 px-8 text-lg font-bold bg-[#25D366] hover:bg-[#128C7E] text-white border-none gap-2 rounded-none">
                   <MessageCircle className="h-5 w-5" /> WhatsApp Us
                 </Button>
               </a>
               <Link to="/contact" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" className="w-full h-14 px-8 text-lg font-bold border-white/40 bg-transparent text-white hover:bg-white hover:text-secondary gap-2">
+                <Button size="lg" variant="outline" className="w-full h-14 px-8 text-lg font-bold border-white/40 bg-transparent text-white hover:bg-white hover:text-secondary gap-2 rounded-none">
                   <Calendar className="h-5 w-5" /> Book Diagnosis
                 </Button>
               </Link>

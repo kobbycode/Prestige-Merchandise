@@ -5,8 +5,10 @@ import { Truck, Clock, ShieldCheck, Wrench, Phone, MessageCircle, CheckCircle2 }
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEOHead from "@/components/SEOHead";
+import { useStoreSettings } from "@/hooks/useStoreSettings";
 
 const FleetSolutions = () => {
+    const { settings } = useStoreSettings();
     const benefits = [
         {
             icon: Clock,
