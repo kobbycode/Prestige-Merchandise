@@ -128,10 +128,10 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-sidebar-border bg-sidebar text-sidebar-foreground shadow-lg">
-      <div className="container mx-auto px-4 py-3">
+      <div className="container mx-auto px-4 py-2">
         <div className="flex items-center justify-between gap-4">
           {/* Logo */}
-          <Link to="/" className="relative flex items-center h-20 md:h-24 shrink-0 z-50">
+          <Link to="/" className="relative flex items-center h-24 md:h-28 shrink-0 z-50">
             <img
               src={logo}
               alt="Prestige Merchandise"
@@ -195,12 +195,12 @@ const Header = () => {
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-6">
             {/* Sticky Call/Help Buttons */}
-            <a href="tel:+233203663708" className="hidden xl:flex items-center gap-2 px-3 py-2 text-sm font-medium text-white hover:bg-white/10 rounded-none transition-colors">
+            <a href={`tel:${settings.phone?.replace(/\s/g, '')}`} className="hidden xl:flex items-center gap-2 px-3 py-2 text-sm font-medium text-white hover:bg-white/10 rounded-none transition-colors">
               <Phone className="h-4 w-4 text-primary" />
               <span>Call Now</span>
             </a>
             <a
-              href="https://wa.me/233203663708"
+              href={`https://wa.me/${settings.whatsappNumber}`}
               target="_blank"
               rel="noopener noreferrer"
               className="hidden xl:flex items-center gap-2 px-3 py-2 text-sm font-medium text-white hover:bg-white/10 rounded-none transition-colors mr-2"
@@ -272,8 +272,11 @@ const Header = () => {
 
           {/* Mobile Actions */}
           <div className="flex items-center gap-1 lg:hidden">
-            <a href="tel:+233203663708" className="p-2 text-white hover:bg-white/10 rounded-full">
+            <a href={`tel:${settings.phone?.replace(/\s/g, '')}`} className="p-2 text-white hover:bg-white/10 rounded-none">
               <Phone className="h-5 w-5 text-primary" />
+            </a>
+            <a href={`https://wa.me/${settings.whatsappNumber}`} target="_blank" rel="noopener noreferrer" className="p-2 text-white hover:bg-white/10 rounded-none">
+              <MessageCircle className="h-5 w-5 text-green-500" />
             </a>
 
             <Button
@@ -342,8 +345,10 @@ const Header = () => {
 
             <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/10">
               <a
-                href="https://wa.me/233203663708"
-                className="flex items-center justify-center gap-2 p-3 rounded-lg bg-green-600/20 text-green-400 font-medium hover:bg-green-600/30 transition-colors"
+                href={`https://wa.me/${settings.whatsappNumber}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 p-3 rounded-none bg-green-600/20 text-green-400 font-medium hover:bg-green-600/30 transition-colors"
               >
                 <MessageCircle className="h-4 w-4" /> WhatsApp
               </a>

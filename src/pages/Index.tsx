@@ -95,9 +95,9 @@ const Index = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-secondary/95 via-secondary/80 to-secondary/40"></div>
           </div>
 
-          <div className="container relative z-10 mx-auto px-4 pt-10">
+          <div className="container relative z-10 mx-auto px-4 pt-4">
             <div className="max-w-3xl text-white space-y-6 animate-in slide-in-from-left duration-700">
-              <span className="inline-block py-1 px-3 rounded-full bg-primary/20 border border-primary text-primary font-bold text-sm uppercase tracking-wider backdrop-blur-sm">
+              <span className="inline-block py-1 px-3 rounded-none bg-primary/20 border border-primary text-primary font-bold text-sm uppercase tracking-wider backdrop-blur-sm">
                 The Steering Authority
               </span>
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tight">
@@ -110,13 +110,13 @@ const Index = () => {
 
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Link to="/contact">
-                  <Button size="lg" className="w-full sm:w-auto h-12 text-base px-8 rounded-full shadow-lg shadow-primary/25 hover:scale-105 transition-transform">
+                  <Button size="lg" className="w-full sm:w-auto h-12 text-base px-8 rounded-none shadow-lg shadow-primary/25 hover:scale-105 transition-transform">
                     <Calendar className="mr-2 h-5 w-5" />
                     Book Diagnosis
                   </Button>
                 </Link>
-                <a href="https://wa.me/233203663708" target="_blank" rel="noopener noreferrer">
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto h-12 text-base px-8 rounded-full border-white/30 bg-transparent text-white hover:bg-white hover:text-secondary backdrop-blur-sm hover:scale-105 transition-transform">
+                <a href={`https://wa.me/${settings.whatsappNumber}`} target="_blank" rel="noopener noreferrer">
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto h-12 text-base px-8 rounded-none border-white/30 bg-transparent text-white hover:bg-white hover:text-secondary backdrop-blur-sm hover:scale-105 transition-transform">
                     <MessageCircle className="mr-2 h-5 w-5" />
                     Talk to an Expert
                   </Button>
@@ -231,87 +231,36 @@ const Index = () => {
         </section>
 
         {/* PARTS CATEGORIES SECTION */}
-        <section className="py-16 md:py-24 bg-white" id="parts">
-          <div className="container mx-auto px-4 max-w-6xl">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-5xl font-bold text-secondary mb-4">Quality Steering & Related Parts</h2>
-              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                We expand our inventory carefully to ensure every part matches our quality standards.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8 mb-16">
-              {/* Steering Components */}
-              <div className="bg-muted/30 rounded-2xl p-8 border border-border hover:border-primary/20 transition-all duration-300">
-                <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-6 text-primary">
-                  <Settings className="h-7 w-7" />
-                </div>
-                <h3 className="text-2xl font-bold text-secondary mb-6">Steering Components</h3>
-                <ul className="space-y-4">
-                  {[
-                    { name: "Steering Racks", link: "/shop?category=steering_racks" },
-                    { name: "Power Steering Pumps", link: "/shop?category=power_steering_pumps" },
-                    { name: "Columns, Rack Ends, Tie Rods", link: "/shop?category=steering_components" }
-                  ].map((item, i) => (
-                    <li key={i}>
-                      <Link to={item.link} className="flex items-center group text-muted-foreground hover:text-primary transition-colors">
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary/40 group-hover:bg-primary mr-3 transition-colors" />
-                        <span className="text-lg">{item.name}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+        <section className="py-16 md:py-24 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+              <div className="max-w-2xl">
+                <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">Quality Steering & Related Parts</h2>
+                <p className="text-muted-foreground">
+                  Find the exact part you need from our extensive inventory of genuine components.
+                </p>
               </div>
-
-              {/* Suspension & Support */}
-              <div className="bg-muted/30 rounded-2xl p-8 border border-border hover:border-primary/20 transition-all duration-300">
-                <div className="w-14 h-14 bg-blue-500/10 rounded-xl flex items-center justify-center mb-6 text-blue-600">
-                  <Activity className="h-7 w-7" />
-                </div>
-                <h3 className="text-2xl font-bold text-secondary mb-6">Suspension & Support</h3>
-                <ul className="space-y-4">
-                  {[
-                    { name: "Ball Joints", link: "/shop?category=suspension" },
-                    { name: "Control Arms", link: "/shop?category=suspension" },
-                    { name: "Bushings", link: "/shop?category=suspension" }
-                  ].map((item, i) => (
-                    <li key={i}>
-                      <Link to={item.link} className="flex items-center group text-muted-foreground hover:text-blue-600 transition-colors">
-                        <span className="w-1.5 h-1.5 rounded-full bg-blue-400/40 group-hover:bg-blue-600 mr-3 transition-colors" />
-                        <span className="text-lg">{item.name}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Fluids & Accessories */}
-              <div className="bg-muted/30 rounded-2xl p-8 border border-border hover:border-primary/20 transition-all duration-300">
-                <div className="w-14 h-14 bg-green-500/10 rounded-xl flex items-center justify-center mb-6 text-green-600">
-                  <Wrench className="h-7 w-7" />
-                </div>
-                <h3 className="text-2xl font-bold text-secondary mb-6">Fluids & Accessories</h3>
-                <ul className="space-y-4">
-                  {[
-                    { name: "Power Steering Fluids", link: "/shop?category=fluids" },
-                    { name: "Belts & Hoses", link: "/shop?category=parts" }
-                  ].map((item, i) => (
-                    <li key={i}>
-                      <Link to={item.link} className="flex items-center group text-muted-foreground hover:text-green-600 transition-colors">
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-400/40 group-hover:bg-green-600 mr-3 transition-colors" />
-                        <span className="text-lg">{item.name}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            <div className="text-center">
               <Link to="/shop">
-                <Button size="lg" className="h-16 px-10 text-lg gap-3 shadow-lg hover:scale-105 transition-transform">
-                  Browse Parts / Enquire on WhatsApp <ArrowRight className="h-5 w-5" />
-                </Button>
+                <Button className="hidden md:flex">Browse All Parts</Button>
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {partCategories.map((cat, index) => (
+                <Link key={index} to={cat.link} className="group">
+                  <div className="bg-muted hover:bg-primary/5 border border-transparent hover:border-primary/20 rounded-xl p-6 text-center transition-all duration-300 h-full flex flex-col items-center justify-center gap-4">
+                    <div className="h-12 w-12 rounded-full bg-white shadow-sm flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+                      <Settings className="h-6 w-6 text-secondary group-hover:text-white transition-colors" />
+                    </div>
+                    <span className="font-semibold text-secondary group-hover:text-primary transition-colors">{cat.name}</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            <div className="mt-8 text-center md:hidden">
+              <Link to="/shop">
+                <Button className="w-full">Browse All Parts</Button>
               </Link>
             </div>
           </div>
