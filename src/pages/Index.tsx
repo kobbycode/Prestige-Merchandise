@@ -116,7 +116,7 @@ const Index = () => {
                   </Button>
                 </Link>
                 <a href="https://wa.me/233203663708" target="_blank" rel="noopener noreferrer">
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto h-12 text-base px-8 rounded-full border-white/30 text-white hover:bg-white hover:text-secondary backdrop-blur-sm hover:scale-105 transition-transform">
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto h-12 text-base px-8 rounded-full border-white/30 bg-transparent text-white hover:bg-white hover:text-secondary backdrop-blur-sm hover:scale-105 transition-transform">
                     <MessageCircle className="mr-2 h-5 w-5" />
                     Talk to an Expert
                   </Button>
@@ -290,7 +290,7 @@ const Index = () => {
                 </Button>
               </a>
               <Link to="/contact" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" className="w-full h-14 px-8 text-lg font-bold border-white/40 text-white hover:bg-white hover:text-secondary gap-2">
+                <Button size="lg" variant="outline" className="w-full h-14 px-8 text-lg font-bold border-white/40 bg-transparent text-white hover:bg-white hover:text-secondary gap-2">
                   <Calendar className="h-5 w-5" /> Book Diagnosis
                 </Button>
               </Link>
