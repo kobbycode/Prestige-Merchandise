@@ -131,7 +131,7 @@ const Header = () => {
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between gap-4">
           {/* Logo */}
-          <Link to="/" className="relative flex items-center h-12 md:h-14 shrink-0 z-50">
+          <Link to="/" className="relative flex items-center h-20 md:h-24 shrink-0 z-50">
             <img
               src={logo}
               alt="Prestige Merchandise"
@@ -147,7 +147,7 @@ const Header = () => {
                 <Input
                   type="text"
                   placeholder="Search steering pumps, racks, parts..."
-                  className="pl-9 h-10 w-full bg-white/10 border-transparent focus:border-primary text-white placeholder:text-gray-400 rounded-full transition-all focus:bg-white/20"
+                  className="pl-9 h-10 w-full bg-white/10 border-transparent focus:border-primary text-white placeholder:text-gray-400 rounded-none transition-all focus:bg-white/20"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => searchQuery.trim().length >= 2 && setShowSuggestions(true)}
@@ -161,7 +161,7 @@ const Header = () => {
 
             {/* Desktop Suggestions Dropdown */}
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute top-full left-4 right-4 mt-2 bg-popover border border-border rounded-lg shadow-xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2">
+              <div className="absolute top-full left-4 right-4 mt-2 bg-popover border border-border bg-white text-black shadow-xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2">
                 <div className="py-2">
                   <p className="px-4 py-2 text-xs font-bold text-muted-foreground uppercase tracking-wider bg-muted/50">
                     Quick Matches
@@ -172,7 +172,7 @@ const Header = () => {
                       className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-muted/50 transition-colors text-left border-b border-border/50 last:border-0"
                       onClick={() => handleSuggestionClick(product.id)}
                     >
-                      <div className="h-10 w-10 shrink-0 bg-muted rounded-md overflow-hidden border border-border">
+                      <div className="h-10 w-10 shrink-0 bg-muted rounded-none overflow-hidden border border-border">
                         {product.images?.[0] ? (
                           <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover" />
                         ) : (
@@ -193,9 +193,9 @@ const Header = () => {
           </div>
 
           {/* Desktop Actions */}
-          <div className="hidden lg:flex items-center gap-2">
+          <div className="hidden lg:flex items-center gap-6">
             {/* Sticky Call/Help Buttons */}
-            <a href="tel:+233203663708" className="hidden xl:flex items-center gap-2 px-3 py-2 text-sm font-medium text-white hover:bg-white/10 rounded-md transition-colors">
+            <a href="tel:+233203663708" className="hidden xl:flex items-center gap-2 px-3 py-2 text-sm font-medium text-white hover:bg-white/10 rounded-none transition-colors">
               <Phone className="h-4 w-4 text-primary" />
               <span>Call Now</span>
             </a>
@@ -203,22 +203,22 @@ const Header = () => {
               href="https://wa.me/233203663708"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden xl:flex items-center gap-2 px-3 py-2 text-sm font-medium text-white hover:bg-white/10 rounded-md transition-colors mr-2"
+              className="hidden xl:flex items-center gap-2 px-3 py-2 text-sm font-medium text-white hover:bg-white/10 rounded-none transition-colors mr-2"
             >
               <MessageCircle className="h-4 w-4 text-green-500" />
               <span>WhatsApp</span>
             </a>
 
-            <nav className="flex items-center gap-1 mr-4">
+            <nav className="flex items-center gap-4 mr-4">
               {isAuthenticated ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="text-sidebar-foreground hover:bg-white/10 gap-2">
+                    <Button variant="ghost" size="sm" className="text-sidebar-foreground hover:bg-white/10 gap-2 rounded-none">
                       <User className="h-4 w-4" />
                       <span className="hidden xl:inline">Account</span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuContent align="end" className="w-56 rounded-none">
                     <DropdownMenuItem asChild>
                       <Link to="/account" className="cursor-pointer">Profile</Link>
                     </DropdownMenuItem>
@@ -236,14 +236,14 @@ const Header = () => {
                 </DropdownMenu>
               ) : (
                 <Link to="/login">
-                  <Button variant="ghost" size="sm" className="text-sidebar-foreground hover:bg-white/10">Login</Button>
+                  <Button variant="ghost" size="sm" className="text-sidebar-foreground hover:bg-white/10 rounded-none">Login</Button>
                 </Link>
               )}
             </nav>
 
-            <div className="flex items-center gap-1 border-l border-white/10 pl-4">
+            <div className="flex items-center gap-4 border-l border-white/10 pl-6">
               <Link to="/account/wishlist">
-                <Button variant="ghost" size="icon" className="relative hover:bg-white/10">
+                <Button variant="ghost" size="icon" className="relative hover:bg-white/10 rounded-none">
                   <Heart className="h-5 w-5" />
                   {wishlistCount > 0 && (
                     <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center animate-in zoom-in">
@@ -256,7 +256,7 @@ const Header = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className={`relative hover:bg-white/10 ${isCartBouncing ? "animate-bounce" : ""}`}
+                className={`relative hover:bg-white/10 rounded-none ${isCartBouncing ? "animate-bounce" : ""}`}
                 onClick={() => setIsCartOpen(true)}
               >
                 <ShoppingBag className={`h-5 w-5 ${isCartBouncing ? "text-primary" : ""}`} />
