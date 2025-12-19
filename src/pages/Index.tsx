@@ -45,7 +45,7 @@ const Index = () => {
       title: "Advanced Diagnosis",
       description: "Pinpoint accuracy for hard steering, noise, leaks, and vibration issues.",
       icon: Wrench,
-      link: "/contact"
+      link: "/services"
     }
   ];
 
