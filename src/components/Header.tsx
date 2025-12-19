@@ -120,7 +120,7 @@ const Header = () => {
       { to: "/", label: "Home" },
       { to: "/shop?category=steering", label: "Steering Systems" },
       { to: "/services", label: "Services" },
-      { to: "/shop", label: "Auto Parts" },
+      { to: "/shop", label: "Parts" },
       { to: "/contact?subject=fleet", label: "Fleet Solutions" },
       { to: "/about", label: "About" },
       { to: "/contact", label: "Book Diagnosis" },
