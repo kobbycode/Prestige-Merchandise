@@ -23,7 +23,7 @@ const defaultSettings: StoreSettings = {
         { label: "Steering Systems", path: "/shop?category=steering", active: true },
         { label: "Services", path: "/services", active: true },
         { label: "Parts", path: "/parts", active: true },
-        { label: "Fleet Solutions", path: "/contact?subject=fleet", active: true },
+        { label: "Fleet Solutions", path: "/fleet-solutions", active: true },
         { label: "About", path: "/about", active: true },
         { label: "Book Diagnosis", path: "/contact", active: true }
     ]
