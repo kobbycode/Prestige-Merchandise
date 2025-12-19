@@ -22,7 +22,7 @@ const Settings = () => {
         phone: "054 123 4567",
         email: "sales@prestigemerchgh.com",
         businessHours: {
-            monSat: "8am - 6pm",
+            monSat: "8am to 6pm",
             sunday: "Closed"
         }
     });
@@ -365,11 +365,11 @@ const Settings = () => {
                             <div className="space-y-2">
                                 <Label htmlFor="monSat" className="flex items-center gap-2">
                                     <Clock className="h-4 w-4" />
-                                    Mon - Sat
+                                    Mon to Sat
                                 </Label>
                                 <Input
                                     id="monSat"
-                                    placeholder="8am - 6pm"
+                                    placeholder="8am to 6pm"
                                     value={settings.businessHours?.monSat}
                                     onChange={(e) => handleBusinessHoursChange('monSat', e.target.value)}
                                 />

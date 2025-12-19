@@ -28,14 +28,14 @@ const FleetSolutions = () => {
         {
             icon: Truck,
             title: "All Vehicle Types",
-            description: "From light commercial to heavy-duty trucks - we handle them all."
+            description: "From light commercial to heavy duty trucks, we handle them all."
         }
     ];
 
     return (
         <div className="flex flex-col min-h-screen">
             <SEOHead
-                title="Fleet Solutions - Commercial Vehicle Steering Services"
+                title="Fleet Solutions: Commercial Vehicle Steering Services"
                 description="Specialized steering repair and parts solutions for commercial fleets, delivery vehicles, and transport companies in Ghana."
                 url="/fleet-solutions"
             />
