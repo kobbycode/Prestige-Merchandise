@@ -200,8 +200,7 @@ const Index = () => {
                 <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl"></div>
 
                 <div className="relative rounded-2xl overflow-hidden border-4 border-white/10 shadow-2xl">
-                  {/* Placeholder for workshop image if heroImage is reused or another one exists */}
-                  <img src={heroImage} alt="Workshop Interior" className="w-full h-auto grayscale hover:grayscale-0 transition-all duration-700" />
+                  <img src={mechanicWorkingImage} alt="Expert mechanic working on steering rack" className="w-full h-auto grayscale hover:grayscale-0 transition-all duration-700" />
                 </div>
               </div>
 
