@@ -22,6 +22,8 @@ export interface Order {
         };
     };
     amount: number;
+    shippingFee?: number;
+    itemsTotal?: number;
     status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
     statusHistory?: StatusHistoryItem[];
     trackingNumber?: string;
