@@ -296,11 +296,29 @@ const Header = () => {
         ))}
       </div>
 
-      {/* Mobile Navigation Menu */}
+      {/* Mobile Lower Nav (Horizontal Scrollable) */}
+      <div className="lg:hidden border-t border-white/10 overflow-x-auto scrollbar-hide">
+        <div className="flex items-center gap-1 px-4 py-2 min-w-max">
+          {navLinks.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className={`px-4 py-2 text-sm font-medium whitespace-nowrap rounded-none transition-colors ${location.pathname === link.to.split('?')[0]
+                  ? "text-primary bg-primary/10"
+                  : "text-gray-300 hover:text-white hover:bg-white/10"
+                }`}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Mobile Utility Menu (Hamburger) */}
       {isMenuOpen && (
-        <nav className="lg:hidden mt-4 pb-4 border-t border-white/10 pt-4 space-y-4 animate-in slide-in-from-top-5">
-          <form onSubmit={handleSearch} className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <nav className="lg:hidden pb-4 border-t border-white/10 pt-4 space-y-4 animate-in slide-in-from-top-5">
+          <form onSubmit={handleSearch} className="relative px-4">
+            <Search className="absolute left-7 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="text"
               placeholder="Search parts..."
@@ -310,20 +328,8 @@ const Header = () => {
             />
           </form>
 
-          <div className="grid grid-cols-1 gap-1">
-            {navLinks.filter(link => link.label !== "Book Diagnosis").map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className="flex items-center justify-between py-3 px-3 rounded-lg text-gray-200 hover:bg-white/10 hover:text-white transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <span className="font-medium">{link.label}</span>
-                {/* ChevronRight className="h-4 w-4 opacity-50" / */}
-              </Link>
-            ))}
-
-            <div className="flex items-center justify-around py-4 border-t border-white/10 mt-2">
+          <div className="px-4 space-y-2">
+            <div className="flex items-center justify-around py-4 border-y border-white/10">
               {/* Wishlist */}
               <Link to="/account/wishlist" className="relative p-2 text-white hover:bg-white/10 rounded-lg flex flex-col items-center gap-1" onClick={() => setIsMenuOpen(false)}>
                 <div className="relative">
@@ -364,16 +370,7 @@ const Header = () => {
                 <span className="text-[10px] uppercase font-bold tracking-wider opacity-70">Cart</span>
               </button>
             </div>
-          </div>
 
-          <div className="pt-2 border-t border-white/10 space-y-2">
-            <Link
-              to="/contact"
-              className="flex items-center justify-center gap-2 p-3 rounded-none bg-primary/20 text-primary font-bold hover:bg-primary/30 transition-colors border border-primary/30"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <Calendar className="h-5 w-5" /> Book Diagnosis
-            </Link>
             <div className="grid grid-cols-2 gap-2">
               <a
                 href={`https://wa.me/${settings.whatsappNumber}`}
@@ -391,15 +388,15 @@ const Header = () => {
                 <User className="h-4 w-4" /> Account
               </Link>
             </div>
-          </div>
 
-          <div className="flex justify-between items-center px-2 pt-2">
-            <CurrencySelector />
-            {isAuthenticated && (
-              <button onClick={() => { logout(); setIsMenuOpen(false); }} className="text-red-400 text-sm font-medium flex items-center gap-1">
-                <LogOut className="h-3 w-3" /> Sign Out
-              </button>
-            )}
+            <div className="flex justify-between items-center pt-2 border-t border-white/10">
+              <CurrencySelector />
+              {isAuthenticated && (
+                <button onClick={() => { logout(); setIsMenuOpen(false); }} className="text-red-400 text-sm font-medium flex items-center gap-1">
+                  <LogOut className="h-3 w-3" /> Sign Out
+                </button>
+              )}
+            </div>
           </div>
         </nav>
       )}
