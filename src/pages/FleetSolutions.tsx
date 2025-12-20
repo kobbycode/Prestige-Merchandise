@@ -71,7 +71,7 @@ const FleetSolutions = () => {
                             {benefits.map((benefit, index) => (
                                 <Card key={index} className="border-none shadow-card hover:shadow-hover transition-shadow">
                                     <CardContent className="p-6 text-center">
-                                        <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4 text-primary">
+                                        <div className="w-14 h-14 bg-secondary rounded-xl flex items-center justify-center mx-auto mb-4 text-primary">
                                             <benefit.icon className="h-7 w-7" />
                                         </div>
                                         <h3 className="text-lg font-bold text-secondary mb-2">{benefit.title}</h3>
