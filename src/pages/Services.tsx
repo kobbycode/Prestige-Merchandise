@@ -248,7 +248,7 @@ const Services = () => {
       </main>
 
       <Footer />
-    </div >
+    </div>
   );
 };
 
