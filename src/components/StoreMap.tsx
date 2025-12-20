@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { GoogleMap, useJsApiLoader, Marker } from "@react-google-maps/api";
+import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from "@react-google-maps/api";
 import { Loader2 } from "lucide-react";
 
 interface StoreMapProps {
@@ -30,6 +30,7 @@ const StoreMap = ({ locations }: StoreMapProps) => {
 
     const [markers, setMarkers] = useState<LocationMarker[]>([]);
     const [map, setMap] = useState<google.maps.Map | null>(null);
+    const [selectedMarker, setSelectedMarker] = useState<LocationMarker | null>(null);
 
     const onLoad = useCallback(function callback(map: google.maps.Map) {
         setMap(map);
@@ -126,8 +127,29 @@ const StoreMap = ({ locations }: StoreMapProps) => {
                         key={idx}
                         position={{ lat: marker.lat, lng: marker.lng }}
                         title={marker.address}
+                        onClick={() => setSelectedMarker(marker)}
                     />
                 ))}
+
+                {selectedMarker && (
+                    <InfoWindow
+                        position={{ lat: selectedMarker.lat, lng: selectedMarker.lng }}
+                        onCloseClick={() => setSelectedMarker(null)}
+                    >
+                        <div className="p-2 min-w-[200px]">
+                            <h3 className="font-semibold text-sm mb-1">{selectedMarker.address}</h3>
+                            <a
+                                href={`https://www.google.com/maps/dir/?api=1&destination=${selectedMarker.lat},${selectedMarker.lng}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline text-sm flex items-center gap-1 mt-2 font-medium"
+                            >
+                                Get Directions
+                                <span aria-hidden="true">→</span>
+                            </a>
+                        </div>
+                    </InfoWindow>
+                )}
             </GoogleMap>
         </div>
     );
