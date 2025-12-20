@@ -17,8 +17,11 @@ const Settings = () => {
     const [settings, setSettings] = useState<StoreSettings>({
         facebookUrl: "",
         whatsappNumber: "0247654321",
-        locations: ["Abossey Okai- Former Odasani Hotel"],
-        location: "Abossey Okai- Former Odasani Hotel",
+        locations: [
+            "Abossey Okai- Former Odasani Hotel, HQ68+PRH, Accra, Ghana",
+            "Kasoa Amanfro- Pink FM, Accra - Cape Coast Rd, Kasoa, Ghana"
+        ],
+        location: "Abossey Okai- Former Odasani Hotel, HQ68+PRH, Accra, Ghana",
         phone: "054 123 4567",
         email: "sales@prestigemerchgh.com",
         businessHours: {

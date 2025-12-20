@@ -12,7 +12,11 @@ interface StoreSettingsContextType {
 const defaultSettings: StoreSettings = {
     facebookUrl: "",
     whatsappNumber: "0247654321", // Default from footer
-    location: "Abossey Okai, Near Total Filling Station",
+    location: "Abossey Okai- Former Odasani Hotel, HQ68+PRH, Accra, Ghana",
+    locations: [
+        "Abossey Okai- Former Odasani Hotel, HQ68+PRH, Accra, Ghana",
+        "Kasoa Amanfro- Pink FM, Accra - Cape Coast Rd, Kasoa, Ghana"
+    ],
     storeLocations: [], // Will be populated by geocoding
     phone: "054 123 4567",
     email: "sales@prestigemerchgh.com",
