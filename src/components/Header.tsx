@@ -263,26 +263,23 @@ const Header = () => {
             </Button>
             <CurrencySelector />
           </div>
-        </div>
+          {/* Mobile Actions */}
+          <div className="flex items-center gap-1 lg:hidden">
+            <a href={`tel:${settings.phone?.replace(/\s/g, '')}`} className="p-2 text-white hover:bg-white/10 rounded-none">
+              <Phone className="h-5 w-5 text-primary" />
+            </a>
+            <a href={`https://wa.me/${settings.whatsappNumber}`} target="_blank" rel="noopener noreferrer" className="p-2 text-white hover:bg-white/10 rounded-none">
+              <MessageCircle className="h-5 w-5 text-green-500" />
+            </a>
 
-        {/* Mobile Actions */}
-        <div className="flex items-center gap-1 lg:hidden">
-          <a href={`tel:${settings.phone?.replace(/\s/g, '')}`} className="p-2 text-white hover:bg-white/10 rounded-none">
-            <Phone className="h-5 w-5 text-primary" />
-          </a>
-          <a href={`https://wa.me/${settings.whatsappNumber}`} target="_blank" rel="noopener noreferrer" className="p-2 text-white hover:bg-white/10 rounded-none">
-            <MessageCircle className="h-5 w-5 text-green-500" />
-          </a>
-
-
-
-          <button
-            className="p-2 text-white hover:bg-white/10 rounded-md transition-colors"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+            <button
+              className="p-2 text-white hover:bg-white/10 rounded-md transition-colors"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
         </div>
       </div>
 
