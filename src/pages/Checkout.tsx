@@ -28,7 +28,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Loader2, ArrowLeft, ShieldCheck, CreditCard, Banknote } from "lucide-react";
+import { Loader2, ArrowLeft, ShieldCheck, CreditCard, Banknote, MapPin } from "lucide-react";
 import { initEmailJS, sendOrderConfirmation } from "@/lib/emailService";
 import { checkAndAlertLowStock } from "@/lib/stockMonitor";
 import { usePaystackPayment } from "react-paystack";
@@ -128,6 +128,69 @@ const Checkout = () => {
         form.setValue("address", addr.address);
         form.setValue("city", addr.city);
         form.setValue("region", addr.region);
+    };
+
+    const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+
+    const detectLocation = () => {
+        if (!navigator.geolocation) {
+            toast.error("Geolocation is not supported by your browser");
+            return;
+        }
+
+        setIsDetectingLocation(true);
+        toast.info("Detecting your location...");
+
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const { latitude, longitude } = position.coords;
+
+                try {
+                    // Using OpenStreetMap Nominatim for free reverse geocoding
+                    const response = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+                    );
+                    const data = await response.json();
+
+                    if (data && data.display_name) {
+                        // Update form fields
+                        form.setValue("address", data.display_name);
+
+                        // Try to populate city and region if available
+                        const addr = data.address;
+                        if (addr) {
+                            if (addr.city || addr.town || addr.village || addr.suburb) {
+                                form.setValue("city", addr.city || addr.town || addr.village || addr.suburb);
+                            }
+                            if (addr.state || addr.region || addr.county) {
+                                form.setValue("region", addr.state || addr.region || addr.county);
+                            }
+                        }
+
+                        toast.success("Location detected and address updated");
+                    } else {
+                        toast.error("Could not determine address details");
+                        // Still fill coordinates if address fails? 
+                        // form.setValue("address", `${latitude}, ${longitude}`);
+                    }
+                } catch (error) {
+                    console.error("Error geocoding:", error);
+                    toast.error("Failed to fetch address details. Please type manually.");
+                } finally {
+                    setIsDetectingLocation(false);
+                }
+            },
+            (error) => {
+                console.error("Error detecting location:", error);
+                let msg = "Failed to detect location";
+                if (error.code === 1) msg = "Location permission denied";
+                if (error.code === 2) msg = "Location unavailable";
+                if (error.code === 3) msg = "Location request timed out";
+                toast.error(msg);
+                setIsDetectingLocation(false);
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+        );
     };
 
     const [showAuthDialog, setShowAuthDialog] = useState(false);
@@ -464,7 +527,28 @@ const Checkout = () => {
                                             )} />
 
                                             <FormField control={form.control} name="address" render={({ field }) => (
-                                                <FormItem><FormLabel>Delivery Address</FormLabel><FormControl><Input placeholder="Street name, landmark..." {...field} /></FormControl><FormMessage /></FormItem>
+                                                <FormItem>
+                                                    <FormLabel>Delivery Address</FormLabel>
+                                                    <FormControl>
+                                                        <div className="relative">
+                                                            <Input placeholder="Street name, landmark..." {...field} className="pr-10" />
+                                                            <button
+                                                                type="button"
+                                                                onClick={detectLocation}
+                                                                disabled={isDetectingLocation}
+                                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                                                                title="Use my current location"
+                                                            >
+                                                                {isDetectingLocation ? (
+                                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                                ) : (
+                                                                    <MapPin className="h-4 w-4" />
+                                                                )}
+                                                            </button>
+                                                        </div>
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
                                             )} />
 
                                             <div className="grid grid-cols-2 gap-4">
