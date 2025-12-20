@@ -8,6 +8,10 @@ export interface Address {
     city: string;
     region: string;
     isDefault: boolean;
+    gpsCoordinates?: {
+        latitude: number;
+        longitude: number;
+    };
     createdAt?: any;
 }
 

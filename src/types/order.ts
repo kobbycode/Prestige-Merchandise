@@ -16,6 +16,10 @@ export interface Order {
         city?: string;
         region?: string;
         notes?: string;
+        gpsCoordinates?: {
+            latitude: number;
+            longitude: number;
+        };
     };
     amount: number;
     status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';

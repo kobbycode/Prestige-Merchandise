@@ -121,6 +121,8 @@ const Checkout = () => {
         }
     }, [user, form]);
 
+    const [coordinates, setCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
+
     const fillFormWithAddress = (addr: any) => {
         form.setValue("firstName", addr.firstName);
         form.setValue("lastName", addr.lastName);
@@ -128,6 +130,9 @@ const Checkout = () => {
         form.setValue("address", addr.address);
         form.setValue("city", addr.city);
         form.setValue("region", addr.region);
+        if (addr.gpsCoordinates) {
+            setCoordinates(addr.gpsCoordinates);
+        }
     };
 
     const [isDetectingLocation, setIsDetectingLocation] = useState(false);
@@ -144,6 +149,7 @@ const Checkout = () => {
         navigator.geolocation.getCurrentPosition(
             async (position) => {
                 const { latitude, longitude } = position.coords;
+                setCoordinates({ latitude, longitude });
 
                 try {
                     // Using OpenStreetMap Nominatim for free reverse geocoding
@@ -307,7 +313,10 @@ const Checkout = () => {
         try {
             const orderData = {
                 userId: user?.uid || "guest",
-                customerDetails: data,
+                customerDetails: {
+                    ...data,
+                    gpsCoordinates: coordinates || undefined
+                },
                 items: items.map(item => ({
                     productId: item.product.id,
                     name: item.product.name,

@@ -26,7 +26,8 @@ const AddressBook = () => {
         address: "",
         city: "",
         region: "",
-        isDefault: false
+        isDefault: false,
+        gpsCoordinates: undefined as { latitude: number; longitude: number } | undefined
     });
 
     useEffect(() => {
@@ -66,7 +67,8 @@ const AddressBook = () => {
                 address: address.address,
                 city: address.city,
                 region: address.region,
-                isDefault: address.isDefault
+                isDefault: address.isDefault,
+                gpsCoordinates: address.gpsCoordinates
             });
         } else {
             setEditingAddress(null);
@@ -77,7 +79,8 @@ const AddressBook = () => {
                 address: "",
                 city: "",
                 region: "",
-                isDefault: addresses.length === 0 // First address is default by default
+                isDefault: addresses.length === 0, // First address is default by default
+                gpsCoordinates: undefined
             });
         }
         setIsDialogOpen(true);
@@ -189,7 +192,8 @@ const AddressBook = () => {
                             ...prev,
                             address: data.display_name,
                             city: (addr.city || addr.town || addr.village || addr.suburb || prev.city),
-                            region: (addr.state || addr.region || addr.county || prev.region)
+                            region: (addr.state || addr.region || addr.county || prev.region),
+                            gpsCoordinates: { latitude, longitude }
                         }));
 
                         toast.success("Location detected and address updated");
