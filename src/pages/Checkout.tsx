@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getDoc } from "firebase/firestore";
+import { useJsApiLoader, Autocomplete } from "@react-google-maps/api";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -203,6 +204,50 @@ const Checkout = () => {
 
             if (result.region) {
                 form.setValue("region", result.region);
+            }
+        }
+    };
+
+    const [addressAutocomplete, setAddressAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
+
+    const onAddressPlaceChanged = () => {
+        if (addressAutocomplete) {
+            const place = addressAutocomplete.getPlace();
+
+            if (place.geometry && place.geometry.location) {
+                const lat = place.geometry.location.lat();
+                const lng = place.geometry.location.lng();
+
+                setCoordinates({ latitude: lat, longitude: lng });
+
+                if (place.formatted_address) {
+                    form.setValue("address", place.formatted_address);
+                } else if (place.name) {
+                    form.setValue("address", place.name);
+                }
+
+                if (place.address_components) {
+                    let city = "";
+                    let region = "";
+
+                    for (const component of place.address_components) {
+                        const types = component.types;
+                        if (types.includes("locality")) {
+                            city = component.long_name;
+                        } else if (!city && types.includes("administrative_area_level_2")) {
+                            city = component.long_name;
+                        }
+
+                        if (types.includes("administrative_area_level_1")) {
+                            region = component.long_name;
+                        }
+                    }
+
+                    if (city) form.setValue("city", city);
+                    if (region) form.setValue("region", region);
+                }
+
+                toast.success("Location selected!");
             }
         }
     };
@@ -597,7 +642,18 @@ const Checkout = () => {
                                                     <FormLabel>Delivery Address</FormLabel>
                                                     <FormControl>
                                                         <div className="relative">
-                                                            <Input placeholder="Street name, landmark..." {...field} className="pr-10" />
+                                                            {isGoogleLoaded ? (
+                                                                <Autocomplete
+                                                                    onLoad={(autocomplete) => setAddressAutocomplete(autocomplete)}
+                                                                    onPlaceChanged={onAddressPlaceChanged}
+                                                                    restrictions={{ country: "gh" }} // Restrict to Ghana
+                                                                >
+                                                                    <Input placeholder="Search location (e.g. Landmark, Street Name)..." {...field} className="pr-10" />
+                                                                </Autocomplete>
+                                                            ) : (
+                                                                <Input placeholder="Loading search..." {...field} className="pr-10" disabled />
+                                                            )}
+
                                                             <button
                                                                 type="button"
                                                                 onClick={handleDetectLocation}
