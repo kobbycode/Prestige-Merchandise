@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { doc, onSnapshot } from "firebase/firestore";
+import { useJsApiLoader, Libraries } from "@react-google-maps/api";
 import { db } from "@/lib/firebase";
 import { StoreSettings } from "@/types/settings";
 
@@ -12,20 +13,7 @@ const defaultSettings: StoreSettings = {
     facebookUrl: "",
     whatsappNumber: "0247654321", // Default from footer
     location: "Abossey Okai, Near Total Filling Station",
-    storeLocations: [
-        {
-            id: "abossey-okai",
-            name: "Abossey Okai (Main Branch)",
-            address: "Near Total Filling Station, Abossey Okai",
-            coordinates: { latitude: 5.5600, longitude: -0.2200 } // Approx coords
-        },
-        {
-            id: "north-industrial",
-            name: "North Industrial Area (Warehouse)",
-            address: "Plot 22, North Industrial Area, Accra",
-            coordinates: { latitude: 5.5800, longitude: -0.2050 } // Approx coords
-        }
-    ],
+    storeLocations: [], // Will be populated by geocoding
     phone: "054 123 4567",
     email: "sales@prestigemerchgh.com",
     businessHours: {
@@ -49,14 +37,22 @@ export const StoreSettingsProvider: React.FC<{ children: React.ReactNode }> = ({
     const [settings, setSettings] = useState<StoreSettings>(defaultSettings);
     const [loading, setLoading] = useState(true);
 
+    const [libraries] = useState<Libraries>(['places']);
+    const { isLoaded } = useJsApiLoader({
+        id: 'google-map-script',
+        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "",
+        libraries
+    });
+
     useEffect(() => {
         setLoading(true);
         const docRef = doc(db, "settings", "general");
 
-        // Use onSnapshot for real-time updates across the app
         const unsubscribe = onSnapshot(docRef, (docSnap) => {
             if (docSnap.exists()) {
                 const data = docSnap.data() as StoreSettings;
+
+                // Set initial settings from Firestore
                 setSettings(prev => ({
                     ...prev,
                     ...data,
@@ -74,6 +70,61 @@ export const StoreSettingsProvider: React.FC<{ children: React.ReactNode }> = ({
 
         return () => unsubscribe();
     }, []);
+
+    // Geocode locations when settings.locations changes and map is loaded
+    useEffect(() => {
+        if (!isLoaded || !settings.locations || settings.locations.length === 0) return;
+
+        const geocodeLocations = async () => {
+            const geocoder = new google.maps.Geocoder();
+            const newStoreLocations: any[] = [];
+            const uniqueLocations = [...new Set(settings.locations?.filter(Boolean))];
+
+            await Promise.all(uniqueLocations.map(async (loc, index) => {
+                try {
+                    const result = await new Promise<google.maps.GeocoderResult[]>((resolve, reject) => {
+                        geocoder.geocode({ address: loc + ", Ghana" }, (results, status) => {
+                            if (status === "OK" && results) {
+                                resolve(results);
+                            } else {
+                                reject(status);
+                            }
+                        });
+                    });
+
+                    if (result && result.length > 0) {
+                        const location = result[0].geometry.location;
+                        newStoreLocations.push({
+                            id: `store-${index}`,
+                            name: loc, // Use the address string as the name for now
+                            address: result[0].formatted_address,
+                            coordinates: {
+                                latitude: location.lat(),
+                                longitude: location.lng()
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error(`Error geocoding ${loc}:`, error);
+                }
+            }));
+
+            // Only update if we actually found something and it's different (shallow check length)
+            if (newStoreLocations.length > 0) {
+                setSettings(prev => ({
+                    ...prev,
+                    storeLocations: newStoreLocations
+                }));
+            }
+        };
+
+        // Debounce slightly to avoid rapid updates if settings change fast
+        const timeoutId = setTimeout(() => {
+            geocodeLocations();
+        }, 1000);
+
+        return () => clearTimeout(timeoutId);
+    }, [isLoaded, JSON.stringify(settings.locations)]);
 
     return (
         <StoreSettingsContext.Provider value={{ settings, loading }}>
