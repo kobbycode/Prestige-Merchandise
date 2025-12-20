@@ -128,10 +128,11 @@ const Checkout = () => {
                     });
                     addressList.sort((a, b) => (a.isDefault === b.isDefault ? 0 : a.isDefault ? -1 : 1));
                     setSavedAddresses(addressList);
-                    const defaultAddr = addressList.find(a => a.isDefault);
-                    if (defaultAddr && !form.getValues("firstName")) {
-                        fillFormWithAddress(defaultAddr);
-                    }
+                    // Don't auto-fill - let user search for accurate location
+                    // const defaultAddr = addressList.find(a => a.isDefault);
+                    // if (defaultAddr && !form.getValues("firstName")) {
+                    //     fillFormWithAddress(defaultAddr);
+                    // }
                 } catch (error) {
                     console.error("Error fetching addresses", error);
                 }
@@ -645,7 +646,12 @@ const Checkout = () => {
 
                                             <FormField control={form.control} name="address" render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Delivery Address</FormLabel>
+                                                    <FormLabel className="flex flex-wrap items-center gap-2">
+                                                        Delivery Address
+                                                        <span className="text-xs font-normal text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                                                            Required: Search & Select from list
+                                                        </span>
+                                                    </FormLabel>
                                                     <FormControl>
                                                         <div className="relative">
                                                             {isGoogleLoaded ? (
@@ -654,7 +660,7 @@ const Checkout = () => {
                                                                     onPlaceChanged={onAddressPlaceChanged}
                                                                     restrictions={{ country: "gh" }} // Restrict to Ghana
                                                                 >
-                                                                    <Input placeholder="Search location (e.g. Landmark, Street Name)..." {...field} className="pr-10" />
+                                                                    <Input placeholder="Type your location (e.g. Pink FM, Kasoa)..." {...field} className="pr-10" />
                                                                 </Autocomplete>
                                                             ) : (
                                                                 <Input placeholder="Loading search..." {...field} className="pr-10" disabled />
@@ -678,8 +684,8 @@ const Checkout = () => {
                                                             </button>
                                                         </div>
                                                     </FormControl>
-                                                    <p className="text-[10px] text-muted-foreground mt-1">
-                                                        💡 Tip: Search for a popular landmark near you for the most accurate location.
+                                                    <p className="text-xs text-muted-foreground mt-2 font-medium">
+                                                        � <span className="text-primary font-bold">Important:</span> Start typing your location (Landmark or Street) and <span className="underline decoration-wavy decoration-primary">click on the correct address</span> from the dropdown list to get the correct shipping fee.
                                                     </p>
                                                     <FormMessage />
                                                 </FormItem>

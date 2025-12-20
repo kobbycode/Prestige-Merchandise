@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Autocomplete, useJsApiLoader } from "@react-google-maps/api";
 import { collection, query, orderBy, getDocs, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, writeBatch, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
@@ -163,6 +164,54 @@ const AddressBook = () => {
         }
     };
 
+    const { isLoaded: isGoogleLoaded } = useJsApiLoader({
+        id: 'google-map-script',
+        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "",
+        libraries: ['places']
+    });
+
+    const [addressAutocomplete, setAddressAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
+
+    const onAddressPlaceChanged = () => {
+        if (addressAutocomplete) {
+            const place = addressAutocomplete.getPlace();
+
+            if (place.geometry && place.geometry.location) {
+                const lat = place.geometry.location.lat();
+                const lng = place.geometry.location.lng();
+
+                let newAddress = place.formatted_address || place.name || "";
+                let city = "";
+                let region = "";
+
+                if (place.address_components) {
+                    for (const component of place.address_components) {
+                        const types = component.types;
+                        if (types.includes("locality")) {
+                            city = component.long_name;
+                        } else if (!city && types.includes("administrative_area_level_2")) {
+                            city = component.long_name;
+                        }
+
+                        if (types.includes("administrative_area_level_1")) {
+                            region = component.long_name;
+                        }
+                    }
+                }
+
+                setFormData(prev => ({
+                    ...prev,
+                    address: newAddress,
+                    city: city || prev.city,
+                    region: region || prev.region,
+                    gpsCoordinates: { latitude: lat, longitude: lng }
+                }));
+
+                toast.success("Location selected!");
+            }
+        }
+    };
+
     const { isDetecting, detectLocation: detectGoogleLocation } = useGoogleGeocoding();
 
     const detectLocation = async () => {
@@ -260,19 +309,45 @@ const AddressBook = () => {
                             <Input id="phone" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} required placeholder="020..." />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="address">Street Address</Label>
+                            <Label htmlFor="address" className="flex flex-wrap items-center gap-2">
+                                Street Address
+                                <span className="text-xs font-normal text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                                    Search & Select from list
+                                </span>
+                            </Label>
                             <div className="relative">
-                                <Input
-                                    id="address"
-                                    value={formData.address}
-                                    onChange={e => setFormData({ ...formData, address: e.target.value })}
-                                    required
-                                    placeholder="House No, Street Name"
-                                    className="pr-10"
-                                />
+                                {isGoogleLoaded ? (
+                                    <Autocomplete
+                                        onLoad={(autocomplete) => setAddressAutocomplete(autocomplete)}
+                                        onPlaceChanged={onAddressPlaceChanged}
+                                        restrictions={{ country: "gh" }}
+                                    >
+                                        <Input
+                                            id="address"
+                                            value={formData.address}
+                                            onChange={e => setFormData({ ...formData, address: e.target.value })}
+                                            required
+                                            placeholder="Type your location (e.g. Pink FM, Kasoa)..."
+                                            className="pr-10"
+                                        />
+                                    </Autocomplete>
+                                ) : (
+                                    <Input
+                                        id="address"
+                                        value={formData.address}
+                                        onChange={e => setFormData({ ...formData, address: e.target.value })}
+                                        required
+                                        placeholder="Loading search..."
+                                        className="pr-10"
+                                        disabled
+                                    />
+                                )}
                                 <button
                                     type="button"
-                                    onClick={detectLocation}
+                                    onClick={() => {
+                                        detectLocation();
+                                        toast.warning("For best results, please search for your location.");
+                                    }}
                                     disabled={isDetecting}
                                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
                                     title="Use my current location"
@@ -284,6 +359,9 @@ const AddressBook = () => {
                                     )}
                                 </button>
                             </div>
+                            <p className="text-xs text-muted-foreground mt-1 font-medium">
+                                💡 Search for a landmark and click the suggestion for accurate coordinates.
+                            </p>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
