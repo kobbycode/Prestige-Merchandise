@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, Plus, Trash2, Edit, Check, Star } from "lucide-react";
+import { MapPin, Plus, Trash2, Edit, Check, Star, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 
@@ -155,7 +155,65 @@ const AddressBook = () => {
         } catch (error) {
             console.error("Error setting default:", error);
             toast.error("Failed to set default address");
+            toast.error("Failed to set default address");
         }
+    };
+
+    const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+
+    const detectLocation = () => {
+        if (!navigator.geolocation) {
+            toast.error("Geolocation is not supported by your browser");
+            return;
+        }
+
+        setIsDetectingLocation(true);
+        toast.info("Detecting your location...");
+
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const { latitude, longitude } = position.coords;
+
+                try {
+                    // Using OpenStreetMap Nominatim for free reverse geocoding
+                    const response = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+                    );
+                    const data = await response.json();
+
+                    if (data && data.display_name) {
+                        // Update form data state
+                        const addr = data.address;
+
+                        setFormData(prev => ({
+                            ...prev,
+                            address: data.display_name,
+                            city: (addr.city || addr.town || addr.village || addr.suburb || prev.city),
+                            region: (addr.state || addr.region || addr.county || prev.region)
+                        }));
+
+                        toast.success("Location detected and address updated");
+                    } else {
+                        toast.error("Could not determine address details");
+                    }
+                } catch (error) {
+                    console.error("Error geocoding:", error);
+                    toast.error("Failed to fetch address details. Please type manually.");
+                } finally {
+                    setIsDetectingLocation(false);
+                }
+            },
+            (error) => {
+                console.error("Error detecting location:", error);
+                let msg = "Failed to detect location";
+                if (error.code === 1) msg = "Location permission denied";
+                if (error.code === 2) msg = "Location unavailable";
+                if (error.code === 3) msg = "Location request timed out";
+                toast.error(msg);
+                setIsDetectingLocation(false);
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+        );
     };
 
     if (loading && addresses.length === 0) {
@@ -240,7 +298,29 @@ const AddressBook = () => {
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="address">Street Address</Label>
-                            <Input id="address" value={formData.address} onChange={e => setFormData({ ...formData, address: e.target.value })} required placeholder="House No, Street Name" />
+                            <div className="relative">
+                                <Input
+                                    id="address"
+                                    value={formData.address}
+                                    onChange={e => setFormData({ ...formData, address: e.target.value })}
+                                    required
+                                    placeholder="House No, Street Name"
+                                    className="pr-10"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={detectLocation}
+                                    disabled={isDetectingLocation}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                                    title="Use my current location"
+                                >
+                                    {isDetectingLocation ? (
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                        <MapPin className="h-4 w-4" />
+                                    )}
+                                </button>
+                            </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
