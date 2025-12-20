@@ -12,6 +12,20 @@ const defaultSettings: StoreSettings = {
     facebookUrl: "",
     whatsappNumber: "0247654321", // Default from footer
     location: "Abossey Okai, Near Total Filling Station",
+    storeLocations: [
+        {
+            id: "abossey-okai",
+            name: "Abossey Okai (Main Branch)",
+            address: "Near Total Filling Station, Abossey Okai",
+            coordinates: { latitude: 5.5600, longitude: -0.2200 } // Approx coords
+        },
+        {
+            id: "north-industrial",
+            name: "North Industrial Area (Warehouse)",
+            address: "Plot 22, North Industrial Area, Accra",
+            coordinates: { latitude: 5.5800, longitude: -0.2050 } // Approx coords
+        }
+    ],
     phone: "054 123 4567",
     email: "sales@prestigemerchgh.com",
     businessHours: {

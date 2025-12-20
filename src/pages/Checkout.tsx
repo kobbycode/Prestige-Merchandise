@@ -26,13 +26,17 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
+import { useGoogleGeocoding } from "@/hooks/useGoogleGeocoding";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Loader2, ArrowLeft, ShieldCheck, CreditCard, Banknote, MapPin } from "lucide-react";
 import { initEmailJS, sendOrderConfirmation } from "@/lib/emailService";
 import { checkAndAlertLowStock } from "@/lib/stockMonitor";
 import { usePaystackPayment } from "react-paystack";
-import { STORE_LOCATION, calculateDistance, calculateShippingFee } from "@/lib/shipping";
+import { calculateShippingFee } from "@/lib/shipping";
+import { useGoogleDistance } from "@/hooks/useGoogleDistance";
+import { useStoreSettings } from "@/contexts/StoreSettingsContext";
+import { StoreLocation } from "@/types/settings";
 
 const checkoutSchema = z.object({
     firstName: z.string().min(2, "First name is required"),
@@ -55,6 +59,18 @@ const Checkout = () => {
     const { user } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState<"cod" | "paystack_momo" | "paystack_telecel" | "paystack_at" | "paystack_card">("cod");
+
+    const { settings } = useStoreSettings();
+    const { calculateDrivingDistance, isLoaded: isGoogleLoaded } = useGoogleDistance();
+    const [selectedStore, setSelectedStore] = useState<StoreLocation | null>(null);
+    const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
+
+    // Default to first store location when settings load
+    useEffect(() => {
+        if (settings.storeLocations && settings.storeLocations.length > 0 && !selectedStore) {
+            setSelectedStore(settings.storeLocations[0]);
+        }
+    }, [settings, selectedStore]);
 
     const form = useForm<CheckoutValues>({
         resolver: zodResolver(checkoutSchema),
@@ -127,21 +143,36 @@ const Checkout = () => {
     const [distance, setDistance] = useState(0);
 
     useEffect(() => {
-        if (coordinates) {
-            const dist = calculateDistance(
-                STORE_LOCATION.latitude,
-                STORE_LOCATION.longitude,
-                coordinates.latitude,
-                coordinates.longitude
-            );
-            const fee = calculateShippingFee(dist);
-            setDistance(Math.round(dist * 10) / 10);
-            setShippingFee(Math.ceil(fee));
-        } else {
-            setDistance(0);
-            setShippingFee(0);
-        }
-    }, [coordinates]);
+        const updateShipping = async () => {
+            if (coordinates && selectedStore && isGoogleLoaded) {
+                setIsCalculatingShipping(true);
+                try {
+                    const dist = await calculateDrivingDistance(
+                        selectedStore.coordinates,
+                        coordinates
+                    );
+
+                    if (dist !== null) {
+                        const fee = calculateShippingFee(dist);
+                        setDistance(Math.round(dist * 10) / 10);
+                        setShippingFee(Math.ceil(fee));
+                    } else {
+                        setDistance(0);
+                        setShippingFee(0);
+                    }
+                } catch (e) {
+                    console.error("Shipping calc error", e);
+                } finally {
+                    setIsCalculatingShipping(false);
+                }
+            } else {
+                setDistance(0);
+                setShippingFee(0);
+            }
+        };
+
+        updateShipping();
+    }, [coordinates, selectedStore, isGoogleLoaded, calculateDrivingDistance]);
 
     const fillFormWithAddress = (addr: any) => {
         form.setValue("firstName", addr.firstName);
@@ -155,69 +186,25 @@ const Checkout = () => {
         }
     };
 
-    const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+    const { isDetecting, detectLocation: detectGoogleLocation } = useGoogleGeocoding();
 
-    const detectLocation = () => {
-        if (!navigator.geolocation) {
-            toast.error("Geolocation is not supported by your browser");
-            return;
+    const handleDetectLocation = async () => {
+        const result = await detectGoogleLocation();
+
+        if (result) {
+            setCoordinates(result.coordinates);
+
+            // Update form fields
+            form.setValue("address", result.address);
+
+            if (result.city) {
+                form.setValue("city", result.city);
+            }
+
+            if (result.region) {
+                form.setValue("region", result.region);
+            }
         }
-
-        setIsDetectingLocation(true);
-        toast.info("Detecting your location...");
-
-        navigator.geolocation.getCurrentPosition(
-            async (position) => {
-                const { latitude, longitude } = position.coords;
-                setCoordinates({ latitude, longitude });
-
-                try {
-                    // Using OpenStreetMap Nominatim for free reverse geocoding
-                    const response = await fetch(
-                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
-                    );
-                    const data = await response.json();
-
-                    if (data && data.display_name) {
-                        // Update form fields
-                        form.setValue("address", data.display_name);
-
-                        // Try to populate city and region if available
-                        const addr = data.address;
-                        if (addr) {
-                            const city = addr.city || addr.town || addr.village || addr.suburb || addr.municipality || addr.county || addr.district || addr.hamlet || addr.neighbourhood;
-                            if (city) {
-                                form.setValue("city", city);
-                            }
-                            if (addr.state || addr.region || addr.county) {
-                                form.setValue("region", addr.state || addr.region || addr.county);
-                            }
-                        }
-
-                        toast.success("Location detected and address updated");
-                    } else {
-                        toast.error("Could not determine address details");
-                        // Still fill coordinates if address fails? 
-                        // form.setValue("address", `${latitude}, ${longitude}`);
-                    }
-                } catch (error) {
-                    console.error("Error geocoding:", error);
-                    toast.error("Failed to fetch address details. Please type manually.");
-                } finally {
-                    setIsDetectingLocation(false);
-                }
-            },
-            (error) => {
-                console.error("Error detecting location:", error);
-                let msg = "Failed to detect location";
-                if (error.code === 1) msg = "Location permission denied";
-                if (error.code === 2) msg = "Location unavailable";
-                if (error.code === 3) msg = "Location request timed out";
-                toast.error(msg);
-                setIsDetectingLocation(false);
-            },
-            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-        );
     };
 
     const [showAuthDialog, setShowAuthDialog] = useState(false);
@@ -504,6 +491,51 @@ const Checkout = () => {
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         <div className="lg:col-span-2 space-y-6">
+                            {/* Store Selection */}
+                            {settings.storeLocations && settings.storeLocations.length > 0 && (
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="flex items-center gap-2">
+                                            <MapPin className="h-5 w-5 text-primary" />
+                                            Select Dispatch Location
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <RadioGroup
+                                            value={selectedStore?.id}
+                                            onValueChange={(val) => {
+                                                const store = settings.storeLocations?.find(s => s.id === val);
+                                                if (store) setSelectedStore(store);
+                                            }}
+                                            className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                                        >
+                                            {settings.storeLocations.map((store) => (
+                                                <div key={store.id}>
+                                                    <RadioGroupItem value={store.id} id={store.id} className="peer sr-only" />
+                                                    <Label
+                                                        htmlFor={store.id}
+                                                        className="flex flex-col h-full items-start justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-all"
+                                                    >
+                                                        <div className="mb-2 w-full">
+                                                            <div className="font-semibold text-lg mb-1">{store.name}</div>
+                                                            <div className="text-sm text-muted-foreground">{store.address}</div>
+                                                        </div>
+                                                        {selectedStore?.id === store.id && (
+                                                            <div className="w-full text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded mt-2 text-center">
+                                                                Selected
+                                                            </div>
+                                                        )}
+                                                    </Label>
+                                                </div>
+                                            ))}
+                                        </RadioGroup>
+                                        <p className="text-xs text-muted-foreground mt-4">
+                                            * Shipping fees will be calculated based on the distance from the selected store to your location.
+                                        </p>
+                                    </CardContent>
+                                </Card>
+                            )}
+
                             <Card>
                                 <CardHeader>
                                     <CardTitle>Shipping Information</CardTitle>
@@ -568,12 +600,12 @@ const Checkout = () => {
                                                             <Input placeholder="Street name, landmark..." {...field} className="pr-10" />
                                                             <button
                                                                 type="button"
-                                                                onClick={detectLocation}
-                                                                disabled={isDetectingLocation}
+                                                                onClick={handleDetectLocation}
+                                                                disabled={isDetecting}
                                                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
                                                                 title="Use my current location"
                                                             >
-                                                                {isDetectingLocation ? (
+                                                                {isDetecting ? (
                                                                     <Loader2 className="h-4 w-4 animate-spin" />
                                                                 ) : (
                                                                     <MapPin className="h-4 w-4" />
@@ -711,7 +743,13 @@ const Checkout = () => {
                                                 <span>{formatPrice(shippingFee)}</span>
                                             ) : (
                                                 <span className="text-muted-foreground text-xs italic">
-                                                    {coordinates ? "Calculating..." : "Select location to calculate"}
+                                                    {isCalculatingShipping ? (
+                                                        <span className="flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" /> Calculating...</span>
+                                                    ) : coordinates ? (
+                                                        "Calculating..."
+                                                    ) : (
+                                                        "Select location to calculate"
+                                                    )}
                                                 </span>
                                             )}
                                         </div>
