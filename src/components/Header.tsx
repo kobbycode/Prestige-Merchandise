@@ -244,9 +244,8 @@ const Header = () => {
               )}
             </nav>
 
-
-
-
+            {/* Notification Bell - Desktop */}
+            <NotificationDropdown className="relative p-2 hover:bg-white/10 rounded-none" />
 
             <Button
               variant="ghost"
