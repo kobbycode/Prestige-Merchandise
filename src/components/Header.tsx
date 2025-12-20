@@ -253,6 +253,29 @@ const Header = () => {
                 </Button>
               </Link>
 
+              {/* Wishlist */}
+              <Link to="/account/wishlist" className="relative p-2 hover:bg-white/10 rounded-none transition-colors">
+                <Heart className="h-5 w-5 text-white" />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
+                    {wishlistCount}
+                  </span>
+                )}
+              </Link>
+
+              {/* Notifications */}
+              <button
+                onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+                className="relative p-2 hover:bg-white/10 rounded-none transition-colors"
+              >
+                <Bell className="h-5 w-5 text-white" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+
               <Button
                 variant="ghost"
                 size="icon"
