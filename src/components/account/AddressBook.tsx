@@ -191,7 +191,7 @@ const AddressBook = () => {
                         setFormData(prev => ({
                             ...prev,
                             address: data.display_name,
-                            city: (addr.city || addr.town || addr.village || addr.suburb || prev.city),
+                            city: (addr.city || addr.town || addr.village || addr.suburb || addr.municipality || addr.county || addr.district || addr.hamlet || addr.neighbourhood || prev.city),
                             region: (addr.state || addr.region || addr.county || prev.region),
                             gpsCoordinates: { latitude, longitude }
                         }));

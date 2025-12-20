@@ -165,8 +165,9 @@ const Checkout = () => {
                         // Try to populate city and region if available
                         const addr = data.address;
                         if (addr) {
-                            if (addr.city || addr.town || addr.village || addr.suburb) {
-                                form.setValue("city", addr.city || addr.town || addr.village || addr.suburb);
+                            const city = addr.city || addr.town || addr.village || addr.suburb || addr.municipality || addr.county || addr.district || addr.hamlet || addr.neighbourhood;
+                            if (city) {
+                                form.setValue("city", city);
                             }
                             if (addr.state || addr.region || addr.county) {
                                 form.setValue("region", addr.state || addr.region || addr.county);
