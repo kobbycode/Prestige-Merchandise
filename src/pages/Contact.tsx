@@ -124,7 +124,7 @@ const Contact = () => {
                 <Card className="shadow-card">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
-                      <div className="p-3 bg-primary/10 rounded-full">
+                      <div className="p-3 bg-secondary rounded-full">
                         <MapPin className="h-6 w-6 text-primary" />
                       </div>
                       <div>
@@ -153,7 +153,7 @@ const Contact = () => {
                 <Card className="shadow-card">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
-                      <div className="p-3 bg-primary/10 rounded-full">
+                      <div className="p-3 bg-secondary rounded-full">
                         <Phone className="h-6 w-6 text-primary" />
                       </div>
                       <div>
@@ -171,7 +171,7 @@ const Contact = () => {
                 <Card className="shadow-card">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
-                      <div className="p-3 bg-primary/10 rounded-full">
+                      <div className="p-3 bg-secondary rounded-full">
                         <Mail className="h-6 w-6 text-primary" />
                       </div>
                       <div>
@@ -189,7 +189,7 @@ const Contact = () => {
                 <Card className="shadow-card">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
-                      <div className="p-3 bg-primary/10 rounded-full">
+                      <div className="p-3 bg-secondary rounded-full">
                         <Clock className="h-6 w-6 text-primary" />
                       </div>
                       <div>

@@ -30,7 +30,7 @@ const Parts = () => {
                         <div className="grid md:grid-cols-3 gap-8 mb-16">
                             {/* Steering Components */}
                             <div className="bg-muted/30 rounded-2xl p-8 border border-border hover:border-primary/20 transition-all duration-300">
-                                <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-6 text-primary">
+                                <div className="w-14 h-14 bg-secondary rounded-xl flex items-center justify-center mb-6 text-primary">
                                     <Settings className="h-7 w-7" />
                                 </div>
                                 <h3 className="text-2xl font-bold text-secondary mb-6">Steering Components</h3>
@@ -52,7 +52,7 @@ const Parts = () => {
 
                             {/* Suspension & Support */}
                             <div className="bg-muted/30 rounded-2xl p-8 border border-border hover:border-primary/20 transition-all duration-300">
-                                <div className="w-14 h-14 bg-blue-500/10 rounded-xl flex items-center justify-center mb-6 text-blue-600">
+                                <div className="w-14 h-14 bg-secondary rounded-xl flex items-center justify-center mb-6 text-primary">
                                     <Activity className="h-7 w-7" />
                                 </div>
                                 <h3 className="text-2xl font-bold text-secondary mb-6">Suspension & Support</h3>
@@ -74,7 +74,7 @@ const Parts = () => {
 
                             {/* Fluids & Accessories */}
                             <div className="bg-muted/30 rounded-2xl p-8 border border-border hover:border-primary/20 transition-all duration-300">
-                                <div className="w-14 h-14 bg-green-500/10 rounded-xl flex items-center justify-center mb-6 text-green-600">
+                                <div className="w-14 h-14 bg-secondary rounded-xl flex items-center justify-center mb-6 text-primary">
                                     <Wrench className="h-7 w-7" />
                                 </div>
                                 <h3 className="text-2xl font-bold text-secondary mb-6">Fluids & Accessories</h3>

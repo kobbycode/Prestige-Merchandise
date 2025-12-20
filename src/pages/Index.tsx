@@ -138,7 +138,7 @@ const Index = () => {
                 { icon: ShieldCheck, title: "Trusted Source", sub: "Genuine Parts" },
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-4 justify-center md:justify-start">
-                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-primary">
+                  <div className="h-12 w-12 rounded-full bg-secondary flex items-center justify-center shrink-0 text-primary">
                     <item.icon className="h-6 w-6" />
                   </div>
                   <div>
@@ -165,7 +165,7 @@ const Index = () => {
               {coreServices.map((service, index) => (
                 <Card key={index} className="border-none shadow-card hover:shadow-hover transition-all duration-300 group overflow-hidden">
                   <CardContent className="p-8">
-                    <div className="h-14 w-14 bg-blue-50 rounded-2xl flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <div className="h-14 w-14 bg-secondary rounded-2xl flex items-center justify-center text-primary mb-6 mx-auto group-hover:scale-110 transition-transform duration-300">
                       <service.icon className="h-7 w-7" />
                     </div>
                     <h3 className="text-xl font-bold text-secondary mb-3">{service.title}</h3>
@@ -249,8 +249,8 @@ const Index = () => {
               {partCategories.map((cat, index) => (
                 <Link key={index} to={cat.link} className="group">
                   <div className="bg-muted hover:bg-primary/5 border border-transparent hover:border-primary/20 rounded-xl p-6 text-center transition-all duration-300 h-full flex flex-col items-center justify-center gap-4">
-                    <div className="h-12 w-12 rounded-full bg-white shadow-sm flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
-                      <Settings className="h-6 w-6 text-secondary group-hover:text-white transition-colors" />
+                    <div className="h-12 w-12 rounded-full bg-secondary shadow-sm flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+                      <Settings className="h-6 w-6 text-primary group-hover:text-white transition-colors" />
                     </div>
                     <span className="font-semibold text-secondary group-hover:text-primary transition-colors">{cat.name}</span>
                   </div>

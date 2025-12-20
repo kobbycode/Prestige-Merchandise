@@ -105,14 +105,14 @@ const Services = () => {
                   <div key={index} className="flex flex-col md:flex-row gap-8 items-start border-b border-border pb-16 last:border-0 last:pb-0">
                     {/* Icon & Title Mobile */}
                     <div className="md:hidden flex items-center gap-4 mb-4">
-                      <div className="w-16 h-16 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
+                      <div className="w-16 h-16 rounded-none bg-secondary flex items-center justify-center shrink-0">
                         <Icon className="h-8 w-8 text-primary" />
                       </div>
                       <h3 className="text-2xl font-bold">{service.title}</h3>
                     </div>
 
                     {/* Icon Desktop */}
-                    <div className="hidden md:flex w-24 h-24 rounded-none bg-primary/10 items-center justify-center shrink-0">
+                    <div className="hidden md:flex w-24 h-24 rounded-none bg-secondary items-center justify-center shrink-0">
                       <Icon className="h-12 w-12 text-primary" />
                     </div>
 

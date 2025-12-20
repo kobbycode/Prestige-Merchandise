@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, Phone, MessageCircle, User, LogOut, ShoppingBag, Search, Heart } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -244,166 +244,165 @@ const Header = () => {
               )}
             </nav>
 
-            <div className="flex items-center gap-4 border-l border-white/10 pl-6">
-              <Link to="/account/wishlist">
-                <Button variant="ghost" size="icon" className="relative hover:bg-white/10 rounded-none">
-                  <Heart className="h-5 w-5" />
-                  {wishlistCount > 0 && (
-                    <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center animate-in zoom-in">
-                      {wishlistCount}
-                    </span>
-                  )}
-                </Button>
-              </Link>
 
-              {/* Wishlist */}
-              <Link to="/account/wishlist" className="relative p-2 hover:bg-white/10 rounded-none transition-colors">
-                <Heart className="h-5 w-5 text-white" />
-                {wishlistCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
-                    {wishlistCount}
-                  </span>
-                )}
-              </Link>
 
-              {/* Notifications */}
-              <NotificationDropdown className="hover:bg-white/10 rounded-none" />
 
-              <Button
-                variant="ghost"
-                size="icon"
-                className={`relative hover:bg-white/10 rounded-none ${isCartBouncing ? "animate-bounce" : ""}`}
-                onClick={() => setIsCartOpen(true)}
-              >
-                <ShoppingBag className={`h-5 w-5 ${isCartBouncing ? "text-primary" : ""}`} />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] font-bold text-white flex items-center justify-center animate-in zoom-in">
-                    {cartCount}
-                  </span>
-                )}
-              </Button>
-              <CurrencySelector />
-            </div>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              className={`relative hover:bg-white/10 rounded-none ${isCartBouncing ? "animate-bounce" : ""}`}
+              onClick={() => setIsCartOpen(true)}
+            >
+              <ShoppingBag className={`h-5 w-5 ${isCartBouncing ? "text-primary" : ""}`} />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] font-bold text-white flex items-center justify-center animate-in zoom-in">
+                  {cartCount}
+                </span>
+              )}
+            </Button>
+            <CurrencySelector />
           </div>
+        </div>
 
-          {/* Mobile Actions */}
-          <div className="flex items-center gap-1 lg:hidden">
-            <a href={`tel:${settings.phone?.replace(/\s/g, '')}`} className="p-2 text-white hover:bg-white/10 rounded-none">
-              <Phone className="h-5 w-5 text-primary" />
-            </a>
-            <a href={`https://wa.me/${settings.whatsappNumber}`} target="_blank" rel="noopener noreferrer" className="p-2 text-white hover:bg-white/10 rounded-none">
-              <MessageCircle className="h-5 w-5 text-green-500" />
-            </a>
+        {/* Mobile Actions */}
+        <div className="flex items-center gap-1 lg:hidden">
+          <a href={`tel:${settings.phone?.replace(/\s/g, '')}`} className="p-2 text-white hover:bg-white/10 rounded-none">
+            <Phone className="h-5 w-5 text-primary" />
+          </a>
+          <a href={`https://wa.me/${settings.whatsappNumber}`} target="_blank" rel="noopener noreferrer" className="p-2 text-white hover:bg-white/10 rounded-none">
+            <MessageCircle className="h-5 w-5 text-green-500" />
+          </a>
+
+          {/* Wishlist */}
+          <Link to="/account/wishlist" className="relative p-2 text-white hover:bg-white/10 rounded-none">
+            <Heart className="h-5 w-5" />
+            {wishlistCount > 0 && (
+              <span className="absolute top-0 right-0 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
+                {wishlistCount}
+              </span>
+            )}
+          </Link>
+
+          {/* Notifications */}
+          <NotificationDropdown className="p-2 text-white hover:bg-white/10 rounded-none" />
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative text-white hover:bg-white/10"
+            onClick={() => setIsCartOpen(true)}
+          >
+            <ShoppingBag className="h-5 w-5" />
+            {cartCount > 0 && (
+              <span className="absolute top-0 right-0 h-3 w-3 rounded-full bg-primary border-2 border-sidebar-background"></span>
+            )}
+          </Button>
+
+          <button
+            className="p-2 text-white hover:bg-white/10 rounded-md transition-colors"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Desktop Lower Nav (Categories) */}
+      <div className="hidden lg:flex items-center justify-center py-2 mt-2 gap-8 text-sm border-t border-white/10">
+        {navLinks.map((link) => (
+          <Link
+            key={link.to}
+            to={link.to}
+            className={`font-medium transition-colors hover:text-primary ${location.pathname === link.to.split('?')[0] ? "text-primary" : "text-gray-300"
+              }`}
+          >
+            {link.label}
+          </Link>
+        ))}
+      </div>
+
+      {/* Mobile Navigation Menu */}
+      {isMenuOpen && (
+        <nav className="lg:hidden mt-4 pb-4 border-t border-white/10 pt-4 space-y-4 animate-in slide-in-from-top-5">
+          <form onSubmit={handleSearch} className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search parts..."
+              className="pl-9 h-10 w-full bg-white/10 border-transparent text-white placeholder:text-gray-400 focus:bg-white/20"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </form>
+
+          <div className="grid grid-cols-1 gap-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className="flex items-center justify-between py-3 px-3 rounded-lg text-gray-200 hover:bg-white/10 hover:text-white transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <span className="font-medium">{link.label}</span>
+                {/* ChevronRight className="h-4 w-4 opacity-50" / */}
+              </Link>
+            ))}
 
             {/* Wishlist */}
-            <Link to="/account/wishlist" className="relative p-2 text-white hover:bg-white/10 rounded-none">
-              <Heart className="h-5 w-5" />
+            <Link to="/account/wishlist" className="flex items-center justify-between py-3 px-3 rounded-lg text-gray-200 hover:bg-white/10 hover:text-white transition-colors" onClick={() => setIsMenuOpen(false)}>
+              <span className="font-medium">Wishlist</span>
               {wishlistCount > 0 && (
-                <span className="absolute top-0 right-0 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
+                <span className="ml-2 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
                   {wishlistCount}
                 </span>
               )}
             </Link>
 
             {/* Notifications */}
-            <NotificationDropdown className="p-2 text-white hover:bg-white/10 rounded-none" />
-
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative text-white hover:bg-white/10"
-              onClick={() => setIsCartOpen(true)}
-            >
-              <ShoppingBag className="h-5 w-5" />
-              {cartCount > 0 && (
-                <span className="absolute top-0 right-0 h-3 w-3 rounded-full bg-primary border-2 border-sidebar-background"></span>
+            <Link to="/notifications" className="flex items-center justify-between py-3 px-3 rounded-lg text-gray-200 hover:bg-white/10 hover:text-white transition-colors" onClick={() => setIsMenuOpen(false)}>
+              <span className="font-medium">Notifications</span>
+              {unreadCount > 0 && (
+                <span className="ml-2 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
+                  {unreadCount}
+                </span>
               )}
-            </Button>
-
-            <button
-              className="p-2 text-white hover:bg-white/10 rounded-md transition-colors"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label="Toggle menu"
-            >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Desktop Lower Nav (Categories) */}
-        <div className="hidden lg:flex items-center justify-center py-2 mt-2 gap-8 text-sm border-t border-white/10">
-          {navLinks.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={`font-medium transition-colors hover:text-primary ${location.pathname === link.to.split('?')[0] ? "text-primary" : "text-gray-300"
-                }`}
-            >
-              {link.label}
             </Link>
-          ))}
-        </div>
+          </div>
 
-        {/* Mobile Navigation Menu */}
-        {isMenuOpen && (
-          <nav className="lg:hidden mt-4 pb-4 border-t border-white/10 pt-4 space-y-4 animate-in slide-in-from-top-5">
-            <form onSubmit={handleSearch} className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search parts..."
-                className="pl-9 h-10 w-full bg-white/10 border-transparent text-white placeholder:text-gray-400 focus:bg-white/20"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </form>
+          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/10">
+            <a
+              href={`https://wa.me/${settings.whatsappNumber}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 p-3 rounded-none bg-green-600/20 text-green-400 font-medium hover:bg-green-600/30 transition-colors"
+            >
+              <MessageCircle className="h-4 w-4" /> WhatsApp
+            </a>
+            <Link
+              to="/account"
+              className="flex items-center justify-center gap-2 p-3 rounded-lg bg-white/10 text-white font-medium hover:bg-white/20 transition-colors"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <User className="h-4 w-4" /> Account
+            </Link>
+          </div>
 
-            <div className="grid grid-cols-1 gap-1">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.to}
-                  to={link.to}
-                  className="flex items-center justify-between py-3 px-3 rounded-lg text-gray-200 hover:bg-white/10 hover:text-white transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <span className="font-medium">{link.label}</span>
-                  {/* ChevronRight className="h-4 w-4 opacity-50" / */}
-                </Link>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/10">
-              <a
-                href={`https://wa.me/${settings.whatsappNumber}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 p-3 rounded-none bg-green-600/20 text-green-400 font-medium hover:bg-green-600/30 transition-colors"
-              >
-                <MessageCircle className="h-4 w-4" /> WhatsApp
-              </a>
-              <Link
-                to="/account"
-                className="flex items-center justify-center gap-2 p-3 rounded-lg bg-white/10 text-white font-medium hover:bg-white/20 transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <User className="h-4 w-4" /> Account
-              </Link>
-            </div>
-
-            <div className="flex justify-between items-center px-2 pt-2">
-              <CurrencySelector />
-              {isAuthenticated && (
-                <button onClick={() => { logout(); setIsMenuOpen(false); }} className="text-red-400 text-sm font-medium flex items-center gap-1">
-                  <LogOut className="h-3 w-3" /> Sign Out
-                </button>
-              )}
-            </div>
-          </nav>
-        )}
-        <CartSheet />
-      </div>
+          <div className="flex justify-between items-center px-2 pt-2">
+            <CurrencySelector />
+            {isAuthenticated && (
+              <button onClick={() => { logout(); setIsMenuOpen(false); }} className="text-red-400 text-sm font-medium flex items-center gap-1">
+                <LogOut className="h-3 w-3" /> Sign Out
+              </button>
+            )}
+          </div>
+        </nav>
+      )}
+      <CartSheet />
     </header>
   );
 };
 
 export default Header;
+
