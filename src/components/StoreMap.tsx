@@ -23,7 +23,7 @@ const defaultCenter = {
 };
 
 const StoreMap = ({ locations }: StoreMapProps) => {
-    const { isLoaded } = useJsApiLoader({
+    const { isLoaded, loadError } = useJsApiLoader({
         id: 'google-map-script',
         googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ""
     });
@@ -31,6 +31,7 @@ const StoreMap = ({ locations }: StoreMapProps) => {
     const [markers, setMarkers] = useState<LocationMarker[]>([]);
     const [map, setMap] = useState<google.maps.Map | null>(null);
     const [selectedMarker, setSelectedMarker] = useState<LocationMarker | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     const onLoad = useCallback(function callback(map: google.maps.Map) {
         setMap(map);
@@ -44,35 +45,41 @@ const StoreMap = ({ locations }: StoreMapProps) => {
         if (!isLoaded || locations.length === 0) return;
 
         const geocodeLocations = async () => {
-            const geocoder = new google.maps.Geocoder();
-            const newMarkers: LocationMarker[] = [];
-            const uniqueLocations = [...new Set(locations.filter(Boolean))];
+            try {
+                const geocoder = new google.maps.Geocoder();
+                const newMarkers: LocationMarker[] = [];
+                const uniqueLocations = [...new Set(locations.filter(Boolean))];
 
-            for (const loc of uniqueLocations) {
-                try {
-                    const result = await new Promise<google.maps.GeocoderResult[]>((resolve, reject) => {
-                        geocoder.geocode({ address: loc + ", Ghana" }, (results, status) => {
-                            if (status === "OK" && results) {
-                                resolve(results);
-                            } else {
-                                reject(status);
-                            }
+                for (const loc of uniqueLocations) {
+                    try {
+                        const result = await new Promise<google.maps.GeocoderResult[]>((resolve, reject) => {
+                            geocoder.geocode({ address: loc + ", Ghana" }, (results, status) => {
+                                if (status === "OK" && results) {
+                                    resolve(results);
+                                } else {
+                                    reject(status);
+                                }
+                            });
                         });
-                    });
 
-                    if (result && result.length > 0) {
-                        const location = result[0].geometry.location;
-                        newMarkers.push({
-                            address: loc,
-                            lat: location.lat(),
-                            lng: location.lng()
-                        });
+                        if (result && result.length > 0) {
+                            const location = result[0].geometry.location;
+                            newMarkers.push({
+                                address: loc,
+                                lat: location.lat(),
+                                lng: location.lng()
+                            });
+                        }
+                    } catch (error) {
+                        console.error(`Error geocoding ${loc}:`, error);
+                        // Continue with other locations even if one fails
                     }
-                } catch (error) {
-                    console.error(`Error geocoding ${loc}:`, error);
                 }
+                setMarkers(newMarkers);
+            } catch (error) {
+                console.error('Error in geocoding:', error);
+                setError('Failed to load map locations');
             }
-            setMarkers(newMarkers);
         };
 
         geocodeLocations();
@@ -80,23 +87,46 @@ const StoreMap = ({ locations }: StoreMapProps) => {
 
     useEffect(() => {
         if (map && markers.length > 0) {
-            const bounds = new google.maps.LatLngBounds();
-            markers.forEach(marker => {
-                bounds.extend({ lat: marker.lat, lng: marker.lng });
-            });
-            map.fitBounds(bounds);
-
-            // Adjust zoom if there's only one marker so we don't zoom in too much
-            if (markers.length === 1) {
-                // Short timeout to allow fitBounds to finish before ensuring max zoom isn't too close
-                // But fitBounds usually handles it. If not, listener:
-                const listener = google.maps.event.addListener(map, "idle", () => {
-                    if (map.getZoom()! > 15) map.setZoom(15);
-                    google.maps.event.removeListener(listener);
+            try {
+                const bounds = new google.maps.LatLngBounds();
+                markers.forEach(marker => {
+                    bounds.extend({ lat: marker.lat, lng: marker.lng });
                 });
+                map.fitBounds(bounds);
+
+                // Adjust zoom if there's only one marker so we don't zoom in too much
+                if (markers.length === 1) {
+                    const listener = google.maps.event.addListener(map, "idle", () => {
+                        if (map.getZoom()! > 15) map.setZoom(15);
+                        google.maps.event.removeListener(listener);
+                    });
+                }
+            } catch (error) {
+                console.error('Error adjusting map bounds:', error);
             }
         }
     }, [map, markers]);
+
+    // Error loading Google Maps API
+    if (loadError) {
+        return (
+            <div className="h-[400px] w-full bg-muted/20 flex items-center justify-center rounded-lg border">
+                <div className="text-center text-muted-foreground">
+                    <p>Unable to load map</p>
+                    <p className="text-sm mt-2">Please check your internet connection</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Internal error
+    if (error) {
+        return (
+            <div className="h-[400px] w-full bg-muted/20 flex items-center justify-center rounded-lg border">
+                <p className="text-muted-foreground">{error}</p>
+            </div>
+        );
+    }
 
     if (!isLoaded) {
         return (
