@@ -32,6 +32,7 @@ import { Loader2, ArrowLeft, ShieldCheck, CreditCard, Banknote, MapPin } from "l
 import { initEmailJS, sendOrderConfirmation } from "@/lib/emailService";
 import { checkAndAlertLowStock } from "@/lib/stockMonitor";
 import { usePaystackPayment } from "react-paystack";
+import { STORE_LOCATION, calculateDistance, calculateShippingFee } from "@/lib/shipping";
 
 const checkoutSchema = z.object({
     firstName: z.string().min(2, "First name is required"),
@@ -122,6 +123,25 @@ const Checkout = () => {
     }, [user, form]);
 
     const [coordinates, setCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
+    const [shippingFee, setShippingFee] = useState(0);
+    const [distance, setDistance] = useState(0);
+
+    useEffect(() => {
+        if (coordinates) {
+            const dist = calculateDistance(
+                STORE_LOCATION.latitude,
+                STORE_LOCATION.longitude,
+                coordinates.latitude,
+                coordinates.longitude
+            );
+            const fee = calculateShippingFee(dist);
+            setDistance(Math.round(dist * 10) / 10);
+            setShippingFee(Math.ceil(fee));
+        } else {
+            setDistance(0);
+            setShippingFee(0);
+        }
+    }, [coordinates]);
 
     const fillFormWithAddress = (addr: any) => {
         form.setValue("firstName", addr.firstName);
@@ -204,8 +224,10 @@ const Checkout = () => {
     const [pendingData, setPendingData] = useState<CheckoutValues | null>(null);
 
     // Calculate total in GHS for Paystack (Paystack expects amount in pesewas)
+    // Calculate total in GHS for Paystack (Paystack expects amount in pesewas)
     // If currency is USD, convert to GHS first
-    const totalInGhs = currency === 'GHS' ? cartTotal : cartTotal * exchangeRate;
+    const totalWithShipping = cartTotal + shippingFee;
+    const totalInGhs = currency === 'GHS' ? totalWithShipping : totalWithShipping * exchangeRate;
     const paystackAmount = Math.round(totalInGhs * 100);
 
     const getPaystackProvider = (method: string) => {
@@ -326,7 +348,9 @@ const Checkout = () => {
                     variant: item.variant || null,
                     image: item.product.images[0] || null
                 })),
-                amount: cartTotal,
+                amount: totalWithShipping,
+                shippingFee: shippingFee,
+                itemsTotal: cartTotal,
                 status: "pending",
                 paymentMethod: getReadablePaymentMethod(paymentMethod),
                 paymentStatus: paymentMethodType === "prepaid" ? "paid" : "unpaid",
@@ -408,7 +432,7 @@ const Checkout = () => {
                         recipientRole: "admin",
                         type: "new_order",
                         title: "New Order",
-                        message: `New order #${orderId.slice(0, 8)} (${formatPrice(cartTotal)})`,
+                        message: `New order #${orderId.slice(0, 8)} (${formatPrice(totalWithShipping)})`,
                         read: false,
                         createdAt: serverTimestamp(),
                         data: { orderId: orderId },
@@ -682,8 +706,14 @@ const Checkout = () => {
                                             <span>{formatPrice(cartTotal)}</span>
                                         </div>
                                         <div className="flex justify-between">
-                                            <span className="text-muted-foreground">Shipping</span>
-                                            <span className="text-muted-foreground text-xs italic">Calculated at delivery</span>
+                                            <span className="text-muted-foreground">Shipping {distance > 0 && <span className="text-xs">({distance}km)</span>}</span>
+                                            {shippingFee > 0 ? (
+                                                <span>{formatPrice(shippingFee)}</span>
+                                            ) : (
+                                                <span className="text-muted-foreground text-xs italic">
+                                                    {coordinates ? "Calculating..." : "Select location to calculate"}
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
 
@@ -691,7 +721,7 @@ const Checkout = () => {
 
                                     <div className="flex justify-between font-bold text-lg">
                                         <span>Total</span>
-                                        <span>{formatPrice(cartTotal)}</span>
+                                        <span>{formatPrice(totalWithShipping)}</span>
                                     </div>
                                 </CardContent>
                                 <CardFooter>
@@ -707,7 +737,7 @@ const Checkout = () => {
                                                 Processing...
                                             </>
                                         ) : (
-                                            paymentMethod.startsWith('paystack') ? `Pay ${formatPrice(cartTotal)} Now` : "Place Order"
+                                            paymentMethod.startsWith('paystack') ? `Pay ${formatPrice(totalWithShipping)} Now` : "Place Order"
                                         )}
                                     </Button>
                                 </CardFooter>
