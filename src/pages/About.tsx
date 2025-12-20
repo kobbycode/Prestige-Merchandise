@@ -1,3 +1,5 @@
+```
+import { useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Building2, Target, Award, Users, MessageCircle, Phone } from "lucide-react";
@@ -7,6 +9,11 @@ import { useStoreSettings } from "@/hooks/useStoreSettings";
 
 const About = () => {
   const { settings } = useStoreSettings();
+
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -129,24 +136,24 @@ const About = () => {
             <p className="text-xl mb-8 opacity-90">Visit our shop in Abossey Okai or contact us today</p>
             <div className="flex flex-wrap gap-4 justify-center">
               <a href={`https://wa.me/${settings.whatsappNumber}`} target="_blank" rel="noopener noreferrer">
-                <Button variant="secondary" size="lg" className="gap-2 min-w-[150px]">
-                  <MessageCircle className="h-5 w-5" />
-                  Contact on WhatsApp
-                </Button>
-              </a>
-              <a href={`tel:${settings.phone?.replace(/\s/g, '')}`}>
-                <Button variant="secondary" size="lg" className="gap-2 min-w-[150px]">
-                  <Phone className="h-5 w-5" />
-                  Call Us Now
-                </Button>
-              </a>
-            </div>
-          </div>
-        </section>
-      </main>
+<Button variant="secondary" size="lg" className="gap-2 min-w-[150px]">
+  <MessageCircle className="h-5 w-5" />
+  Contact on WhatsApp
+</Button>
+              </a >
+  <a href={`tel:${settings.phone?.replace(/\s/g, '')}`}>
+    <Button variant="secondary" size="lg" className="gap-2 min-w-[150px]">
+      <Phone className="h-5 w-5" />
+      Call Us Now
+    </Button>
+  </a>
+            </div >
+          </div >
+        </section >
+      </main >
 
-      <Footer />
-    </div>
+  <Footer />
+    </div >
   );
 };
 
