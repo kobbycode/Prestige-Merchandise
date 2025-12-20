@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from "@/components/ui/label";
 import {
     AlertDialog,
@@ -537,15 +538,15 @@ const Checkout = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         <div className="lg:col-span-2 space-y-6">
                             {/* Store Selection */}
-                            {settings.storeLocations && settings.storeLocations.length > 0 && (
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle className="flex items-center gap-2">
-                                            <MapPin className="h-5 w-5 text-primary" />
-                                            Select Dispatch Location
-                                        </CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <MapPin className="h-5 w-5 text-primary" />
+                                        Select Dispatch Location
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    {settings.storeLocations && settings.storeLocations.length > 0 ? (
                                         <RadioGroup
                                             value={selectedStore?.id}
                                             onValueChange={(val) => {
@@ -559,7 +560,7 @@ const Checkout = () => {
                                                     <RadioGroupItem value={store.id} id={store.id} className="peer sr-only" />
                                                     <Label
                                                         htmlFor={store.id}
-                                                        className="flex flex-col h-full items-start justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-all"
+                                                        className="flex flex-col h-full items-start justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-muted/50 peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-all"
                                                     >
                                                         <div className="mb-2 w-full">
                                                             <div className="font-semibold text-lg mb-1">{store.name}</div>
@@ -574,12 +575,17 @@ const Checkout = () => {
                                                 </div>
                                             ))}
                                         </RadioGroup>
-                                        <p className="text-xs text-muted-foreground mt-4">
-                                            * Shipping fees will be calculated based on the distance from the selected store to your location.
-                                        </p>
-                                    </CardContent>
-                                </Card>
-                            )}
+                                    ) : (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <Skeleton className="h-32 w-full" />
+                                            <Skeleton className="h-32 w-full" />
+                                        </div>
+                                    )}
+                                    <p className="text-xs text-muted-foreground mt-4">
+                                        * Shipping fees will be calculated based on the distance from the selected store to your location.
+                                    </p>
+                                </CardContent>
+                            </Card>
 
                             <Card>
                                 <CardHeader>
@@ -656,9 +662,12 @@ const Checkout = () => {
 
                                                             <button
                                                                 type="button"
-                                                                onClick={handleDetectLocation}
+                                                                onClick={() => {
+                                                                    handleDetectLocation();
+                                                                    toast.warning("For best results on a computer, please type your location in the search box.");
+                                                                }}
                                                                 disabled={isDetecting}
-                                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary disabled:opacity-50"
                                                                 title="Use my current location"
                                                             >
                                                                 {isDetecting ? (
@@ -669,6 +678,9 @@ const Checkout = () => {
                                                             </button>
                                                         </div>
                                                     </FormControl>
+                                                    <p className="text-[10px] text-muted-foreground mt-1">
+                                                        💡 Tip: Search for a popular landmark near you for the most accurate location.
+                                                    </p>
                                                     <FormMessage />
                                                 </FormItem>
                                             )} />
