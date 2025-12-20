@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Phone, MessageCircle, User, LogOut, ShoppingBag, Search, Heart } from "lucide-react";
+import { Menu, X, Phone, MessageCircle, User, LogOut, ShoppingBag, Search, Heart, Calendar } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { collection, query, where, limit, getDocs } from "firebase/firestore";
@@ -312,7 +312,7 @@ const Header = () => {
           </form>
 
           <div className="grid grid-cols-1 gap-1">
-            {navLinks.map((link) => (
+            {navLinks.filter(link => link.label !== "Book Diagnosis").map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
@@ -324,59 +324,74 @@ const Header = () => {
               </Link>
             ))}
 
-            {/* Wishlist */}
-            <Link to="/account/wishlist" className="flex items-center justify-between py-3 px-3 rounded-lg text-gray-200 hover:bg-white/10 hover:text-white transition-colors" onClick={() => setIsMenuOpen(false)}>
-              <span className="font-medium">Wishlist</span>
-              {wishlistCount > 0 && (
-                <span className="ml-2 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
-                  {wishlistCount}
-                </span>
-              )}
-            </Link>
+            <div className="flex items-center justify-around py-4 border-t border-white/10 mt-2">
+              {/* Wishlist */}
+              <Link to="/account/wishlist" className="relative p-2 text-white hover:bg-white/10 rounded-lg flex flex-col items-center gap-1" onClick={() => setIsMenuOpen(false)}>
+                <div className="relative">
+                  <Heart className="h-6 w-6" />
+                  {wishlistCount > 0 && (
+                    <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
+                      {wishlistCount}
+                    </span>
+                  )}
+                </div>
+                <span className="text-[10px] uppercase font-bold tracking-wider opacity-70">Wishlist</span>
+              </Link>
 
-            {/* Notifications */}
-            <Link to="/notifications" className="flex items-center justify-between py-3 px-3 rounded-lg text-gray-200 hover:bg-white/10 hover:text-white transition-colors" onClick={() => setIsMenuOpen(false)}>
-              <span className="font-medium">Notifications</span>
-              {unreadCount > 0 && (
-                <span className="ml-2 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
-                  {unreadCount}
-                </span>
-              )}
-            </Link>
+              {/* Notifications */}
+              <Link to="/notifications" className="relative p-2 text-white hover:bg-white/10 rounded-lg flex flex-col items-center gap-1" onClick={() => setIsMenuOpen(false)}>
+                <div className="relative">
+                  <NotificationDropdown className="p-0 hover:bg-transparent text-white" />
+                </div>
+                <span className="text-[10px] uppercase font-bold tracking-wider opacity-70">Alerts</span>
+              </Link>
 
-            {/* Cart */}
-            <button
-              className="flex items-center justify-between py-3 px-3 rounded-lg text-gray-200 hover:bg-white/10 hover:text-white transition-colors w-full"
-              onClick={() => {
-                setIsMenuOpen(false);
-                setIsCartOpen(true);
-              }}
-            >
-              <span className="font-medium">Cart</span>
-              {cartCount > 0 && (
-                <span className="ml-2 h-4 w-4 rounded-full bg-primary text-[10px] font-bold text-white flex items-center justify-center">
-                  {cartCount}
-                </span>
-              )}
-            </button>
+              {/* Cart */}
+              <button
+                className="relative p-2 text-white hover:bg-white/10 rounded-lg flex flex-col items-center gap-1"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  setIsCartOpen(true);
+                }}
+              >
+                <div className="relative">
+                  <ShoppingBag className="h-6 w-6" />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] font-bold text-white flex items-center justify-center">
+                      {cartCount}
+                    </span>
+                  )}
+                </div>
+                <span className="text-[10px] uppercase font-bold tracking-wider opacity-70">Cart</span>
+              </button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/10">
-            <a
-              href={`https://wa.me/${settings.whatsappNumber}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 p-3 rounded-none bg-green-600/20 text-green-400 font-medium hover:bg-green-600/30 transition-colors"
-            >
-              <MessageCircle className="h-4 w-4" /> WhatsApp
-            </a>
+          <div className="pt-2 border-t border-white/10 space-y-2">
             <Link
-              to="/account"
-              className="flex items-center justify-center gap-2 p-3 rounded-lg bg-white/10 text-white font-medium hover:bg-white/20 transition-colors"
+              to="/contact"
+              className="flex items-center justify-center gap-2 p-3 rounded-none bg-primary/20 text-primary font-bold hover:bg-primary/30 transition-colors border border-primary/30"
               onClick={() => setIsMenuOpen(false)}
             >
-              <User className="h-4 w-4" /> Account
+              <Calendar className="h-5 w-5" /> Book Diagnosis
             </Link>
+            <div className="grid grid-cols-2 gap-2">
+              <a
+                href={`https://wa.me/${settings.whatsappNumber}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 p-3 rounded-none bg-green-600/20 text-green-400 font-medium hover:bg-green-600/30 transition-colors"
+              >
+                <MessageCircle className="h-4 w-4" /> WhatsApp
+              </a>
+              <Link
+                to="/account"
+                className="flex items-center justify-center gap-2 p-3 rounded-lg bg-white/10 text-white font-medium hover:bg-white/20 transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <User className="h-4 w-4" /> Account
+              </Link>
+            </div>
           </div>
 
           <div className="flex justify-between items-center px-2 pt-2">
