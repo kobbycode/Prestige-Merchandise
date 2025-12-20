@@ -176,7 +176,11 @@ const Services = () => {
               <p className="text-muted-foreground">Visit our workshops at these locations</p>
             </div>
             <div className="max-w-5xl mx-auto shadow-lg">
-              <StoreMap locations={settings.locations || [settings.location || "Abossey Okai"]} />
+              {/* Temporarily commented out to debug white screen issue */}
+              {/* <StoreMap locations={settings.locations || [settings.location || "Abossey Okai"]} /> */}
+              <div className="h-[400px] bg-muted flex items-center justify-center rounded-lg border">
+                <p className="text-muted-foreground">Map loading...</p>
+              </div>
             </div>
           </div>
         </section>
