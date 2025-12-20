@@ -274,30 +274,7 @@ const Header = () => {
             <MessageCircle className="h-5 w-5 text-green-500" />
           </a>
 
-          {/* Wishlist */}
-          <Link to="/account/wishlist" className="relative p-2 text-white hover:bg-white/10 rounded-none">
-            <Heart className="h-5 w-5" />
-            {wishlistCount > 0 && (
-              <span className="absolute top-0 right-0 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
-                {wishlistCount}
-              </span>
-            )}
-          </Link>
 
-          {/* Notifications */}
-          <NotificationDropdown className="p-2 text-white hover:bg-white/10 rounded-none" />
-
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative text-white hover:bg-white/10"
-            onClick={() => setIsCartOpen(true)}
-          >
-            <ShoppingBag className="h-5 w-5" />
-            {cartCount > 0 && (
-              <span className="absolute top-0 right-0 h-3 w-3 rounded-full bg-primary border-2 border-sidebar-background"></span>
-            )}
-          </Button>
 
           <button
             className="p-2 text-white hover:bg-white/10 rounded-md transition-colors"
@@ -369,6 +346,22 @@ const Header = () => {
                 </span>
               )}
             </Link>
+
+            {/* Cart */}
+            <button
+              className="flex items-center justify-between py-3 px-3 rounded-lg text-gray-200 hover:bg-white/10 hover:text-white transition-colors w-full"
+              onClick={() => {
+                setIsMenuOpen(false);
+                setIsCartOpen(true);
+              }}
+            >
+              <span className="font-medium">Cart</span>
+              {cartCount > 0 && (
+                <span className="ml-2 h-4 w-4 rounded-full bg-primary text-[10px] font-bold text-white flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </button>
           </div>
 
           <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/10">
