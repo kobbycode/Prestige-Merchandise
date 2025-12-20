@@ -18,6 +18,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEOHead from "@/components/SEOHead";
 import heroImage from "@/assets/hero-mechanic.jpg";
+import mechanicWorkingImage from "@/assets/mechanic-working.jpg";
 import { useStoreSettings } from "@/hooks/useStoreSettings";
 
 const Index = () => {
