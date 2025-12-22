@@ -22,21 +22,63 @@ const Blog = () => {
 
   const fetchPosts = async () => {
     try {
-      // Only fetch published posts
+      // Fetch posts where isPublished is true
+      // We order by createdAt to be safe, as publishedAt might be missing on older posts
       const q = query(
         collection(db, "blog_posts"),
         where("isPublished", "==", true),
-        orderBy("publishedAt", "desc")
+        orderBy("createdAt", "desc")
       );
 
       const querySnapshot = await getDocs(q);
       const postsList: BlogPost[] = [];
       querySnapshot.forEach((doc) => {
-        postsList.push({ id: doc.id, ...doc.data() } as BlogPost);
+        const data = doc.data();
+        postsList.push({
+          id: doc.id,
+          ...data,
+          // Fallback for publishedAt if it's missing
+          publishedAt: data.publishedAt || data.createdAt
+        } as BlogPost);
       });
+
+      // Sort by publishedAt DESC in memory as a secondary precaution
+      postsList.sort((a, b) => {
+        const dateA = new Date(a.publishedAt || a.createdAt).getTime();
+        const dateB = new Date(b.publishedAt || b.createdAt).getTime();
+        return dateB - dateA;
+      });
+
       setPosts(postsList);
     } catch (error) {
       console.error("Error fetching blog posts:", error);
+      // Fallback: try fetching without ordering if error is related to missing index
+      try {
+        const qSimple = query(
+          collection(db, "blog_posts"),
+          where("isPublished", "==", true)
+        );
+        const querySnapshot = await getDocs(qSimple);
+        const postsList: BlogPost[] = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          postsList.push({
+            id: doc.id,
+            ...data,
+            publishedAt: data.publishedAt || data.createdAt
+          } as BlogPost);
+        });
+
+        postsList.sort((a, b) => {
+          const dateA = new Date(a.publishedAt || a.createdAt).getTime();
+          const dateB = new Date(b.publishedAt || b.createdAt).getTime();
+          return dateB - dateA;
+        });
+
+        setPosts(postsList);
+      } catch (innerError) {
+        console.error("Critical error fetching blog posts:", innerError);
+      }
     } finally {
       setLoading(false);
     }
