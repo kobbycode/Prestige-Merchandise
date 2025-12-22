@@ -22,11 +22,14 @@ const BlogPostDetail = () => {
 
     const fetchPost = async (slugId: string) => {
         try {
-            // First check if it's a direct ID match
+            console.log("Fetching blog post with slug or ID:", slugId);
+
+            // 1. Try direct ID match
             const docRef = doc(db, "blog_posts", slugId);
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
+                console.log("Post found by ID");
                 const postData = { id: docSnap.id, ...docSnap.data() } as BlogPost;
                 setPost(postData);
 
@@ -38,25 +41,59 @@ const BlogPostDetail = () => {
                     });
                     sessionStorage.setItem(sessionKey, 'true');
                 }
-            } else {
-                // If not found by ID, try querying by slug field
-                const q = query(collection(db, "blog_posts"), where("slug", "==", slugId), limit(1));
-                const querySnapshot = await getDocs(q);
+                return;
+            }
 
-                if (!querySnapshot.empty) {
-                    const docFn = querySnapshot.docs[0];
-                    const postData = { id: docFn.id, ...docFn.data() } as BlogPost;
-                    setPost(postData);
+            // 2. Try querying by slug field
+            console.log("ID match failed, trying slug query...");
+            const q = query(collection(db, "blog_posts"), where("slug", "==", slugId), limit(1));
+            const querySnapshot = await getDocs(q);
 
-                    // Increment view count for slug match too
-                    const sessionKey = `viewed_post_${docFn.id}`;
-                    if (!sessionStorage.getItem(sessionKey)) {
-                        await updateDoc(docFn.ref, {
-                            views: increment(1)
-                        });
-                        sessionStorage.setItem(sessionKey, 'true');
-                    }
+            if (!querySnapshot.empty) {
+                console.log("Post found by slug query");
+                const docFn = querySnapshot.docs[0];
+                const postData = { id: docFn.id, ...docFn.data() } as BlogPost;
+                setPost(postData);
+
+                // Increment view count for slug match too
+                const sessionKey = `viewed_post_${docFn.id}`;
+                if (!sessionStorage.getItem(sessionKey)) {
+                    await updateDoc(docFn.ref, {
+                        views: increment(1)
+                    });
+                    sessionStorage.setItem(sessionKey, 'true');
                 }
+                return;
+            }
+
+            // 3. Resilient Fallback: Fetch all and find by slug in memory
+            console.log("Slug query failed, trying resilient fallback (fetch all)...");
+            const allPostsSnapshot = await getDocs(collection(db, "blog_posts"));
+            console.log("Total posts to check in memory:", allPostsSnapshot.size);
+
+            let foundPost: BlogPost | null = null;
+            allPostsSnapshot.forEach((doc) => {
+                const data = doc.data();
+                if (data.slug === slugId || doc.id === slugId) {
+                    foundPost = { id: doc.id, ...data } as BlogPost;
+                }
+            });
+
+            if (foundPost) {
+                console.log("Post found via resilient fallback");
+                setPost(foundPost);
+
+                // Increment view count
+                const postRef = doc(db, "blog_posts", (foundPost as BlogPost).id);
+                const sessionKey = `viewed_post_${(foundPost as BlogPost).id}`;
+                if (!sessionStorage.getItem(sessionKey)) {
+                    await updateDoc(postRef, {
+                        views: increment(1)
+                    });
+                    sessionStorage.setItem(sessionKey, 'true');
+                }
+            } else {
+                console.warn("Post NOT found even after resilient fallback");
             }
         } catch (error) {
             console.error("Error fetching post:", error);
