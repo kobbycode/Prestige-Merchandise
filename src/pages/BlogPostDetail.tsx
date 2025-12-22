@@ -136,48 +136,47 @@ const BlogPostDetail = () => {
         <div className="min-h-screen flex flex-col">
             <Header />
             <main className="flex-grow pt-8 pb-16">
-                {/* Hero / Cover Image */}
-                {post.coverImage && (
-                    <div className="w-full h-[400px] relative mb-12">
-                        <img
-                            src={post.coverImage}
-                            alt={post.title}
-                            className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-black/40"></div>
-                        <div className="absolute inset-0 container mx-auto px-4 flex flex-col justify-end pb-12">
-                            <Link to="/blog" className="text-white/80 hover:text-white flex items-center gap-2 mb-6 w-fit hover:underline">
-                                <ArrowLeft className="h-4 w-4" /> Back to Blog
-                            </Link>
-                            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 max-w-4xl">
-                                {post.title}
-                            </h1>
-                            <div className="flex items-center gap-6 text-white/90">
-                                <div className="flex items-center gap-2">
-                                    <Calendar className="h-4 w-4" />
-                                    {post.publishedAt ? format(new Date(post.publishedAt), "MMMM d, yyyy") : "Draft"}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                <div className="container mx-auto px-4 max-w-4xl">
+                    {/* Back Link */}
+                    <Link to="/blog" className="text-muted-foreground hover:text-primary flex items-center gap-2 mb-8 transition-colors w-fit">
+                        <ArrowLeft className="h-4 w-4" /> Back to Blog
+                    </Link>
 
-                {!post.coverImage && (
-                    <div className="container mx-auto px-4 mb-12 pt-12">
-                        <Link to="/blog" className="text-muted-foreground hover:text-foreground flex items-center gap-2 mb-8">
-                            <ArrowLeft className="h-4 w-4" /> Back to Blog
-                        </Link>
-                        <h1 className="text-4xl md:text-5xl font-bold mb-6 max-w-4xl text-primary">
-                            {post.title}
-                        </h1>
-                        <div className="flex items-center gap-6 text-muted-foreground border-b pb-8">
-                            <div className="flex items-center gap-2">
+                    {/* Header Content */}
+                    <header className="mb-10 text-center">
+                        <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground mb-4">
+                            <div className="flex items-center gap-1.5 bg-secondary/50 px-3 py-1 rounded-full">
                                 <Calendar className="h-4 w-4" />
                                 {post.publishedAt ? format(new Date(post.publishedAt), "MMMM d, yyyy") : "Draft"}
                             </div>
+                            {post.tags && post.tags.length > 0 && (
+                                <div className="flex items-center gap-1.5 bg-secondary/50 px-3 py-1 rounded-full">
+                                    <Tag className="h-4 w-4" />
+                                    {post.tags[0]}
+                                </div>
+                            )}
                         </div>
-                    </div>
-                )}
+
+                        <h1 className="text-3xl md:text-5xl font-bold mb-6 text-foreground leading-tight">
+                            {post.title}
+                        </h1>
+
+                        <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+                            {post.excerpt}
+                        </p>
+                    </header>
+
+                    {/* Featured Image - Contained & Full Visibility */}
+                    {post.coverImage && (
+                        <div className="rounded-2xl overflow-hidden shadow-xl border bg-muted mb-12">
+                            <img
+                                src={post.coverImage}
+                                alt={post.title}
+                                className="w-full h-auto max-h-[600px] object-cover"
+                            />
+                        </div>
+                    )}
+                </div>
 
                 <article className="container mx-auto px-4 max-w-3xl">
                     <div className="prose prose-lg dark:prose-invert max-w-none">
