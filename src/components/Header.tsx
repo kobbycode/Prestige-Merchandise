@@ -116,7 +116,7 @@ const Header = () => {
     }
   };
 
-  const navLinks = settings.menuItems?.filter(item => item.active).map(item => ({
+  const baseNavLinks = settings.menuItems?.filter(item => item.active).map(item => ({
     to: item.path,
     label: item.label
   })) || [
@@ -129,6 +129,11 @@ const Header = () => {
       { to: "/about", label: "About" },
       { to: "/contact", label: "Book Diagnosis" },
     ];
+
+  // Ensure Blog is always present if not already there
+  const navLinks = baseNavLinks.some(link => link.to === "/blog")
+    ? baseNavLinks
+    : [...baseNavLinks.slice(0, 3), { to: "/blog", label: "Blog" }, ...baseNavLinks.slice(3)];
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-sidebar-border bg-sidebar text-sidebar-foreground shadow-lg">

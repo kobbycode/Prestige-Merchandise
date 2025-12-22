@@ -28,6 +28,7 @@ const defaultSettings: StoreSettings = {
         { label: "Home", path: "/", active: true },
         { label: "Steering Systems", path: "/shop?category=steering", active: true },
         { label: "Services", path: "/services", active: true },
+        { label: "Blog", path: "/blog", active: true },
         { label: "Parts", path: "/parts", active: true },
         { label: "Fleet Solutions", path: "/fleet-solutions", active: true },
         { label: "About", path: "/about", active: true },

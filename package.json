@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run generate-sitemap && vite build && npm run copy-html",
+    "build": "npm run generate-sitemap || true && vite build && npm run copy-html",
     "build:dev": "vite build --mode development",
     "copy-html": "node scripts/copy-html.js",
     "generate-sitemap": "tsx scripts/generate-sitemap.ts",

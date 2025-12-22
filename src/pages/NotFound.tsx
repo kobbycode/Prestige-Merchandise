@@ -9,7 +9,7 @@ const NotFound = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.error("404 Error: Page not found");
+    console.error("404 Error: Page not found (V1.2.1)");
   }, []);
 
   return (
