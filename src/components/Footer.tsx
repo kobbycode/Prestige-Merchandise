@@ -9,13 +9,14 @@ const Footer = () => {
     <footer className="bg-sidebar text-sidebar-foreground mt-auto border-t border-sidebar-border">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          
+
           {/* Quick Links */}
           <div>
             <h3 className="text-lg font-bold mb-4 text-white">Quick Links</h3>
             <ul className="space-y-2 text-gray-400 text-sm">
               <li><Link to="/" className="hover:text-primary transition-colors">Home</Link></li>
               <li><Link to="/about" className="hover:text-primary transition-colors">About Us</Link></li>
+              <li><Link to="/blog" className="hover:text-primary transition-colors">Blog</Link></li>
               <li><Link to="/contact" className="hover:text-primary transition-colors">Book Diagnosis</Link></li>
               <li><Link to="/track" className="hover:text-primary transition-colors">Track Order</Link></li>
               <li><Link to="/contact?subject=fleet" className="hover:text-primary transition-colors">Fleet Solutions</Link></li>
@@ -35,13 +36,13 @@ const Footer = () => {
 
           {/* Services */}
           <div>
-             <h3 className="text-lg font-bold mb-4 text-white">Expert Services</h3>
-             <ul className="space-y-2 text-gray-400 text-sm">
-               <li><Link to="/services" className="hover:text-primary transition-colors">Hydraulic Repair</Link></li>
-               <li><Link to="/services" className="hover:text-primary transition-colors">Electric Steering (EPS)</Link></li>
-               <li><Link to="/services" className="hover:text-primary transition-colors">Leak & Noise Diagnosis</Link></li>
-               <li><Link to="/services" className="hover:text-primary transition-colors">Rack Rebuilding</Link></li>
-             </ul>
+            <h3 className="text-lg font-bold mb-4 text-white">Expert Services</h3>
+            <ul className="space-y-2 text-gray-400 text-sm">
+              <li><Link to="/services" className="hover:text-primary transition-colors">Hydraulic Repair</Link></li>
+              <li><Link to="/services" className="hover:text-primary transition-colors">Electric Steering (EPS)</Link></li>
+              <li><Link to="/services" className="hover:text-primary transition-colors">Leak & Noise Diagnosis</Link></li>
+              <li><Link to="/services" className="hover:text-primary transition-colors">Rack Rebuilding</Link></li>
+            </ul>
           </div>
 
           {/* Contact Info */}
@@ -49,20 +50,20 @@ const Footer = () => {
             <h3 className="text-lg font-bold mb-4 text-primary">Contact Us</h3>
             <ul className="space-y-3 text-sm text-gray-400">
               <li className="flex items-start gap-2">
-                 <span>📍</span>
-                 <span>
-                   {settings.location || "Abossey Okai, Accra, Ghana"}
-                   {settings.locations && settings.locations.length > 0 && (
-                     <span className="block text-xs mt-1 text-gray-500">Other branches: {settings.locations.join(", ")}</span>
-                   )}
-                 </span>
+                <span>📍</span>
+                <span>
+                  {settings.location || "Abossey Okai, Accra, Ghana"}
+                  {settings.locations && settings.locations.length > 0 && (
+                    <span className="block text-xs mt-1 text-gray-500">Other branches: {settings.locations.join(", ")}</span>
+                  )}
+                </span>
               </li>
               <li className="flex items-center gap-2">
                 <span>📞</span>
                 <a href={`tel:${settings.phone}`} className="hover:text-white transition-colors">{settings.phone}</a>
               </li>
               <li className="flex items-center gap-2">
-                <span>📱</span> 
+                <span>📱</span>
                 <a href={`https://wa.me/${settings.whatsappNumber}`} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
                   WhatsApp: {settings.whatsappNumber}
                 </a>

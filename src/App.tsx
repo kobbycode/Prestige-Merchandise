@@ -65,14 +65,15 @@ const App = () => (
                     <ScrollToTop />
                     <Routes>
                       <Route path="/" element={<Index />} />
+                      <Route path="/blog" element={<Blog />} />
+                      <Route path="/blog/" element={<Blog />} />
+                      <Route path="/blog/:slug" element={<BlogPostDetail />} />
                       <Route path="/shop" element={<Shop />} />
                       <Route path="/product/:id" element={<ProductDetail />} />
                       <Route path="/about" element={<About />} />
                       <Route path="/services" element={<Services />} />
                       <Route path="/parts" element={<Parts />} />
                       <Route path="/fleet-solutions" element={<FleetSolutions />} />
-                      <Route path="/blog" element={<Blog />} />
-                      <Route path="/blog/:slug" element={<BlogPostDetail />} />
                       <Route path="/contact" element={<Contact />} />
                       <Route path="/checkout" element={<Checkout />} />
                       <Route path="/track" element={<TrackOrder />} />

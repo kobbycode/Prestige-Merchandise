@@ -123,6 +123,7 @@ const Header = () => {
       { to: "/", label: "Home" },
       { to: "/shop?category=steering", label: "Steering Systems" },
       { to: "/services", label: "Services" },
+      { to: "/blog", label: "Blog" },
       { to: "/parts", label: "Parts" },
       { to: "/fleet-solutions", label: "Fleet Solutions" },
       { to: "/about", label: "About" },
@@ -304,8 +305,8 @@ const Header = () => {
               key={link.to}
               to={link.to}
               className={`px-4 py-2 text-sm font-medium whitespace-nowrap rounded-none transition-colors ${location.pathname === link.to.split('?')[0]
-                  ? "text-primary bg-primary/10"
-                  : "text-gray-300 hover:text-white hover:bg-white/10"
+                ? "text-primary bg-primary/10"
+                : "text-gray-300 hover:text-white hover:bg-white/10"
                 }`}
             >
               {link.label}
