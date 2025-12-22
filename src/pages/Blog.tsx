@@ -22,72 +22,51 @@ const Blog = () => {
 
   const fetchPosts = async () => {
     try {
-      // Fetch posts where isPublished is true
-      // We order by createdAt to be safe, as publishedAt might be missing on older posts
-      const q = query(
-        collection(db, "blog_posts"),
-        where("isPublished", "==", true),
-        orderBy("createdAt", "desc")
-      );
-
+      // Fetch ALL posts and filter in memory to avoid indexing issues
+      const q = query(collection(db, "blog_posts"));
       const querySnapshot = await getDocs(q);
+
+      console.log("Total posts found in Firestore:", querySnapshot.size);
+
       const postsList: BlogPost[] = [];
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        postsList.push({
-          id: doc.id,
-          ...data,
-          // Fallback for publishedAt if it's missing
-          publishedAt: data.publishedAt || data.createdAt
-        } as BlogPost);
-      });
+        // Convert whatever isPublished is (boolean or string) to a boolean check
+        const isPublished = data.isPublished === true || data.isPublished === "true";
 
-      // Sort by publishedAt DESC in memory as a secondary precaution
-      postsList.sort((a, b) => {
-        const dateA = new Date(a.publishedAt || a.createdAt).getTime();
-        const dateB = new Date(b.publishedAt || b.createdAt).getTime();
-        return dateB - dateA;
-      });
-
-      setPosts(postsList);
-    } catch (error) {
-      console.error("Error fetching blog posts:", error);
-      // Fallback: try fetching without ordering if error is related to missing index
-      try {
-        const qSimple = query(
-          collection(db, "blog_posts"),
-          where("isPublished", "==", true)
-        );
-        const querySnapshot = await getDocs(qSimple);
-        const postsList: BlogPost[] = [];
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
+        if (isPublished) {
           postsList.push({
             id: doc.id,
             ...data,
             publishedAt: data.publishedAt || data.createdAt
           } as BlogPost);
-        });
+        }
+      });
 
-        postsList.sort((a, b) => {
-          const dateA = new Date(a.publishedAt || a.createdAt).getTime();
-          const dateB = new Date(b.publishedAt || b.createdAt).getTime();
-          return dateB - dateA;
-        });
+      console.log("Published posts after filtering:", postsList.length);
 
-        setPosts(postsList);
-      } catch (innerError) {
-        console.error("Critical error fetching blog posts:", innerError);
-      }
+      // Sort by publishedAt DESC
+      postsList.sort((a, b) => {
+        const dateA = new Date(a.publishedAt || a.createdAt || 0).getTime();
+        const dateB = new Date(b.publishedAt || b.createdAt || 0).getTime();
+        return dateB - dateA;
+      });
+
+      setPosts(postsList);
+    } catch (error) {
+      console.error("Critical error fetching blog posts:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredPosts = posts.filter(post =>
-    post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.excerpt.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredPosts = posts.filter(post => {
+    const title = (post.title || "").toLowerCase();
+    const excerpt = (post.excerpt || "").toLowerCase();
+    const query = searchQuery.toLowerCase();
+
+    return title.includes(query) || excerpt.includes(query);
+  });
 
   return (
     <div className="min-h-screen flex flex-col">
