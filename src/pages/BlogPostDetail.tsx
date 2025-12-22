@@ -144,15 +144,17 @@ const BlogPostDetail = () => {
 
                     {/* Header Content */}
                     <header className="mb-10 text-center">
-                        <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground mb-4">
-                            <div className="flex items-center gap-1.5 bg-secondary/50 px-3 py-1 rounded-full">
-                                <Calendar className="h-4 w-4" />
-                                {post.publishedAt ? format(new Date(post.publishedAt), "MMMM d, yyyy") : "Draft"}
+                        <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
+                            <div className="flex items-center gap-2 px-4 py-1.5 rounded-full border bg-card/50 backdrop-blur-sm shadow-sm text-sm font-medium transition-colors hover:bg-accent/50">
+                                <Calendar className="h-4 w-4 text-primary" />
+                                <span className="text-foreground/80">
+                                    {post.publishedAt ? format(new Date(post.publishedAt), "MMMM d, yyyy") : "Draft"}
+                                </span>
                             </div>
                             {post.tags && post.tags.length > 0 && (
-                                <div className="flex items-center gap-1.5 bg-secondary/50 px-3 py-1 rounded-full">
-                                    <Tag className="h-4 w-4" />
-                                    {post.tags[0]}
+                                <div className="flex items-center gap-2 px-4 py-1.5 rounded-full border bg-card/50 backdrop-blur-sm shadow-sm text-sm font-medium transition-colors hover:bg-accent/50">
+                                    <Tag className="h-4 w-4 text-primary" />
+                                    <span className="text-foreground/80 capitalize">{post.tags[0]}</span>
                                 </div>
                             )}
                         </div>
