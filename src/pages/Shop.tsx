@@ -333,7 +333,10 @@ const Shop = () => {
                     <PaginationContent>
                       <PaginationItem>
                         <PaginationPrevious
-                          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                          onClick={() => {
+                            setCurrentPage(p => Math.max(1, p - 1));
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          }}
                           className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
                         />
                       </PaginationItem>
@@ -351,7 +354,10 @@ const Shop = () => {
                             <PaginationItem key={pageNumber}>
                               <PaginationLink
                                 isActive={currentPage === pageNumber}
-                                onClick={() => setCurrentPage(pageNumber)}
+                                onClick={() => {
+                                  setCurrentPage(pageNumber);
+                                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }}
                                 className="cursor-pointer"
                               >
                                 {pageNumber}
@@ -369,7 +375,10 @@ const Shop = () => {
 
                       <PaginationItem>
                         <PaginationNext
-                          onClick={() => setCurrentPage(p => Math.min(Math.ceil(filteredProducts.length / itemsPerPage), p + 1))}
+                          onClick={() => {
+                            setCurrentPage(p => Math.min(Math.ceil(filteredProducts.length / itemsPerPage), p + 1));
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          }}
                           className={currentPage === Math.ceil(filteredProducts.length / itemsPerPage) ? "pointer-events-none opacity-50" : "cursor-pointer"}
                         />
                       </PaginationItem>
