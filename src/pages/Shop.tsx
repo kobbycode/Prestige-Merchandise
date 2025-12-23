@@ -74,7 +74,11 @@ const Shop = () => {
 
   // Scroll to top when page changes
   useEffect(() => {
+    // Use both methods for maximum compatibility
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Fallback for browsers that don't support smooth scrolling
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
   }, [currentPage]);
 
   const fetchProducts = async () => {
