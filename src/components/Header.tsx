@@ -130,10 +130,11 @@ const Header = () => {
       { to: "/contact", label: "Book Diagnosis" },
     ];
 
-  // Ensure Blog is always present if not already there
-  const navLinks = baseNavLinks.some(link => link.to === "/blog")
-    ? baseNavLinks
-    : [...baseNavLinks.slice(0, 3), { to: "/blog", label: "Blog" }, ...baseNavLinks.slice(3)];
+  // Remove "Blog post" entries and ensure only "Blog" is present
+  const cleanedLinks = baseNavLinks.filter(link => link.label.toLowerCase() !== "blog post");
+  const navLinks = cleanedLinks.some(link => link.to === "/blog")
+    ? cleanedLinks
+    : [...cleanedLinks.slice(0, 3), { to: "/blog", label: "Blog" }, ...cleanedLinks.slice(3)];
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-sidebar-border bg-sidebar text-sidebar-foreground shadow-lg">
