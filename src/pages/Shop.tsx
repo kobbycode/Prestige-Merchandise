@@ -333,7 +333,8 @@ const Shop = () => {
                     <PaginationContent>
                       <PaginationItem>
                         <PaginationPrevious
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.preventDefault();
                             setCurrentPage(p => Math.max(1, p - 1));
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                           }}
@@ -354,7 +355,8 @@ const Shop = () => {
                             <PaginationItem key={pageNumber}>
                               <PaginationLink
                                 isActive={currentPage === pageNumber}
-                                onClick={() => {
+                                onClick={(e) => {
+                                  e.preventDefault();
                                   setCurrentPage(pageNumber);
                                   window.scrollTo({ top: 0, behavior: 'smooth' });
                                 }}
@@ -375,7 +377,8 @@ const Shop = () => {
 
                       <PaginationItem>
                         <PaginationNext
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.preventDefault();
                             setCurrentPage(p => Math.min(Math.ceil(filteredProducts.length / itemsPerPage), p + 1));
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                           }}
