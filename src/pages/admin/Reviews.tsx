@@ -156,103 +156,113 @@ const AdminReviews = () => {
                     <CardTitle>Review List</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Date</TableHead>
-                                <TableHead>Product</TableHead>
-                                <TableHead>Customer</TableHead>
-                                <TableHead>Rating</TableHead>
-                                <TableHead className="w-[300px]">Comment</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredReviews.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                                        No reviews found matching your filter.
-                                    </TableCell>
-                                </TableRow>
-                            ) : (
-                                filteredReviews.map((review) => (
-                                    <TableRow key={review.id}>
-                                        <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
-                                            {format(new Date(review.createdAt), "MMM d, yyyy")}
-                                        </TableCell>
-                                        <TableCell className="font-medium">
-                                            <div className="flex flex-col">
-                                                <span>{review.productName}</span>
-                                                <Link to={`/product/${review.productId}`} target="_blank" className="text-xs text-primary flex items-center gap-1 hover:underline">
-                                                    View Product <ExternalLink className="h-3 w-3" />
-                                                </Link>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>{review.userName}</TableCell>
-                                        <TableCell>
-                                            <div className="flex items-center gap-1">
-                                                <span className="font-bold">{review.rating}</span>
-                                                <span className="text-yellow-500">★</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="max-w-[300px]">
-                                            <p className="truncate text-sm" title={review.comment}>
-                                                {review.comment}
-                                            </p>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge
-                                                variant={
-                                                    review.status === 'approved' ? 'default' :
-                                                        review.status === 'rejected' ? 'destructive' :
-                                                            'secondary'
-                                                }
-                                                className={review.status === 'approved' ? 'bg-green-600 hover:bg-green-700' : ''}
-                                            >
-                                                {(review.status || 'pending').toUpperCase()}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex justify-end gap-2">
-                                                {review.status !== 'approved' && (
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-                                                        onClick={() => updateStatus(review.id, 'approved')}
-                                                        disabled={actionLoading === review.id}
-                                                    >
-                                                        {actionLoading === review.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
-                                                    </Button>
-                                                )}
-                                                {review.status !== 'rejected' && (
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        className="h-8 w-8 p-0 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
-                                                        onClick={() => updateStatus(review.id, 'rejected')}
-                                                        disabled={actionLoading === review.id}
-                                                    >
-                                                        {actionLoading === review.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
-                                                    </Button>
-                                                )}
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                    onClick={() => deleteReview(review.id)}
-                                                    disabled={actionLoading === review.id}
-                                                >
-                                                    {actionLoading === review.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                                                </Button>
-                                            </div>
-                                        </TableCell>
+                    {/* Responsive table wrapper for horizontal scroll on mobile */}
+                    <div className="overflow-x-auto -mx-6 sm:mx-0">
+                        <div className="inline-block min-w-full align-middle">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="hidden md:table-cell">Date</TableHead>
+                                        <TableHead>Product</TableHead>
+                                        <TableHead className="hidden lg:table-cell">Customer</TableHead>
+                                        <TableHead>Rating</TableHead>
+                                        <TableHead className="hidden sm:table-cell w-[200px] lg:w-[300px]">Comment</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead className="text-right">Actions</TableHead>
                                     </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
+                                </TableHeader>
+                                <TableBody>
+                                    {filteredReviews.length === 0 ? (
+                                        <TableRow>
+                                            <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                                                No reviews found matching your filter.
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : (
+                                        filteredReviews.map((review) => (
+                                            <TableRow key={review.id}>
+                                                <TableCell className="hidden md:table-cell whitespace-nowrap text-sm text-muted-foreground">
+                                                    {format(new Date(review.createdAt), "MMM d, yyyy")}
+                                                </TableCell>
+                                                <TableCell className="font-medium">
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className="line-clamp-2 sm:line-clamp-1">{review.productName}</span>
+                                                        <Link to={`/product/${review.productId}`} target="_blank" className="text-xs text-primary flex items-center gap-1 hover:underline">
+                                                            View Product <ExternalLink className="h-3 w-3" />
+                                                        </Link>
+                                                        {/* Show customer name on mobile when Customer column is hidden */}
+                                                        <span className="lg:hidden text-xs text-muted-foreground">by {review.userName}</span>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="hidden lg:table-cell">{review.userName}</TableCell>
+                                                <TableCell>
+                                                    <div className="flex items-center gap-1">
+                                                        <span className="font-bold">{review.rating}</span>
+                                                        <span className="text-yellow-500">★</span>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="hidden sm:table-cell max-w-[200px] lg:max-w-[300px]">
+                                                    <p className="line-clamp-2 text-sm" title={review.comment}>
+                                                        {review.comment}
+                                                    </p>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Badge
+                                                        variant={
+                                                            review.status === 'approved' ? 'default' :
+                                                                review.status === 'rejected' ? 'destructive' :
+                                                                    'secondary'
+                                                        }
+                                                        className={review.status === 'approved' ? 'bg-green-600 hover:bg-green-700' : ''}
+                                                    >
+                                                        {(review.status || 'pending').toUpperCase()}
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    <div className="flex justify-end gap-1 sm:gap-2">
+                                                        {review.status !== 'approved' && (
+                                                            <Button
+                                                                size="sm"
+                                                                variant="outline"
+                                                                className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+                                                                onClick={() => updateStatus(review.id, 'approved')}
+                                                                disabled={actionLoading === review.id}
+                                                                title="Approve"
+                                                            >
+                                                                {actionLoading === review.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
+                                                            </Button>
+                                                        )}
+                                                        {review.status !== 'rejected' && (
+                                                            <Button
+                                                                size="sm"
+                                                                variant="outline"
+                                                                className="h-8 w-8 p-0 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                                                                onClick={() => updateStatus(review.id, 'rejected')}
+                                                                disabled={actionLoading === review.id}
+                                                                title="Reject"
+                                                            >
+                                                                {actionLoading === review.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
+                                                            </Button>
+                                                        )}
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                            onClick={() => deleteReview(review.id)}
+                                                            disabled={actionLoading === review.id}
+                                                            title="Delete"
+                                                        >
+                                                            {actionLoading === review.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                                                        </Button>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </div>
                 </CardContent>
             </Card>
         </div>

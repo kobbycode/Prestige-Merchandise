@@ -72,6 +72,11 @@ const Shop = () => {
     setCurrentPage(1);
   }, [searchQuery, selectedCategory, sortBy, selectedManufacturer, selectedCondition, inStockOnly, featuredOnly]);
 
+  // Scroll to top when page changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentPage]);
+
   const fetchProducts = async () => {
     try {
       // Fetch only active products
