@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -38,6 +38,7 @@ const Shop = () => {
   const { addToCart } = useCart();
   const { settings } = useStoreSettings();
   const { formatPrice } = useCurrency();
+  const productsTopRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
@@ -74,11 +75,9 @@ const Shop = () => {
 
   // Scroll to top when page changes
   useEffect(() => {
-    // Use both methods for maximum compatibility
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    // Fallback for browsers that don't support smooth scrolling
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
+    if (productsTopRef.current) {
+      productsTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }, [currentPage]);
 
   const fetchProducts = async () => {
@@ -191,7 +190,7 @@ const Shop = () => {
           </div>
         </section>
 
-        <div className="container mx-auto px-4 py-6 md:py-8">
+        <div ref={productsTopRef} className="container mx-auto px-4 py-6 md:py-8">
           {loading ? (
             <div className="space-y-8">
               <div className="mb-6 md:mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
@@ -336,7 +335,6 @@ const Shop = () => {
                           onClick={(e) => {
                             e.preventDefault();
                             setCurrentPage(p => Math.max(1, p - 1));
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
                           }}
                           className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
                         />
@@ -358,7 +356,6 @@ const Shop = () => {
                                 onClick={(e) => {
                                   e.preventDefault();
                                   setCurrentPage(pageNumber);
-                                  window.scrollTo({ top: 0, behavior: 'smooth' });
                                 }}
                                 className="cursor-pointer"
                               >
@@ -380,7 +377,6 @@ const Shop = () => {
                           onClick={(e) => {
                             e.preventDefault();
                             setCurrentPage(p => Math.min(Math.ceil(filteredProducts.length / itemsPerPage), p + 1));
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
                           }}
                           className={currentPage === Math.ceil(filteredProducts.length / itemsPerPage) ? "pointer-events-none opacity-50" : "cursor-pointer"}
                         />
