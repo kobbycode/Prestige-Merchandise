@@ -130,8 +130,20 @@ const Header = () => {
       { to: "/contact", label: "Book Diagnosis" },
     ];
 
-  // Remove "Blog post" entries and ensure only "Blog" is present
-  const cleanedLinks = baseNavLinks.filter(link => link.label.toLowerCase() !== "blog post");
+  // Debug: Log all menu items before filtering
+  console.log("Menu items before filter:", baseNavLinks);
+
+  // Remove "Blog post", "Blog Post", or any variation, and items pointing to /blog/:slug
+  const cleanedLinks = baseNavLinks.filter(link => {
+    const labelLower = link.label.toLowerCase();
+    const isBlogPost = labelLower === "blog post" || labelLower === "blog posts";
+    const isBlogDetailPath = link.to.includes("/blog/");
+    return !isBlogPost && !isBlogDetailPath;
+  });
+
+  console.log("Menu items after filter:", cleanedLinks);
+
+  // Ensure only "Blog" is present
   const navLinks = cleanedLinks.some(link => link.to === "/blog")
     ? cleanedLinks
     : [...cleanedLinks.slice(0, 3), { to: "/blog", label: "Blog" }, ...cleanedLinks.slice(3)];
